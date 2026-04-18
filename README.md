@@ -1,8 +1,7 @@
 Tienda de productos (React)
 Aplicacion desarrollada en React donde se pueden visualizar productos,filtrarlos,buscarlos y agregarlos a un carrito de compras.
 
-https://tienda-de-productos-ivory.vercel.app/
-Funcionalidades
+Funcionalidades:
 * Listado de productos
 * Búsqueda por nombre
 * Filtro por categoría
@@ -16,5 +15,4 @@ Funcionalidades
 * Focus en input de búsqueda
 
 Deploy (Vercel)
-
 https://tienda-de-productos-ivory.vercel.app/

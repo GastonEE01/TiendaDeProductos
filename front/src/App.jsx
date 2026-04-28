@@ -22,7 +22,7 @@ function App() {
 
     // Pedir datos al back 
     useEffect(() => {
-      fetch("http://localhost:5157/api/product")
+      fetch("https://tiendadeproductos-fmhngcc8czgjd9dk.brazilsouth-01.azurewebsites.net/api/product")
     .then(res => res.json())
     .then(data => {
           console.log(data)

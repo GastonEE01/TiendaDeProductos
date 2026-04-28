@@ -6,16 +6,29 @@ import { Cart } from './assets/components/Cart'
 import { SearchBar } from './assets/components/SearchBar'
 import { useTheme } from './assets/components/ThemeContext'
 
-  const products = [
+  /*const products = [
   { id: 1, nombre: 'Laptop', precio: 1200, categoria: 'tecnologia', imagen: '💻' },
   { id: 2, nombre: 'Auriculares', precio: 150, categoria: 'tecnologia', imagen: '🎧' },
   { id: 3, nombre: 'Remera', precio: 30, categoria: 'ropa', imagen: '👕' },
   { id: 4, nombre: 'Zapatillas', precio: 90, categoria: 'ropa', imagen: '👟' },
   { id: 5, nombre: 'Mochila', precio: 60, categoria: 'accesorios', imagen: '🎒' },
   { id: 6, nombre: 'Reloj', precio: 200, categoria: 'accesorios', imagen: '⌚' },
-  ]
+  ]*/
+
 
 function App() {
+
+    const [products,setProducts] = useState([])
+
+    // Pedir datos al back 
+    useEffect(() => {
+      fetch("http://localhost:5157/api/product")
+    .then(res => res.json())
+    .then(data => {
+          console.log(data)
+          setProducts(data)
+    })
+}, [])
 
   const [cart, setCart] = useState(() => {
     const savedCart = localStorage.getItem('cart')
@@ -57,16 +70,16 @@ const handleFilterChange = (e) => {
 
 const filteredProducts = useMemo(() => {
   return products.filter((product) => {
-    const coincideCategoria =
-      seachTerm === 'Todos' ||
-      product.categoria === seachTerm.toLowerCase()
+   const coincideCategoria =
+  seachTerm === 'Todos' ||
+  product.categoria === seachTerm.toLowerCase()
 
     const coincideTexto =
       product.nombre.toLowerCase().includes(searchText.toLowerCase())
 
     return coincideCategoria && coincideTexto
   })
-}, [ seachTerm, searchText])
+}, [ seachTerm, searchText, products])
 
 
 

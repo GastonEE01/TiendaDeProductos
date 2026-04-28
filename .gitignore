@@ -22,3 +22,20 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Node
+node_modules/
+dist/
+
+# .NET
+bin/
+obj/
+.vs/
+
+# Vite
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db

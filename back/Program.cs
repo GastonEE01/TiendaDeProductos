@@ -1,3 +1,5 @@
+using MercadoPago.Config;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
@@ -9,7 +11,11 @@ builder.Services.AddCors(options =>
 });
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+     .AddJsonOptions(options =>
+     {
+         options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+     });
 
 var app = builder.Build();
 
@@ -25,6 +31,11 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+var mpSection = builder.Configuration.GetSection("MercadoPago");
+var accessToken = mpSection["AccessToken"];
+
+MercadoPago.Config.MercadoPagoConfig.AccessToken = accessToken;
+
 app.UseHttpsRedirection();
 app.UseRouting();
 
@@ -32,4 +43,6 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 
+Console.WriteLine("ENV: " + builder.Environment.EnvironmentName);
+Console.WriteLine("TOKEN: " + accessToken);
 app.Run();

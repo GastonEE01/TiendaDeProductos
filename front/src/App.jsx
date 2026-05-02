@@ -1,34 +1,53 @@
 import { useState,useRef,useEffect,useMemo } from 'react'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import './App.css'
-import { Header } from './assets/components/Header'
-import { ProductList } from './assets/components/ProductList'
-import { Cart } from './assets/components/Cart'
-import { SearchBar } from './assets/components/SearchBar'
+import { Header } from './assets/components/Header/Header'
+import { ProductList } from './assets/components/Card/ProductList'
+import { Cart } from './assets/components/Cart/Cart'
+import { SearchBar } from './assets/components/SearchBar/SearchBar'
 import { useTheme } from './assets/components/ThemeContext'
-
-  /*const products = [
-  { id: 1, nombre: 'Laptop', precio: 1200, categoria: 'tecnologia', imagen: '💻' },
-  { id: 2, nombre: 'Auriculares', precio: 150, categoria: 'tecnologia', imagen: '🎧' },
-  { id: 3, nombre: 'Remera', precio: 30, categoria: 'ropa', imagen: '👕' },
-  { id: 4, nombre: 'Zapatillas', precio: 90, categoria: 'ropa', imagen: '👟' },
-  { id: 5, nombre: 'Mochila', precio: 60, categoria: 'accesorios', imagen: '🎒' },
-  { id: 6, nombre: 'Reloj', precio: 200, categoria: 'accesorios', imagen: '⌚' },
-  ]*/
-
-
+import { CheckoutMP } from './assets/components/CheckoutMP'
 function App() {
 
     const [products,setProducts] = useState([])
+    const [loading, setLoading] = useState(true)
+
+    const API_URL = import.meta.env.VITE_API_URL;
+//      fetch("https://tiendadeproductos-fmhngcc8czgjd9dk.brazilsouth-01.azurewebsites.net/api/product")
 
     // Pedir datos al back 
     useEffect(() => {
-      fetch("https://tiendadeproductos-fmhngcc8czgjd9dk.brazilsouth-01.azurewebsites.net/api/product")
+      fetch(`${API_URL}/api/product`)
     .then(res => res.json())
     .then(data => {
           console.log(data)
           setProducts(data)
+          setLoading(false)
     })
 }, [])
+
+// mercado pago
+const [preferenceId, setPreferenceId] = useState(null);
+
+const handleCheckout = async () => {
+   const cartParaBackend = cart.map(item => ({
+    id: item.id,
+    name: item.name,
+    precio: item.precio,
+    quantity: 1
+  }));
+console.log(cartParaBackend);
+  const res = await fetch(`${API_URL}/api/product/create_preference`, {
+    method: "POST",
+    headers: {
+      "Content-Type" : "application/json",
+    },
+    body: JSON.stringify(cartParaBackend),
+  });
+
+  const data = await res.json();
+  setPreferenceId(data.id);
+};
 
   const [cart, setCart] = useState(() => {
     const savedCart = localStorage.getItem('cart')
@@ -75,7 +94,7 @@ const filteredProducts = useMemo(() => {
   product.categoria === seachTerm.toLowerCase()
 
     const coincideTexto =
-      product.nombre.toLowerCase().includes(searchText.toLowerCase())
+      product.name.toLowerCase().includes(searchText.toLowerCase())
 
     return coincideCategoria && coincideTexto
   })
@@ -84,7 +103,6 @@ const filteredProducts = useMemo(() => {
 
 
 const carritoRef = useRef(null)
-
 const { darkMode, toggleDarkMode } = useTheme()
 
 // cargar al iniciar
@@ -92,34 +110,40 @@ useEffect(() => {
   localStorage.setItem('cart', JSON.stringify(cart))
 }, [cart])
 
-
-
-
 return (
-  <>
-    <Header />
-    <SearchBar 
-    onFilterChange={handleFilterChange }  
-    onSearchChange={handleSearchChange}
-//    searchText={searchText}
-    />
-
-
-    <ProductList products={filteredProducts} addToCart={addToCart} />   
-        {notification && <p>{notification}</p>}
-
-    <Cart ref = {carritoRef} items = {cart} deleteFromCart={deleteFromCart} />
-
-<button onClick={() => carritoRef.current.scrollIntoView({ behavior: 'smooth' })}>
-  Ir al carrito
-</button>
-
-<button onClick={toggleDarkMode}>
-  {darkMode ? 'Modo Claro' : 'Modo Oscuro'}
-</button>
-     </>
-
-  )
+  <div className={darkMode ? 'dark-mode' : 'light-mode'}>
+    <BrowserRouter>
+      <Header cart={cart} toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
+      <Routes>
+        <Route path="/product" element={
+          <>
+            <SearchBar 
+              onFilterChange={handleFilterChange}  
+              onSearchChange={handleSearchChange}
+            />
+            <ProductList products={filteredProducts} addToCart={addToCart} />   
+            {notification && <p>{notification}</p>}
+          </>
+        } />
+        <Route path="/cart" element={
+          loading ? (
+            <p>Cargando...</p>
+          ) : (
+            <>
+            {preferenceId && (
+          <CheckoutMP preferenceId={preferenceId} />
+        )}
+            
+            <Cart items={cart} deleteFromCart={deleteFromCart}  handleCheckout = {handleCheckout}/>
+            </>
+            )
+          
+        } />
+      </Routes>
+    </BrowserRouter>
+  </div>
+)
 }
+
 
 export default App

@@ -1,2 +1,39 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
+.light-mode {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  color: #333;
+  min-height: 100vh;
+  transition: all 0.3s ease;
+}
 
+.dark-mode {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #e0e0e0;
+  min-height: 100vh;
+  transition: all 0.3s ease;
+}
+
+.dark-mode .input-container input,
+.dark-mode .input-container select {
+  background-color: #2a2a3e;
+  color: #e0e0e0;
+  border-color: #764ba2;
+}
+
+.dark-mode .card {
+  background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+  color: #e0e0e0;
+}
+
+.dark-mode h1 {
+  color: #e0e0e0;
+}
+
+.dark-mode p {
+  color: #c0c0c0;
+}

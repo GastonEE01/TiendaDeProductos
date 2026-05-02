@@ -1,9 +1,9 @@
 import React from 'react'
 import { ProductCard } from './ProductCard'
-
+import './ProductList.css'
 export const ProductList = ({products,addToCart}) => {
   return (
-    <div>
+    <div className='container'>
       {products.map((product) => (
         <ProductCard 
         key={product.id} 

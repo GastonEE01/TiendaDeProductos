@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using MercadoPago.Client.Preference;
+using MercadoPago.Resource.Preference;
 using Microsoft.AspNetCore.Mvc;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using TiendaDeProductosBack.Models;
 
 namespace TiendaDeProductosBack.Controllers
 {
@@ -15,14 +15,14 @@ namespace TiendaDeProductosBack.Controllers
             return View();
         }*/
 
-        private static List<object> _products = new List<object>
+        private static List<Product> _products = new List<Product>
         {
-            new { id = 1, nombre =  "Laptop", precio = 1200, categoria = "tecnologia", imagen = "💻" },
-            new { id = 2, nombre = "Auriculares", precio = 150, categoria = "tecnologia", imagen = "🎧" },
-            new { id = 3, nombre = "Remera", precio = 30, categoria = "ropa", imagen = "👕" },
-            new { id = 4, nombre = "Zapatillas", precio = 90, categoria = "ropa", imagen = "👟" },
-            new { id = 5, nombre = "Mochila", precio = 60, categoria = "accesorios", imagen = "🎒" },
-            new { id = 6, nombre = "Reloj", precio = 200, categoria = "accesorios", imagen = "⌚" },
+            new Product { Id = 1, Name =  "Laptop", Precio = 1200, Categoria = "tecnologia", Imagen = "💻" },
+            new Product { Id = 2, Name = "Auriculares", Precio = 150, Categoria = "tecnologia", Imagen = "🎧" },
+            new Product { Id = 3, Name = "Remera", Precio = 30, Categoria = "ropa", Imagen = "👕" },
+            new Product { Id = 4, Name = "Zapatillas", Precio = 90, Categoria = "ropa", Imagen = "👟" },
+            new Product { Id = 5, Name = "Mochila", Precio = 60, Categoria = "accesorios", Imagen = "🎒" },
+            new Product { Id = 6, Name = "Reloj", Precio = 200, Categoria = "accesorios", Imagen = "⌚" },
         };
 
         [HttpGet]
@@ -32,81 +32,122 @@ namespace TiendaDeProductosBack.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] object product)
+        public IActionResult Post([FromBody] Product product)
         {
             _products.Add(product);
             return Ok(product);
         }
 
+        [HttpPost("create_preference")]
+        public async Task<IActionResult> CreatePreference([FromBody] List<CartItem> cart)
+        {
+            if( cart == null || !cart.Any() )
+            {
+                return BadRequest("El carrito esta vacio");
+            }
+
+            var items = cart.Select(p => new PreferenceItemRequest
+            {
+                Title = p.Name,
+                Quantity = 1,
+                CurrencyId = "ARS",
+                UnitPrice = (decimal)p.Precio
+            }).ToList();
+
+
+            /*   var request = new PreferenceRequest
+               {
+                   Items = new List<PreferenceItemRequest>
+           {
+               new PreferenceItemRequest
+               {
+                   Title = "Mi producto",
+                   Quantity = 1,
+                   CurrencyId = "ARS",
+                   UnitPrice = 75.56m
+               }
+           }
+               };*/
+
+            var request = new PreferenceRequest
+            {
+                Items = items
+            };
+
+            var client = new PreferenceClient();
+            var preference = await client.CreateAsync(request);
+            
+            return Ok(new {id = preference.Id});
+        }
 
         // GET: ProductController/Details/5
-      /*  public ActionResult Details(int id)
-        {
-            return View();
-        }
+        /*  public ActionResult Details(int id)
+          {
+              return View();
+          }
 
-        // GET: ProductController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
+          // GET: ProductController/Create
+          public ActionResult Create()
+          {
+              return View();
+          }
 
-        // POST: ProductController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+          // POST: ProductController/Create
+          [HttpPost]
+          [ValidateAntiForgeryToken]
+          public ActionResult Create(IFormCollection collection)
+          {
+              try
+              {
+                  return RedirectToAction(nameof(Index));
+              }
+              catch
+              {
+                  return View();
+              }
+          }
 
-        // GET: ProductController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
+          // GET: ProductController/Edit/5
+          public ActionResult Edit(int id)
+          {
+              return View();
+          }
 
-        // POST: ProductController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+          // POST: ProductController/Edit/5
+          [HttpPost]
+          [ValidateAntiForgeryToken]
+          public ActionResult Edit(int id, IFormCollection collection)
+          {
+              try
+              {
+                  return RedirectToAction(nameof(Index));
+              }
+              catch
+              {
+                  return View();
+              }
+          }
 
-        // GET: ProductController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
+          // GET: ProductController/Delete/5
+          public ActionResult Delete(int id)
+          {
+              return View();
+          }
 
-        // POST: ProductController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }*/
+          // POST: ProductController/Delete/5
+          [HttpPost]
+          [ValidateAntiForgeryToken]
+          public ActionResult Delete(int id, IFormCollection collection)
+          {
+              try
+              {
+                  return RedirectToAction(nameof(Index));
+              }
+              catch
+              {
+                  return View();
+              }
+          }*/
 
     }
 }

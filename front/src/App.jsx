@@ -1,5 +1,5 @@
 import { useState,useRef,useEffect,useMemo } from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes,Navigate } from 'react-router-dom'
 import './App.css'
 import { Header } from './assets/components/Header/Header'
 import { ProductList } from './assets/components/Card/ProductList'
@@ -13,18 +13,17 @@ function App() {
     const [loading, setLoading] = useState(true)
 
     const API_URL = import.meta.env.VITE_API_URL;
-//      fetch("https://tiendadeproductos-fmhngcc8czgjd9dk.brazilsouth-01.azurewebsites.net/api/product")
 
     // Pedir datos al back 
     useEffect(() => {
       fetch(`${API_URL}/api/product`)
     .then(res => res.json())
     .then(data => {
-          console.log(data)
+      console.log("DATA DEL BACK:", data); 
           setProducts(data)
           setLoading(false)
     })
-}, [])
+}, [API_URL])
 
 // mercado pago
 const [preferenceId, setPreferenceId] = useState(null);
@@ -54,7 +53,16 @@ console.log(cartParaBackend);
     return savedCart ? JSON.parse(savedCart) : []
   })
   const addToCart = (products) => {
-    setCart([...cart, products])
+    const item = {
+    id: products.id,
+    name: products.name,
+    precio: products.precio,
+    imagen: products.imagen,
+    categoria: products.categoria,
+    quantity: 1
+  };
+  
+    setCart([...cart, item])
     setNotification('Producto agregado al carrito')
   }
 
@@ -89,12 +97,16 @@ const handleFilterChange = (e) => {
 
 const filteredProducts = useMemo(() => {
   return products.filter((product) => {
-   const coincideCategoria =
+    if(!product) return false;
+  
+  const nombre = product.name || "";
+
+  const coincideCategoria =
   seachTerm === 'Todos' ||
   product.categoria === seachTerm.toLowerCase()
 
     const coincideTexto =
-      product.name.toLowerCase().includes(searchText.toLowerCase())
+      nombre.toLowerCase().includes(searchText.toLowerCase())
 
     return coincideCategoria && coincideTexto
   })
@@ -115,7 +127,10 @@ return (
     <BrowserRouter>
       <Header cart={cart} toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
       <Routes>
-        <Route path="/product" element={
+        <Route path="/" element={<Navigate to="/product" />} />
+           <Route
+      path="/product"
+      element={
           <>
             <SearchBar 
               onFilterChange={handleFilterChange}  
@@ -125,8 +140,10 @@ return (
             {notification && <p>{notification}</p>}
           </>
         } />
-        <Route path="/cart" element={
-          loading ? (
+       <Route
+      path="/cart"
+      element={
+        loading ? (
             <p>Cargando...</p>
           ) : (
             <>

@@ -1,13 +1,12 @@
-Tienda de productos (React)
+# Tienda de productos
 Aplicacion fullstack donde se pueden visualizar productos,filtrarlos,buscarlos y agregarlos a un carrito de compras,con integracion de pagos mediante Mercado Pago.
 
-Demo
-https://tienda-de-productos-ivory.vercel.app/
+## 🔗 Enlaces del Proyecto
+DEMO Frontend (Vercel): https://tienda-de-productos-ivory.vercel.app/
 
-API
-https://tiendadeproductos-fmhngcc8czgjd9dk.brazilsouth-01.azurewebsites.net/api/product
+API Backend (Azure): https://tiendadeproductos-fmhngcc8czgjd9dk.brazilsouth-01.azurewebsites.net/api/product
 
-Funcionalidades:
+## Funcionalidades:
 * Listado de productos
 * Búsqueda por nombre
 * Filtro por categoría
@@ -19,22 +18,30 @@ Funcionalidades:
 * Notificaciones al agregar productos
 * Integración con Mercado Pago (checkout)
 
-Tecnologías:
+## Tecnologías Utilizadas
 
-Frontend:
+### Frontend:
 * React
 * React Router DOM
 * CSS
 * Vite
 
-Backend:
+### Backend:
 * .NET(ASP.NET Core Web API)
+* Entity Framework Core
 
-Deploy: 
+### Base de Datos
+* PostgreSQL
+* Supabase
+  
+### Deploy
 * Vercel (Frontend)
-* Azure (Backend)
+* Azure App Service (Backend)
 
-Mejoras futuras:
+### Estado del proyecto
+* Proyecto personal desarrollado con fines de práctica y aprendizaje Fullstack utilizando React + .NET + Azure.
+
+### Mejoras futuras:
 * Reemplazar íconos por imágenes reales
 * Integrar base de datos (PostgreSQL o SQL Server)
 * Manejo de cantidades en el carrito

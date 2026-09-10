@@ -8,7 +8,7 @@ namespace MercadoExpress.Application.DTO.Usuario
 {
     public class LoginDtoRequest
     {
-        public string Email { get; set; } = string.Empty;
+        public string Mail { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
     }
 }

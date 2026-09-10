@@ -8,10 +8,11 @@ namespace MercadoExpress.Application.DTO.Usuario
 {
     public class LoginDtoResponse
     {
+        public Guid Id { get; set; }
         public string Token { get; set; } = string.Empty;
         public string Rol { get; set; } = string.Empty;
         public string UserName { get; set; }  = string.Empty;
-        public string Email { get; set; } = string.Empty;
+        public string Mail { get; set; } = string.Empty;
         public string AliasCBU { get; set; } = string.Empty;
         public string MercadoPagoAccessToken { get; set; } = string.Empty;
         public string Message = string.Empty;

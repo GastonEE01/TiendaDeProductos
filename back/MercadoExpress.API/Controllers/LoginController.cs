@@ -14,7 +14,7 @@ namespace MercadoExpress.API.Controllers
             _loginUserUseCase = loginUserUseCase;
         }
 
-        [HttpPost("Login")]
+        [HttpPost]
         public async Task<IActionResult> Login([FromBody] LoginDtoRequest dto)
         {
             var response = await _loginUserUseCase.Login(dto);

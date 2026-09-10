@@ -28,9 +28,9 @@ namespace MercadoExpress.Application.UseCase.Usuarios
 
         public async Task<LoginDtoResponse> Login(LoginDtoRequest dto)
         {
-            Usuario searchUserEmail = await _usuarioRepository.GetUserByMail(dto.Email);
+            Usuario searchUserEmail = await _usuarioRepository.GetUserByMail(dto.Mail);
 
-            if (string.IsNullOrEmpty(dto.Email) || string.IsNullOrEmpty(dto.Password)) throw new ArgumentException("El email y la contraseña son obligatorios.");
+            if (string.IsNullOrEmpty(dto.Mail) || string.IsNullOrEmpty(dto.Password)) throw new ArgumentException("El email y la contraseña son obligatorios.");
             if (searchUserEmail == null) throw new KeyNotFoundException("No se  encontro ese Mail");
 
             var validationPassword = _passwordHasher.VerifyHashedPassword(searchUserEmail, searchUserEmail.Password, dto.Password);

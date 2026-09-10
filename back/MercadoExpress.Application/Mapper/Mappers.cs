@@ -13,16 +13,16 @@ namespace MercadoExpress.Application.Mapper
     public class Mappers : Profile
     {
         public Mappers() {
-            CreateMap<RegisterDtoRequest, Usuario>().ReverseMap()
+            CreateMap<RegisterDtoRequest, Usuario>().ReverseMap()// aca el RegisterDtoRequest seria origen por que viene del front o por que al ser ida y vuelta con ReverseMap 
               .ForMember(dest => dest.Password, opt => opt.Ignore());
-
+         
             CreateMap<AddProductoRequest, Producto>()
      .ForMember(dest => dest.CategoriaId, opt => opt.Ignore()) // Lo manejamos a mano en el caso de uso
      .ForMember(dest => dest.UsuarioId, opt => opt.Ignore());  // Lo manejamos a mano o con el token
 
 
             CreateMap<Usuario, LoginDtoResponse>()
-          .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Mail));
+          .ForMember(dest => dest.Mail, opt => opt.MapFrom(src => src.Mail));
 
          
             CreateMap<Producto, UpdateProductResponse>()

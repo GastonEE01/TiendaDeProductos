@@ -15,7 +15,7 @@ namespace MercadoExpress.API.Controllers
             _registerUserUseCase = registerUserUseCase;
         }
 
-        [HttpPost("register")]
+        [HttpPost]
         public async Task<IActionResult> Register([FromBody] RegisterDtoRequest dto)
         {
             var response = await _registerUserUseCase.AddUser(dto);

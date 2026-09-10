@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="MercadoExpress.API/MercadoExpress.API.csproj" />
+  <Project Path="MercadoExpress.Application/MercadoExpress.Application.csproj" Id="da2c64de-ce24-49cf-824b-b314ff7b8796" />
+  <Project Path="MercadoExpress.Domain/MercadoExpress.Domain.csproj" Id="fe2a26ee-0b64-425e-90ed-809b82bdda21" />
+  <Project Path="MercadoExpress.Infrastructure/MercadoExpress.Infrastructure.csproj" Id="cbfe6b6b-0e6d-4589-ad4c-bad000c808a0" />
+  <Project Path="MercadoExpress.Test/MercadoExpress.Test.csproj" Id="3bc1055f-8b8b-4ba5-ad40-58058e77d68b" />
+</Solution>

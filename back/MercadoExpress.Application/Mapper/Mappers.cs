@@ -17,6 +17,7 @@ namespace MercadoExpress.Application.Mapper
               .ForMember(dest => dest.Password, opt => opt.Ignore());
          
             CreateMap<AddProductoRequest, Producto>()
+     .ForMember(dest => dest.IMG, opt => opt.Ignore())
      .ForMember(dest => dest.CategoriaId, opt => opt.Ignore()) // Lo manejamos a mano en el caso de uso
      .ForMember(dest => dest.UsuarioId, opt => opt.Ignore());  // Lo manejamos a mano o con el token
 
@@ -28,6 +29,8 @@ namespace MercadoExpress.Application.Mapper
             CreateMap<Producto, UpdateProductResponse>()
     .ForMember(dest => dest.NameCategoria, opt => opt.MapFrom(src => src.Categoria.Name));
 
+            CreateMap<Producto, GetProductResponse>()
+                .ForMember(dest => dest.CategoriaName, opt => opt.MapFrom(src => src.Categoria.Name));
         }
     }
 }

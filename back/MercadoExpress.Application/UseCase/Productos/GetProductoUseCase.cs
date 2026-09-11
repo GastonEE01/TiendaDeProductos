@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using MercadoExpress.Application.DTO.Producto;
 using MercadoExpress.Application.Interface;
 using MercadoExpress.Domain.Entities;
 using System;
@@ -12,15 +13,17 @@ namespace MercadoExpress.Application.UseCase.Productos
     public class GetProductoUseCase
     {
         public readonly IProductoRepository _productoRepository;
+        public readonly IMapper _mapper;
 
-        public GetProductoUseCase(IProductoRepository productoRespository)
+        public GetProductoUseCase(IProductoRepository productoRespository, IMapper mapper)
         {
             _productoRepository = productoRespository;
+            _mapper = mapper;
         }
-        public async Task<List<Producto>> GetProduts()
+        public async Task<List<GetProductResponse>> GetProduts()
         {
             List<Producto> products = await _productoRepository.GetAll();
-            return products;
+            return _mapper.Map<List<GetProductResponse>>(products);
         }
     }
 }

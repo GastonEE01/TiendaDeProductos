@@ -35,6 +35,7 @@ namespace MercadoExpress.Infrastructure.Repositories
         public async Task<List<Producto>> GetAll()
         {
             return await _context.Productos
+                .Include(p => p.Categoria)    
                 .ToListAsync();
         }
 

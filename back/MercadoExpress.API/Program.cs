@@ -121,7 +121,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy.WithOrigins(
-                "http://localhost:5173",                  // Tu React en tu PC
+                "http://localhost:5174",                  // Tu React en tu PC
                 "https://app-peliculas-three.vercel.app"   // Tu React publicado en Vercel
               )
               .AllowAnyHeader()
@@ -132,6 +132,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+app.UseStaticFiles();
 
 // Habilitar CORS como primer paso en el pipeline HTTP
 app.UseCors("AllowFrontend");

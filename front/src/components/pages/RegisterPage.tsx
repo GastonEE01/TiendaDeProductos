@@ -51,10 +51,6 @@ export const RegisterPage: React.FC = () => {
     }
   };
 
-
-
-
-
   return (
     <div
       style={{
@@ -161,7 +157,12 @@ export const RegisterPage: React.FC = () => {
           </div>
 
           <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <Button color="info" variant="contained" type="Sumit">
+            <Button
+              color="info"
+              variant="contained"
+              type="submit"
+              disabled={loading}
+            >
               Enviar
             </Button>
             <Link

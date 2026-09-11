@@ -5,6 +5,8 @@ import { RegisterPage } from './components/pages/RegisterPage'
 import { ClientPage } from './components/pages/ClientPage'
 import { AdminPage } from './components/pages/AdminPage'
 
+import { Product } from './components/Product'
+
 function App() {
 
 return (
@@ -13,11 +15,11 @@ return (
         <Route path="/login" element={ <LoginPage/>} /> 
         <Route path="/" element={ <LoginPage/>} />
         
-      <Route path="/register" element={ <RegisterPage/>} /> 
+        <Route path="/register" element={ <RegisterPage/>} /> 
 
-      <Route path="/admin" element={ <AdminPage/>} /> 
+        <Route path="/admin" element={ <><AdminPage/> <Product/> </>}/> 
 
-       <Route path="/client" element={ <ClientPage/>} /> 
+        <Route path="/client" element={ <ClientPage/>} /> 
 
        <Route path="/register" element={ <RegisterPage/>} /> 
       

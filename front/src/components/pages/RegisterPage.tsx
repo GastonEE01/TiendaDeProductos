@@ -29,7 +29,6 @@ export const RegisterPage: React.FC = () => {
     setFormError(null);
 
     const formData = new FormData(e.currentTarget);
-
     const user: RegisterDtoRequest = {
         userName: formData.get("userName") as string,
         mail: formData.get("mail") as string,
@@ -44,8 +43,9 @@ export const RegisterPage: React.FC = () => {
         toast.success(response.message);      
         formRef.current?.reset();  // resetea los campos   
     }
-    catch (error: any) {
-      setFormError(error.message);
+    catch (error: unknown) {
+      const message = error instanceof Error ? error.message : null;
+      setFormError(message);
     } finally {
       setLoading(false);
     }
@@ -161,7 +161,7 @@ export const RegisterPage: React.FC = () => {
               color="info"
               variant="contained"
               type="submit"
-              disabled={loading}
+              disabled={loading}// preguntar para que sirve 
             >
               Enviar
             </Button>

@@ -5,7 +5,6 @@ import { RegisterPage } from './components/pages/RegisterPage'
 import { ClientPage } from './components/pages/ClientPage'
 import { AdminPage } from './components/pages/AdminPage'
 
-import { Product } from './components/Product'
 
 function App() {
 
@@ -17,7 +16,7 @@ return (
         
         <Route path="/register" element={ <RegisterPage/>} /> 
 
-        <Route path="/admin" element={ <><AdminPage/> <Product/> </>}/> 
+        <Route path="/admin" element={ <><AdminPage/> </>}/> 
 
         <Route path="/client" element={ <ClientPage/>} /> 
 

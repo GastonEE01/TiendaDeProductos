@@ -4,6 +4,7 @@ import {
   LoginDtoRequest,
   LoginDtoResponse,
 } from "../interfaces/UsuarioType";
+import { OrdenDtoRequest } from "../interfaces/OrdenType";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -19,6 +20,11 @@ export interface UpdateProductRequest {
   price: number;
   stock: number;
   nameCategoria: string;
+  img: File | null;
+}
+
+export interface UpdateProductResponse extends ApiResponse {
+  img?: string;
 }
 
 // Usuario
@@ -133,14 +139,26 @@ const rest = await fetch(`${API_URL}/api/Producto/Delete${id}`, {
 
 export const updateProduct = async (
   credentials: UpdateProductRequest,
-): Promise<ApiResponse> => {
+): Promise<UpdateProductResponse> => {
+  const productData = new FormData();
+
+  productData.append("Id", credentials.id);
+  productData.append("Name", credentials.name);
+  productData.append("Description", credentials.description);
+  productData.append("Price", String(credentials.price));
+  productData.append("Stock", String(credentials.stock));
+  productData.append("NameCategoria", credentials.nameCategoria);
+
+  if (credentials.img instanceof File) {
+    productData.append("IMG", credentials.img);
+  }
+
   const rest = await fetch(`${API_URL}/api/Producto/Update`, {
     method: "PUT",
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
-      "Content-type": "application/json",
     },
-    body: JSON.stringify(credentials),
+    body: productData,
   });
 
   if (!rest.ok) {
@@ -154,3 +172,26 @@ export const updateProduct = async (
   return rest.json();
 };
 
+
+// Oden
+export const addOrden = async (
+  credentials: OrdenDtoRequest,): Promise<ApiResponse> => {
+  //const token = localStorage.getItem("token");
+  const rest = await fetch(`${API_URL}/Api/Orden/Add`, {
+    method: "POST",
+    headers: {
+      "Content-type": "application/json",
+    },
+         body: JSON.stringify(credentials),
+
+  });
+
+    if (!rest.ok) {
+    const errorData = await rest.json().catch(() => ({}));
+    const messageError = errorData.Message || errorData.message;
+    throw new Error(messageError);
+  }
+  console.log(rest);
+  return rest.json();
+    
+}

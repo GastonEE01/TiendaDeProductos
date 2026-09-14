@@ -2,6 +2,7 @@ using AutoMapper;
 using Azure.Identity;
 using MercadoExpress.API.Middlewares;
 using MercadoExpress.Application.Interface;
+using MercadoExpress.Application.UseCase.Ordenes;
 using MercadoExpress.Application.UseCase.Productos;
 using MercadoExpress.Application.UseCase.Usuarios;
 using MercadoExpress.Infrastructure.Data;
@@ -25,6 +26,7 @@ builder.Services.AddScoped<IJwtTokenGenerator, JWTService>();
 builder.Services.AddScoped<IUsuarioRepository,UsuarioRepository>();
 builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
+builder.Services.AddScoped<IOrdenRepository, OrdenRepository>();
 
 
 // Casos de uso
@@ -35,6 +37,9 @@ builder.Services.AddScoped<AddProductoUseCase>();
 builder.Services.AddScoped<DeleteProductoUseCase>();
 builder.Services.AddScoped<UpdateProductoUseCase>();
 builder.Services.AddScoped<GetProductoUseCase>();
+
+builder.Services.AddScoped<AddOrdenUseCase>();
+
 
 builder.Services.AddAutoMapper(cfg => { }, typeof(MercadoExpress.Application.Mapper.Mappers));
 //builder.Services.AddAutoMapper(typeof(MercadoExpress.Application.Mapper.Mappers));
@@ -121,7 +126,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy.WithOrigins(
-                "http://localhost:5174",                  // Tu React en tu PC
+                "http://localhost:5173",                  // Tu React en tu PC
                 "https://app-peliculas-three.vercel.app"   // Tu React publicado en Vercel
               )
               .AllowAnyHeader()

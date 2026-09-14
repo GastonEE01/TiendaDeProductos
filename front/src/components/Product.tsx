@@ -3,8 +3,13 @@ import { addProduct } from "../service/api";
 import toast from "react-hot-toast";
 import { useAuthStore } from "../hooks/userStorage";
 import { Button, TextField, FormControl } from "@mui/material";
+import { FaTimes } from "react-icons/fa";
 
-export const Product: React.FC = () => {
+interface ProductProps {
+  onClose: () => void;
+}
+
+export const Product: React.FC<ProductProps> = ({onClose}) => {
   const formRef = useRef<HTMLFormElement>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -15,7 +20,6 @@ export const Product: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     setFormError(null);
-
     if (!userId) {
       toast.error("No se encontró el usuario autenticado");
       setLoading(false);
@@ -26,25 +30,21 @@ export const Product: React.FC = () => {
       const formData = new FormData(e.currentTarget);
       const image = formData.get("img");
 
-      if (!(image instanceof File) || image.size === 0) {
-        throw new Error("Debés seleccionar una imagen");
-      }
-
       const productData = new FormData();
       productData.append("Name", formData.get("name") as string);
       productData.append("Description", formData.get("description") as string);
       productData.append("Price", formData.get("price") as string);
-      productData.append("IMG", image);
+      if (image instanceof File) {
+        productData.append("IMG", image);
+      }
       productData.append("Stock", formData.get("stock") as string);
-      productData.append("CategoriaName", formData.get("categoriaName") as string);
+      productData.append("CategoriaName",formData.get("categoriaName") as string);
       productData.append("UsuarioId", userId);
       const response = await addProduct(productData);
       toast.success(response.message);
       formRef.current?.reset();
     } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "Error al agregar el producto";
-
+      const message = error instanceof Error ? error.message : null;
       setFormError(message);
     } finally {
       setLoading(false);
@@ -53,25 +53,38 @@ export const Product: React.FC = () => {
   return (
     <div
       style={{
-        background: "red",
-        margin: "5%",
-        maxHeight: "350px",
+        background: "rgba(224, 191, 163, 0.96)",
+        margin: "3%",
+        marginLeft: "25%",
+        marginRight: "25%",
         minHeight: "100px",
+        borderRadius: "10px",
+        padding: "20px",
+        height: "fit-content", 
+        
       }}
     >
-      <h1>producto</h1>
+  
       <FormControl
         component="form"
         onSubmit={handleSumit}
-        style={{ display: "flex", flexDirection: "column", gap: "20px" }}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "20px",
+          fontSize: "20px",
+        }}
         ref={formRef}
-
       >
-        <h2
-          style={{ textAlign: "center", margin: "0 0 10px 0", color: "#333" }}
-        >
+        <div style={{display:"flex",justifyContent: "space-between",alignItems: "center",marginBottom: "10px"}}>
+        <div style={{ width: "30px" }}></div> 
+
+          <h2 style={{ margin: 0, color: "#333", flexGrow: 1, textAlign: "center" }}>
+
           Producto
         </h2>
+        <FaTimes size={30} onClick={onClose} style={{ cursor: "pointer", color: "#dd1e1e" }}/>
+        </div>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <TextField
             id="standard-basic"
@@ -79,7 +92,7 @@ export const Product: React.FC = () => {
             variant="standard"
             type="text"
             name="name"
-            fullWidth
+            size="medium"
           />
         </div>
 
@@ -91,6 +104,8 @@ export const Product: React.FC = () => {
             type="text"
             name="description"
             fullWidth
+                        size="medium"
+
           />
         </div>
 
@@ -102,6 +117,7 @@ export const Product: React.FC = () => {
             type="file"
             name="img"
             fullWidth
+            size="medium"
           />
         </div>
 
@@ -113,6 +129,7 @@ export const Product: React.FC = () => {
             type="text"
             name="categoriaName"
             fullWidth
+            size="medium"
           />
         </div>
 
@@ -124,6 +141,7 @@ export const Product: React.FC = () => {
             type="text"
             name="price"
             fullWidth
+            size="medium"
           />
         </div>
 
@@ -135,11 +153,17 @@ export const Product: React.FC = () => {
             type="text"
             name="stock"
             fullWidth
+            size="medium"
           />
         </div>
 
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <Button color="info" variant="contained" type="submit" disabled={loading}>
+          <Button
+            color="info"
+            variant="contained"
+            type="submit"
+            disabled={loading}
+          >
             Enviar
           </Button>
         </div>
@@ -152,3 +176,11 @@ export const Product: React.FC = () => {
     </div>
   );
 };
+
+
+/*
+           slotProps={{
+    input: { style: { fontSize: "16px" } },       // 👈 Reduce la letra de lo que escribe el usuario
+    inputLabel: { style: { fontSize: "14px" } }   // 👈 Reduce la letra del texto flotante (Label)
+  }}
+    */      

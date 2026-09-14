@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getProducts, deleteProduct, updateProduct } from "../service/api";
 import { ProductDtoRequest } from "../interfaces/ProductoType";
 import { ProductCard } from "../components/ProductCard";
+import { useDebouceSearch } from "../hooks/useDebouce";
 import toast from "react-hot-toast";
 import {
   Button,
@@ -11,19 +12,34 @@ import {
   DialogTitle,
   TextField,
 } from "@mui/material";
+import { FaSearch } from "react-icons/fa";
 
 export const ProductList: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [products, setProducts] = useState<ProductDtoRequest[]>([]);
-  const [error, setError] = useState<string>("");
-  const [editProduct, setEditProduct] = useState<ProductDtoRequest | null>(null);
-  const [editFormData, setEditFormData] = useState({
+  const [error, setError] = useState<string | null>(null);
+  const [editProduct, setEditProduct] = useState<ProductDtoRequest | null>(
+    null,
+  );
+
+  const [editFormData, setEditFormData] = useState<{
+    name: string;
+    description: string;
+    price: string;
+    stock: string;
+    nameCategoria: string;
+    img: File | null;
+  }>({
     name: "",
     description: "",
     price: "",
     stock: "",
     nameCategoria: "",
+    img: null,
   });
+
+  const [search, setSearch] = useState("");
+  const deboucedSearch = useDebouceSearch<string>(search, 1000);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -31,15 +47,21 @@ export const ProductList: React.FC = () => {
         setLoading(true);
         const data = await getProducts();
         setProducts(data);
-      } catch (err: unknown) {
-        const errorObject = err as Error;
-        setError(errorObject.message || "Error al cargar productos");
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : null;
+        setError(message);
       } finally {
         setLoading(false);
       }
     };
     loadProducts();
   }, []);
+
+  useEffect(() => {
+    if (deboucedSearch) {
+      console.log("Filtrando productos en la API por:", deboucedSearch);
+    }
+  }, [deboucedSearch]);
 
   const handleDelete = async (id: string) => {
     try {
@@ -49,11 +71,7 @@ export const ProductList: React.FC = () => {
       );
       toast.success(response.message);
     } catch (error: unknown) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Error al eliminar el producto";
-
+      const message = error instanceof Error ? error.message : null;
       setError(message);
       toast.error(message);
     }
@@ -67,6 +85,7 @@ export const ProductList: React.FC = () => {
       price: String(product.price),
       stock: String(product.stock),
       nameCategoria: product.categoriaName,
+      img: null,
     });
   };
 
@@ -82,6 +101,7 @@ export const ProductList: React.FC = () => {
         price: Number(editFormData.price),
         stock: Number(editFormData.stock),
         nameCategoria: editFormData.nameCategoria.trim(),
+        img: editFormData.img
       });
 
       setProducts((currentProducts) =>
@@ -94,6 +114,7 @@ export const ProductList: React.FC = () => {
                 price: Number(editFormData.price),
                 stock: Number(editFormData.stock),
                 categoriaName: editFormData.nameCategoria.trim(),
+                img: response.img ?? product.img,
               }
             : product,
         ),
@@ -101,8 +122,7 @@ export const ProductList: React.FC = () => {
       toast.success(response.message || "Producto actualizado");
       setEditProduct(null);
     } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "Error al actualizar el producto";
+      const message = error instanceof Error ? error.message : null;
       setError(message);
       toast.error(message);
     }
@@ -116,18 +136,68 @@ export const ProductList: React.FC = () => {
     }));
   };
 
+  const normalizedSearch = deboucedSearch.trim().toLowerCase();
+  const filteredProducts = products.filter((product) => {
+    if (!normalizedSearch) {
+      return true;
+    }
+    return product.name.toLowerCase().includes(normalizedSearch);
+  });
+
   return (
-    <div>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "20px",
+        marginLeft: "15%",
+        width: "calc(100% - 250px)",
+        padding: "20px",
+      }}
+    >
       {loading && <p>Cargando productos...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
-      {products.map((product) => (
-        <ProductCard
-          key={product.id}
-          product={product}
-          onDelete={handleDelete}
-          onEdit={handleEdit}
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          width: "100%",
+        }}
+      >
+        <FaSearch size={30} style={{ color: "#d8a6a6" }} />
+        <TextField
+          label="Buscar producto"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          fullWidth
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "50px", // Estilo píldora/cápsula
+            },
+          }}
         />
-      ))}
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          flexWrap: "wrap",
+          gap: "15px",
+          width: "100%",
+        }}
+      >
+        {filteredProducts.map((product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            onDelete={handleDelete}
+            onEdit={handleEdit}
+          />
+        ))}
+      </div>
 
       <Dialog
         open={editProduct !== null}
@@ -161,6 +231,23 @@ export const ProductList: React.FC = () => {
               onChange={handleFieldChange}
               required
             />
+
+            <TextField
+              name="img"
+              label="Nueva imagen"
+              type="file"
+              onChange={(event) => {
+                if (event.target instanceof HTMLInputElement) {
+                  const file = event.target.files?.[0] ?? null;
+
+                  setEditFormData((currentData) => ({
+                    ...currentData,
+                    img: file,
+                  }));
+                }
+              }}
+            />
+
             <TextField
               name="price"
               label="Precio"
@@ -180,7 +267,9 @@ export const ProductList: React.FC = () => {
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setEditProduct(null)}>Cancelar</Button>
-            <Button type="submit" variant="contained">Guardar cambios</Button>
+            <Button type="submit" variant="contained">
+              Guardar cambios
+            </Button>
           </DialogActions>
         </form>
       </Dialog>

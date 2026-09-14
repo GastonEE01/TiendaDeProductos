@@ -5,6 +5,7 @@ import {
   Button,
   TextField,
   FormControl,
+  Typography
 } from "@mui/material";
 import { Link ,useNavigate} from "react-router-dom";
 import { MdOutlineMailLock } from "react-icons/md";
@@ -18,8 +19,9 @@ export const LoginPage: React.FC = () => {
         const [loading, setLoading] = useState<boolean>(false);
         const [formError, setFormError] = useState<string | null>(null);
         const navigate = useNavigate();
+        
 
-   const handleSumit =  async (e: React.FormEvent<HTMLFormElement>)  => {
+   const handleSubmit =  async (e: React.FormEvent<HTMLFormElement>)  => {
       e.preventDefault();
       setLoading(true);
       setFormError(null);
@@ -48,9 +50,9 @@ export const LoginPage: React.FC = () => {
         navigate("/admin");
                 
     }}
-    catch (error: any) {
-        
-      setFormError(error.message);
+    catch (error: unknown) {
+      const menssage = error instanceof Error ? error.message : null;
+      setFormError(menssage);
       formRef.current?.reset();  // resetea los campos
     } finally {
       setLoading(false);
@@ -67,6 +69,7 @@ export const LoginPage: React.FC = () => {
         backgroundColor: "#99bde4", 
       }}
     >
+    
       <div
         style={{
           backgroundColor: "white",
@@ -77,9 +80,16 @@ export const LoginPage: React.FC = () => {
           maxWidth: "450px",
         }}
       >
+
+       {loading && (
+        <Typography variant="body2" color="primary" style={{ textAlign: "center", marginBottom: "15px", fontWeight: "bold" }}>
+          Iniciando sesión, por favor espere...
+        </Typography>
+      )}
+
         <FormControl
           component="form"
-          onSubmit={handleSumit}
+          onSubmit={handleSubmit}
           style={{ display: "flex", flexDirection: "column", gap: "20px" }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -91,6 +101,7 @@ export const LoginPage: React.FC = () => {
               type="text"
               name="mail"
               fullWidth
+              disabled={loading} 
             />
           </div>
 
@@ -103,12 +114,13 @@ export const LoginPage: React.FC = () => {
               type="password"
               name="password"
               fullWidth
+              disabled={loading}
             />
           </div>
 
           <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <Button color="info" variant="contained" type="Sumit">
-              Enviar
+            <Button color="info" variant="contained" type="submit" disabled={loading}>
+              {loading ? "Cargando..." : "Enviar"}
             </Button>
             <Link
               to="/register"

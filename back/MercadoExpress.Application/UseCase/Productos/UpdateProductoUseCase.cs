@@ -31,7 +31,7 @@ namespace MercadoExpress.Application.UseCase.Productos
             if (!string.IsNullOrEmpty(dto.Name)) searchProduct.Name = dto.Name;
             if (!string.IsNullOrEmpty(dto.Description)) searchProduct.Description = dto.Description;
             if (dto.Price.HasValue) searchProduct.Price = dto.Price.Value;
-            if (!string.IsNullOrEmpty(dto.IMG)) searchProduct.IMG = dto.IMG;
+            if (!string.IsNullOrEmpty(dto.ImgPath)) searchProduct.IMG = dto.ImgPath;
             if (dto.Stock.HasValue) searchProduct.Stock = dto.Stock.Value;
             if (!string.IsNullOrEmpty(dto.NameCategoria)) searchProduct.Categoria.Name = dto.NameCategoria;
 

@@ -64,6 +64,38 @@ namespace MercadoExpress.Infrastructure.Migrations
                     b.ToTable("DetallesOrden");
                 });
 
+            modelBuilder.Entity("MercadoExpress.Domain.Entities.Notificacion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("OrdenId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrdenId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("Notificaciones");
+                });
+
             modelBuilder.Entity("MercadoExpress.Domain.Entities.Orden", b =>
                 {
                     b.Property<Guid>("Id")
@@ -100,6 +132,14 @@ namespace MercadoExpress.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("DeliveryMethod")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("MercadoPagoPreferenceId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PaymentUrl")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -213,6 +253,25 @@ namespace MercadoExpress.Infrastructure.Migrations
                     b.Navigation("Orden");
 
                     b.Navigation("Producto");
+                });
+
+            modelBuilder.Entity("MercadoExpress.Domain.Entities.Notificacion", b =>
+                {
+                    b.HasOne("MercadoExpress.Domain.Entities.Orden", "Orden")
+                        .WithMany()
+                        .HasForeignKey("OrdenId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MercadoExpress.Domain.Entities.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Orden");
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("MercadoExpress.Domain.Entities.Producto", b =>

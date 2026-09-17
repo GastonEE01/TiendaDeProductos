@@ -2,6 +2,7 @@
 using MercadoExpress.Application.UseCase.Productos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace MercadoExpress.API.Controllers
 {
@@ -13,14 +14,17 @@ namespace MercadoExpress.API.Controllers
         public readonly DeleteProductoUseCase _deleteProductoUseCase;
         public readonly UpdateProductoUseCase _updateProductoUseCase;
         public readonly GetProductoUseCase _getProductoUseCase;
+        public readonly GetProductoVendedorUseCase _getProductoVendedorUseCase;
 
 
-        public ProductoController(AddProductoUseCase addProductoUseCase, DeleteProductoUseCase deleteProductoUseCase, UpdateProductoUseCase updateProductoUseCase, GetProductoUseCase getProductoUseCase)
+
+        public ProductoController(AddProductoUseCase addProductoUseCase, DeleteProductoUseCase deleteProductoUseCase, UpdateProductoUseCase updateProductoUseCase, GetProductoUseCase getProductoUseCase, GetProductoVendedorUseCase getProductoVendedorUseCase)
         {
             _addProductoUseCase = addProductoUseCase;
             _deleteProductoUseCase = deleteProductoUseCase;
             _updateProductoUseCase = updateProductoUseCase;
             _getProductoUseCase = getProductoUseCase;
+            _getProductoVendedorUseCase = getProductoVendedorUseCase;
         }
 
         [Authorize]
@@ -96,5 +100,20 @@ namespace MercadoExpress.API.Controllers
             var response = await _getProductoUseCase.GetProduts();
             return Ok(response);
         }
+
+        [Authorize]
+        [HttpGet("GetProductSeller")]
+        public async Task<IActionResult> GetMisProductos()
+        {
+            // Captura el ID del usuario autenticado desde los Claims del JWT
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized();
+
+            var usuarioId = Guid.Parse(userIdClaim);
+            var productos = await _getProductoVendedorUseCase.GetProductosVendedor(usuarioId);
+
+            return Ok(productos);
+        }
+
     }
 }

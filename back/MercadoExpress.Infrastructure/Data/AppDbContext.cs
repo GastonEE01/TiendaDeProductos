@@ -19,6 +19,8 @@ namespace MercadoExpress.Infrastructure.Data
         public DbSet<Categoria> Categorias { get; set; }
         public DbSet<DetalleOrden> DetallesOrden { get; set; }
         public DbSet<Orden> Ordenes { get; set; }
+        public DbSet<Notificacion> Notificaciones { get; set; }
+
 
     }
 }

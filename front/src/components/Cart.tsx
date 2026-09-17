@@ -12,11 +12,13 @@ import {
   FormControl,
 } from "@mui/material";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
-
+import { initMercadoPago, Wallet } from "@mercadopago/sdk-react";
 import { useCartStore } from "../hooks/useCartStore";
 import toast from "react-hot-toast";
 import { addOrden } from "../service/api";
 import { CartItemDto } from "../interfaces/CartType";
+
+initMercadoPago("APP_USR-e8b4cfda-bf2e-4ac7-88e5-46bf4f4afc5a");
 
 export const Cart = () => {
   const formRef = useRef<HTMLFormElement>(null);
@@ -24,6 +26,7 @@ export const Cart = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [pay, setPay] = useState<Boolean>(false);
   const [deliveryMethod, setDeliveryMethod] = useState<string>("");
+  const [preferenceId, setPreferenceId] = useState<string | null>(null);
 
   const cart = useCartStore((state) => state.cart);
   const clearCart = useCartStore((state) => state.clearCart);
@@ -66,14 +69,24 @@ export const Cart = () => {
       items: cartItems,
     };
     try {
-      console.log("Enviando orden al Backend:", orden);
-
       const response = await addOrden(orden);
       toast.success(response.message);
+  console.log("JSON recibido crudo en el front:" , response);
+      // Ponemos 'as any' temporalmente si tu interfaz ApiResponse te obligara a buscar un .data intermedio
+  const idDirecto = (response as any).preferenceId || (response as any).data?.preferenceId;
+
+ if (idDirecto) {
+    setPreferenceId(idDirecto); // ⚡ Guardamos el ID en el estado y se activa el botón
+    console.log("¡Botón activado con el ID directo del Back!", idDirecto);
+  } else {
+    setFormError("El pedido se creó, pero no se recibió el código de pago 'preferenceId'.");
+  }
+
       formRef.current?.reset();
       console.log(response);
-      clearCart();
-      setPay(false);
+     // setDeliveryMethod("");
+      //clearCart();
+      //setPay(false);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : null;
       setFormError(message);
@@ -158,7 +171,7 @@ export const Cart = () => {
                     >
                       Pagar
                     </Button>
-                  </div> 
+                  </div>
                 </Box>
               </>
             )}
@@ -340,6 +353,32 @@ export const Cart = () => {
                       </Button>
                     </div>
                   </Box>
+
+                  {/* 🚀 6. RENDERIZADO DEL BOTÓN DE MERCADO PAGO */}
+                  {preferenceId && (
+                    <Box
+                      sx={{
+                        mt: 3,
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        sx={{ mb: 1, fontWeight: "bold", color: "green" }}
+                      >
+                        ¡Orden registrada! Haz clic abajo para pagar de forma
+                        segura:
+                      </Typography>
+                      <div style={{ width: "100%" }}>
+                        {/* El componente Wallet lee el ID dinámico y dibuja el botón azul oficial */}
+                        <Wallet
+                          initialization={{ preferenceId: preferenceId }}
+                        />
+                      </div>
+                    </Box>
+                  )}
                   {formError && (
                     <div
                       style={{

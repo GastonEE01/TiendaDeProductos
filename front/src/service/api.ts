@@ -4,8 +4,8 @@ import {
   LoginDtoRequest,
   LoginDtoResponse,
 } from "../interfaces/UsuarioType";
-import { OrdenDtoRequest } from "../interfaces/OrdenType";
-
+import { OrdenDtoRequest,OrdenResponseData } from "../interfaces/OrdenType";
+import { NotificacionDtoResponse } from "../interfaces/NotificacionType"
 const API_URL = import.meta.env.VITE_API_URL;
 
 export interface ApiResponse<T = void> {
@@ -118,6 +118,25 @@ export const getProducts = async (): Promise<ProductDtoRequest[]> => {
   return rest.json();
 };
 
+export const getProductsSeller = async (): Promise<ProductDtoRequest[]> => {
+  const token = localStorage.getItem("token");
+  const rest = await fetch(`${API_URL}/api/Producto/GetProductSeller`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-type": "application/json",
+    },
+  });
+  if (!rest.ok) {
+    const errorData = await rest.json().catch(() => ({}));
+    const messageError = errorData.Message || errorData.message;
+    throw new Error(messageError);
+  }
+  console.log(rest);
+  return rest.json();
+};
+
+
 export const deleteProduct = async ( id: String): Promise< ApiResponse > => {
   const token = localStorage.getItem("token");
 const rest = await fetch(`${API_URL}/api/Producto/Delete${id}`, {
@@ -175,7 +194,7 @@ export const updateProduct = async (
 
 // Oden
 export const addOrden = async (
-  credentials: OrdenDtoRequest,): Promise<ApiResponse> => {
+  credentials: OrdenDtoRequest,): Promise<ApiResponse<OrdenResponseData>> => {
   //const token = localStorage.getItem("token");
   const rest = await fetch(`${API_URL}/Api/Orden/Add`, {
     method: "POST",
@@ -195,3 +214,32 @@ export const addOrden = async (
   return rest.json();
     
 }
+
+export const getNotificacionesAdmin = async (): Promise<NotificacionDtoResponse[]> => {
+  const token = localStorage.getItem("token"); // Ajustalo a cómo recuperás tu JWT
+  const rest = await fetch(`${API_URL}/Api/Notificacion/GetNotificacionAdmin`, {
+    method: "GET",
+    headers: {
+      "Content-type": "application/json",
+      "Authorization": `Bearer ${token}` // Crucial para que .NET lea el Claim
+    },
+  });
+
+  if (!rest.ok) {
+    throw new Error("No se pudieron cargar las notificaciones");
+  }
+
+  return rest.json();
+};
+
+export const MarkNotificationsRead = async (): Promise<void> => {
+  const token = localStorage.getItem("token");
+  await fetch(`${API_URL}/Api/Notificacion/MarkNotificationsRead`, {
+    method: "PUT",
+    headers: {
+      "Content-type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+  });
+};
+

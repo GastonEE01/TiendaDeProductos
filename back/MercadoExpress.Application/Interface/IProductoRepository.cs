@@ -13,6 +13,7 @@ namespace MercadoExpress.Application.Interface
         Task Delete(Producto producto);
         Task <List<Producto>> GetAll();
         Task<Producto> GetProductoById(Guid id);
+        Task<List<Producto>> GetProductVendedor(Guid usuarioId);
         Task<Producto>Update(Producto searchProduct);
     }
 }

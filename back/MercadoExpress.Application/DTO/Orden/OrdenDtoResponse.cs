@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MercadoPago.Resource.Preference;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,5 +10,7 @@ namespace MercadoExpress.Application.DTO.Orden
     public class OrdenDtoResponse
     {
         public string Message { get; set; } = string.Empty;
+        public string PaymentUrl { get; set; } = string.Empty;
+        public string? PreferenceId { get; set; }
     }
 }

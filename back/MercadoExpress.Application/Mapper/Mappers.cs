@@ -37,6 +37,7 @@ namespace MercadoExpress.Application.Mapper
             CreateMap<OrdenDtoRequest, Orden>()
              .ForMember(dest => dest.Detalles, opt => opt.Ignore());
 
+
         }
     }
 }

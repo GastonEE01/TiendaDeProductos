@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { getProducts, deleteProduct, updateProduct } from "../service/api";
+import { getProducts,getProductsSeller, deleteProduct, updateProduct } from "../service/api";
 import { ProductDtoRequest } from "../interfaces/ProductoType";
 import { ProductCard } from "../components/ProductCard";
 import { useDebouceSearch } from "../hooks/useDebouce";
+import { useAuthStore } from '../hooks/userStorage'
 import toast from "react-hot-toast";
 import {
   Button,
@@ -18,9 +19,9 @@ export const ProductList: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [products, setProducts] = useState<ProductDtoRequest[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [editProduct, setEditProduct] = useState<ProductDtoRequest | null>(
-    null,
-  );
+  const [editProduct, setEditProduct] = useState<ProductDtoRequest | null>(null,);
+
+  const user = useAuthStore((state) => state.user);
 
   const [editFormData, setEditFormData] = useState<{
     name: string;
@@ -45,7 +46,12 @@ export const ProductList: React.FC = () => {
     const loadProducts = async () => {
       try {
         setLoading(true);
-        const data = await getProducts();
+         let data;
+         if (user?.rol === "Admin") {
+        data = await getProductsSeller(); 
+      } else {
+        data = await getProducts(); 
+      }
         setProducts(data);
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : null;

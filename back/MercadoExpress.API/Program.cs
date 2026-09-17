@@ -2,12 +2,14 @@ using AutoMapper;
 using Azure.Identity;
 using MercadoExpress.API.Middlewares;
 using MercadoExpress.Application.Interface;
+using MercadoExpress.Application.UseCase.Notificaciones;
 using MercadoExpress.Application.UseCase.Ordenes;
 using MercadoExpress.Application.UseCase.Productos;
 using MercadoExpress.Application.UseCase.Usuarios;
 using MercadoExpress.Infrastructure.Data;
 using MercadoExpress.Infrastructure.Repositories;
 using MercadoExpress.Infrastructure.Services;
+using MercadoPago.Config;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -18,6 +20,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+var mpToken = builder.Configuration.GetSection("MercadoPago:AccessToken").Value;
+
+// Se lo asignás a la configuración global de Mercado Pago
+MercadoPagoConfig.AccessToken = mpToken;
+
+
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 
@@ -27,6 +35,7 @@ builder.Services.AddScoped<IUsuarioRepository,UsuarioRepository>();
 builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<IOrdenRepository, OrdenRepository>();
+builder.Services.AddScoped<INotificacionRepository, NotificacionRepository>();
 
 
 // Casos de uso
@@ -37,8 +46,12 @@ builder.Services.AddScoped<AddProductoUseCase>();
 builder.Services.AddScoped<DeleteProductoUseCase>();
 builder.Services.AddScoped<UpdateProductoUseCase>();
 builder.Services.AddScoped<GetProductoUseCase>();
+builder.Services.AddScoped<GetProductoVendedorUseCase>();
 
 builder.Services.AddScoped<AddOrdenUseCase>();
+
+builder.Services.AddScoped<GetNotificacionUserAdminUseCase>();
+builder.Services.AddScoped<MarkNotificationsReadUseCase>();
 
 
 builder.Services.AddAutoMapper(cfg => { }, typeof(MercadoExpress.Application.Mapper.Mappers));
@@ -159,6 +172,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
 
 // MIGRACIONES AUTOMÁTICAS(Para Neon en la nube
 using (var scope = app.Services.CreateScope())

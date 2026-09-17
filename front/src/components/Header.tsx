@@ -10,11 +10,12 @@ import {
   Box,
   Dialog,
 } from "@mui/material";
-import { FaShoppingCart,FaSignOutAlt  } from "react-icons/fa";
+import { FaShoppingCart,FaSignOutAlt,FaBell } from "react-icons/fa";
 import { Cart } from '../components/Cart';
-
-
+import { HeaderNotification } from '../components/HeaderNotification'
 export const Header = () => {
+
+const [modalNotificacion, setModalNotifications] = useState<boolean>(false);
 
 const logout = useAuthStore((state) => state.logout);
 const user = useAuthStore((state) => state.user);
@@ -22,7 +23,7 @@ console.log("Rol:", JSON.stringify(user?.rol));
 
  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
 const handleOpenCart = (): void => setIsCartOpen(true);
-  const handleCloseCart = (): void => setIsCartOpen(false);
+const handleCloseCart = (): void => setIsCartOpen(false);
 
 const navigate = useNavigate(); 
 const handleLogout = () => {
@@ -32,7 +33,6 @@ const handleLogout = () => {
 
 
   return (
-     // AppBar maneja el fondo y la elevación (sombra) automáticamente
     <AppBar position="static" style={{ background: "black", height: "10vh" }}>
       <Toolbar style={{ display: "flex", justifyContent: "space-between", height: "100%"}}>
         
@@ -56,10 +56,17 @@ const handleLogout = () => {
             U {/* Inicial del usuario o un icono */}
           </Avatar>
 
-          {user?.rol !== "Admin" && (
+          {user?.rol !== "Admin" && ( 
             <FaShoppingCart   onClick={handleOpenCart}  fontSize={25} style={{ cursor: "pointer", color: "white"}} />
           ) }
 
+           {user?.rol == "Admin" && ( 
+              <HeaderNotification />
+            
+           )}
+      
+              
+         
           <FaSignOutAlt  
             onClick={handleLogout}
             fontSize="25"
@@ -73,7 +80,7 @@ const handleLogout = () => {
       </Toolbar>
 
        <Dialog
-        open={isCartOpen}          // Si es true se muestra, si es false se oculta
+        open={isCartOpen}          
         onClose={handleCloseCart}  // Se ejecuta si el usuario hace click fuera del modal
         fullWidth
         maxWidth="sm" // Tamaño del modal (puedes usar xs, sm, md, lg)

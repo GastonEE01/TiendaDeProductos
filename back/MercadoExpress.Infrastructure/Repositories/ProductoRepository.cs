@@ -47,6 +47,13 @@ namespace MercadoExpress.Infrastructure.Repositories
  //           _context.SaveChanges();
         }
 
+        public async Task<List<Producto>> GetProductVendedor(Guid usuarioId)
+        {
+            return await _context.Productos
+                .Where(p => p.UsuarioId == usuarioId)
+                .ToListAsync();
+        }
+
         public async Task<Producto> Update(Producto searchProduct)
         {
             _context.Productos.Update(searchProduct);

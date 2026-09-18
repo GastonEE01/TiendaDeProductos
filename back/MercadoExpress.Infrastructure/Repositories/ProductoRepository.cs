@@ -21,8 +21,8 @@ namespace MercadoExpress.Infrastructure.Repositories
 
         public async Task<Producto> Add(Producto product)
         {
-            _context.AddAsync(product);
-            _context.SaveChanges();
+            await _context.AddAsync(product);
+             _context.SaveChanges();
             return product;
         }
 

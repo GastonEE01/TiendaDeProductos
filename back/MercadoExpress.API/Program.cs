@@ -49,6 +49,10 @@ builder.Services.AddScoped<GetProductoUseCase>();
 builder.Services.AddScoped<GetProductoVendedorUseCase>();
 
 builder.Services.AddScoped<AddOrdenUseCase>();
+builder.Services.AddScoped<GetCustomerCartClientUseCase>();
+builder.Services.AddScoped<SimulatePaymentWebhookUseCase>();
+builder.Services.AddScoped<UpdateStateOrdenShippedUseCase>();
+builder.Services.AddScoped<UpdateOrdenDeliveredUseCase>();
 
 builder.Services.AddScoped<GetNotificacionUserAdminUseCase>();
 builder.Services.AddScoped<MarkNotificationsReadUseCase>();

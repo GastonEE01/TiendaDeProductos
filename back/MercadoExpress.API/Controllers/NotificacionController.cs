@@ -40,7 +40,6 @@ namespace MercadoExpress.API.Controllers
 
             var usuarioId = Guid.Parse(userIdClaim);
 
-            // 2. Ejecutamos la actualización
             var resultMessage = _markNotificationsRead.MarkNotificationsRead(usuarioId);
 
             return Ok(new { Message = resultMessage });

@@ -13,6 +13,8 @@ namespace MercadoExpress.Application.DTO.Notificacion
         public string State { get; set; } = string.Empty;
         public DateTime CreationDate { get; set; }
 
+        public string OrderState { get; set; } = string.Empty; // "Approved", "Shipped", "Delivered"
+        public Guid OrdenId { get; set; }
         // Datos del Comprador
         public string CustomerName { get; set; } = string.Empty;
         public string CustomerAddress { get; set; } = string.Empty;

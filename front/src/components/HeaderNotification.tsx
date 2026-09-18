@@ -1,56 +1,76 @@
-import React, {useState,useEffect} from 'react'
-import { NotificacionDtoResponse } from '../interfaces/NotificacionType'
-import { getNotificacionesAdmin,MarkNotificationsRead } from '../service/api'
+import React, { useState, useEffect } from "react";
+import { NotificacionDtoResponse } from "../interfaces/NotificacionType";
+import { getNotificacionesAdmin, MarkNotificationsRead,updateOrdenShipped } from "../service/api";
 
-import { Badge, IconButton, Drawer, Box, Typography, List, ListItem, Divider } from "@mui/material";
-import { FaBell } from "react-icons/fa"
-
-
+import {
+  Badge,
+  IconButton,
+  Drawer,
+  Box,
+  Typography,
+  List,
+  ListItem,
+  Divider,
+} from "@mui/material";
+import { FaBell } from "react-icons/fa";
 
 export const HeaderNotification = () => {
+  const [notifications, setNotifications] = useState<NotificacionDtoResponse[]>(
+    [],
+  );
+  const [loading, setLoading] = useState(false);
 
-    const [notifications, setNotifications] = useState<NotificacionDtoResponse[]>([]);
-    const [loading, setLoading] = useState(false);
-    
-    const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchAlert = async () => {
+      try {
+        setLoading(true);
+        const data = await getNotificacionesAdmin();
+        setNotifications(data);
+      } catch (error) {
+        console.error("Error al traer notificaciones: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAlert();
+  }, []);
+
+  const unreadCount = notifications.filter((n) => n.state === "Unread").length;
+
+  const handleCloseDrawer = async () => {
+    setIsDrawerOpen(false);
+
+    try {
+      await MarkNotificationsRead();
+
+      // 3. Modificamos nuestro estado local para que pasen a "Read" en la pantalla
+      setNotifications((prev) => prev.map((n) => ({ ...n, state: "Read" })));
+    } catch (error) {
+      console.error("Error al actualizar notificaciones:", error);
+    }
+  };
 
 
-    useEffect(() => {
-      const fetchAlert = async () => {
-        try{
-          setLoading(true);
-          const data = await getNotificacionesAdmin();
-          setNotifications(data);
-        }catch(error){
-          console.error("Error al traer notificaciones: ", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchAlert();
-    },[]);
-
-    const unreadCount = notifications.filter((n) => n.state === "Unread").length;
-
-    const handleCloseDrawer = async () => {
-  setIsDrawerOpen(false); 
-  
-  try {
-    await MarkNotificationsRead(); 
-    
-    // 3. Modificamos nuestro estado local para que pasen a "Read" en la pantalla
-    setNotifications((prev) =>
-      prev.map((n) => ({ ...n, state: "Read" }))
-    );
-  } catch (error) {
-    console.error("Error al actualizar notificaciones:", error);
-  }
-};
+  const handleUpdateOrdenShipped = async(ordenId: string) => {
+    try{
+      await updateOrdenShipped(ordenId);
+          // 2. 🚀 SINCRO LOCAL: Modificamos el orderState en la memoria de React
+      setNotifications((prev) => 
+        prev.map((n) => 
+           n.ordenId === ordenId ? { ...n, orderState: "Shipped" } : n
+        )
+      );
+    } catch(error){
+      console.error("Error al enviar el pedido:", error);
+    }
+  };
 
   return (
     <>
       {/* 🔔 ÍCONO DE LA CAMPANA */}
-      <IconButton color="inherit" onClick={() => setIsDrawerOpen(true)}> 
+      <IconButton color="inherit" onClick={() => setIsDrawerOpen(true)}>
         <Badge badgeContent={unreadCount} color="error">
           <FaBell size={24} style={{ color: "#d8a6a6" }} />
         </Badge>
@@ -62,7 +82,6 @@ export const HeaderNotification = () => {
         open={isDrawerOpen}
         onClose={handleCloseDrawer} // Al hacer clic afuera, se cierra
       >
-
         <Box sx={{ width: 350, padding: 3 }}>
           <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
             Notificaciones de Ventas 🔔
@@ -76,20 +95,24 @@ export const HeaderNotification = () => {
           ) : (
             <List sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               {notifications.map((notif) => (
-                <ListItem 
-                  key={notif.id} 
-                  disablePadding 
-                  sx={{ 
-                    flexDirection: "column", 
+                <ListItem
+                  key={notif.id}
+                  disablePadding
+                  sx={{
+                    flexDirection: "column",
                     alignItems: "flex-start",
-                    backgroundColor: notif.state === "Unread" ? "#fff9f9" : "transparent", 
+                    backgroundColor:
+                      notif.state === "Unread" ? "#fff9f9" : "transparent",
                     padding: 2,
                     borderRadius: "8px",
-                    border: "1px solid #eee"
+                    border: "1px solid #eee",
                   }}
                 >
                   {/* Mensaje principal armado por el Back */}
-                  <Typography variant="body2" sx={{ fontWeight: "bold", mb: 1 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: "bold", mb: 1 }}
+                  >
                     {notif.message}
                   </Typography>
 
@@ -97,21 +120,73 @@ export const HeaderNotification = () => {
                   <Typography variant="caption" color="textSecondary">
                     📍 Dirección: {notif.customerAddress}
                   </Typography>
-                  <Typography variant="caption" color="textSecondary" sx={{ mb: 1 }}>
+                  <Typography
+                    variant="caption"
+                    color="textSecondary"
+                    sx={{ mb: 1 }}
+                  >
                     📞 Tel: {notif.customerPhone}
                   </Typography>
+
+                  {notif.orderState === "Approved" ? (
+                    <button
+                      style={{
+                        marginTop: "10px",
+                        padding: "5px 10px",
+                        backgroundColor: "#007bff",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "5px",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => handleUpdateOrdenShipped(notif.ordenId)} // Aquí irá tu llamada PUT mañana
+                    >
+                      Marcar como Enviado 📦
+                    </button>
+                  ) : (
+                    <Typography
+                      variant="caption"
+                      color="textSecondary"
+                      sx={{
+                        display: "block",
+                        mt: 1,
+                        fontWeight: "bold",
+                        color:
+                          notif.orderState === "Shipped" ? "orange" : "green",
+                      }}
+                    >
+                       {notif.orderState === "Shipped" ? "🚚 Pedido en camino" : "✅ Entrega confirmada por el cliente"}
+
+                    </Typography>
+                  )}
 
                   {/* Lista de productos que vienen en tu JSON plano */}
                   <Box sx={{ width: "100%", mt: 1 }}>
                     {notif.productos.map((prod) => (
-                      <Box key={prod.id} sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
-                        <img 
-                          src={`https://localhost:7197${prod.img}`} 
-                          alt={prod.name} 
-                          style={{ width: 40, height: 40, borderRadius: 4, objectFit: "cover" }} 
+                      <Box
+                        key={prod.id}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                          mt: 1,
+                        }}
+                      >
+                        <img
+                          src={`https://localhost:7197${prod.img}`}
+                          alt={prod.name}
+                          style={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: 4,
+                            objectFit: "cover",
+                          }}
                         />
                         <Box>
-                          <Typography variant="caption" sx={{ display: "block", fontWeight: "bold" }}>
+                          <Typography
+                            variant="caption"
+                            sx={{ display: "block", fontWeight: "bold" }}
+                          >
                             {prod.name}
                           </Typography>
                           <Typography variant="caption" color="textSecondary">
@@ -127,7 +202,6 @@ export const HeaderNotification = () => {
           )}
         </Box>
       </Drawer>
-        </>
+    </>
   );
 };
-

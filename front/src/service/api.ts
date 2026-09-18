@@ -6,6 +6,7 @@ import {
 } from "../interfaces/UsuarioType";
 import { OrdenDtoRequest,OrdenResponseData } from "../interfaces/OrdenType";
 import { NotificacionDtoResponse } from "../interfaces/NotificacionType"
+import { CustomerPurchasesDtoResponse } from "../interfaces/CartType"
 const API_URL = import.meta.env.VITE_API_URL;
 
 export interface ApiResponse<T = void> {
@@ -243,3 +244,67 @@ export const MarkNotificationsRead = async (): Promise<void> => {
   });
 };
 
+export const GetCustomerCartClient = async (email: string): Promise<CustomerPurchasesDtoResponse[]> => {
+  const rest = await fetch(`${API_URL}/Api/Orden/GetCustomerCartClient/${email}`, {
+    method: "GET",
+    headers: {
+      "Content-type": "application/json",
+    },
+  });
+
+  if (!rest.ok) {
+    throw new Error("No se pudieron cargar las compras");
+  }
+
+  return rest.json();
+};
+
+export const updateOrdenShipped = async (
+  ordenId: string,
+): Promise<ApiResponse> => {
+  const token = localStorage.getItem("token");
+
+  const rest = await fetch(`${API_URL}/Api/Orden/OrdenShipped/${ordenId}`, {
+    method: "PUT",
+    headers: {
+     "Content-Type": "application/json", 
+      "Authorization": `Bearer ${token}`
+
+    },
+  });
+
+  if (!rest.ok) {
+    const errorData = await rest.json().catch(() => ({}));
+    const messageError = errorData.Message || errorData.message;
+    throw new Error(messageError);
+  }
+
+  console.log(rest);
+
+  return rest.json();
+};
+
+export const updateOrdenDelivered = async (
+  ordenId: string,email: string
+): Promise<ApiResponse> => {
+  const token = localStorage.getItem("token");
+
+  const rest = await fetch(`${API_URL}/Api/Orden/UpdateOrdenDelivered/${ordenId}/${email}`, {
+    method: "PUT",
+    headers: {
+     "Content-Type": "application/json", 
+      "Authorization": `Bearer ${token}`
+
+    },
+  });
+
+  if (!rest.ok) {
+    const errorData = await rest.json().catch(() => ({}));
+    const messageError = errorData.Message || errorData.message;
+    throw new Error(messageError);
+  }
+
+  console.log(rest);
+
+  return rest.json();
+};

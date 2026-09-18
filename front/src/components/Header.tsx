@@ -13,6 +13,7 @@ import {
 import { FaShoppingCart,FaSignOutAlt,FaBell } from "react-icons/fa";
 import { Cart } from '../components/Cart';
 import { HeaderNotification } from '../components/HeaderNotification'
+import { HeaderShopping } from '../components/HeaderShopping'
 export const Header = () => {
 
 const [modalNotificacion, setModalNotifications] = useState<boolean>(false);
@@ -57,7 +58,10 @@ const handleLogout = () => {
           </Avatar>
 
           {user?.rol !== "Admin" && ( 
+            <>
             <FaShoppingCart   onClick={handleOpenCart}  fontSize={25} style={{ cursor: "pointer", color: "white"}} />
+            <HeaderShopping />
+            </>
           ) }
 
            {user?.rol == "Admin" && ( 

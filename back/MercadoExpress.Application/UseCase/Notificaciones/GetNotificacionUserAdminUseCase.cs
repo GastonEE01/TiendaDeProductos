@@ -28,7 +28,8 @@ namespace MercadoExpress.Application.UseCase.Notificaciones
                 Message = n.Message,
                 State = n.State,
                 CreationDate = n.CreationDate,
-
+                OrderState = n.Orden?.State ?? string.Empty,
+                OrdenId = n.OrdenId,
                 CustomerName = n.Orden?.CustomerName ?? string.Empty,
                 CustomerAddress = n.Orden?.CustomerAddress ?? string.Empty,
                 CustomerPhone = n.Orden?.CustomerPhone ?? string.Empty,

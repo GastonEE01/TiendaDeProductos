@@ -17,7 +17,6 @@ namespace MercadoExpress.API.Controllers
         public readonly GetProductoVendedorUseCase _getProductoVendedorUseCase;
 
 
-
         public ProductoController(AddProductoUseCase addProductoUseCase, DeleteProductoUseCase deleteProductoUseCase, UpdateProductoUseCase updateProductoUseCase, GetProductoUseCase getProductoUseCase, GetProductoVendedorUseCase getProductoVendedorUseCase)
         {
             _addProductoUseCase = addProductoUseCase;
@@ -114,6 +113,8 @@ namespace MercadoExpress.API.Controllers
 
             return Ok(productos);
         }
+
+        
 
     }
 }

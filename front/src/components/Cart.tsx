@@ -59,6 +59,7 @@ export const Cart = () => {
     const orden: OrdenDtoRequest = {
       customerName: formData.get("customerName") as string,
       customerEmail: formData.get("customerEmail") as string,
+
       customerPhone: Number(formData.get("customerPhone")),
       deliveryMethod: deliveryMethod,
       customerAddress: isPickup
@@ -68,25 +69,32 @@ export const Cart = () => {
       postalCode: isPickup ? "N/A" : (formData.get("postalCode") as string),
       items: cartItems,
     };
+    localStorage.setItem("customerEmail", orden.customerEmail);
     try {
       const response = await addOrden(orden);
       toast.success(response.message);
-  console.log("JSON recibido crudo en el front:" , response);
-      // Ponemos 'as any' temporalmente si tu interfaz ApiResponse te obligara a buscar un .data intermedio
-  const idDirecto = (response as any).preferenceId || (response as any).data?.preferenceId;
+ console.log("JSON recibido crudo en el front:", response);
+     
+   // 🚀 LEEMOS DIRECTAMENTE DE LA RAÍZ (Quitamos el .data? que no existe en tu objeto real)
+  const urlDePago = (response as any).paymentUrl;
+  const idDirecto = (response as any).preferenceId;
 
- if (idDirecto) {
-    setPreferenceId(idDirecto); // ⚡ Guardamos el ID en el estado y se activa el botón
-    console.log("¡Botón activado con el ID directo del Back!", idDirecto);
+     if (idDirecto) {
+    setPreferenceId(idDirecto);
+    console.log("¡ID de preferencia guardado con éxito!", idDirecto);
   } else {
-    setFormError("El pedido se creó, pero no se recibió el código de pago 'preferenceId'.");
+    console.warn("No se recibió el preferenceId en la raíz del objeto.");
+  }
+
+     if (urlDePago) {
+    console.log("Redirigiendo a la pasarela externa de Mercado Pago...", urlDePago);
+    // 🔥 Forzamos la redirección en pantalla completa para ganarle al bloqueo de Chrome
+    window.location.href = urlDePago; 
+  } else {
+    setFormError("No se encontró la URL de pago ('paymentUrl') en el servidor.");
   }
 
       formRef.current?.reset();
-      console.log(response);
-     // setDeliveryMethod("");
-      //clearCart();
-      //setPay(false);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : null;
       setFormError(message);

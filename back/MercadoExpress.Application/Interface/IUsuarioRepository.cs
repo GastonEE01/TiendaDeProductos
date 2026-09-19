@@ -10,6 +10,8 @@ namespace MercadoExpress.Application.Interface
     public interface IUsuarioRepository
     {
         Task Add(Usuario user);
+        Task<Usuario> GetUserById(Guid usuarioId);
         Task<Usuario> GetUserByMail(string email);
+        Task<Usuario> Update(Usuario searchUser);
     }
 }

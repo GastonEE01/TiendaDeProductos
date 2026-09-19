@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { FaCartPlus, FaTrash, FaEdit } from "react-icons/fa";
 
-import { InputNumber } from "antd"; // 🚀 Ya lo tenés instaladoimport { FaTrash, FaEdit,FaCartPlus } from "react-icons/fa"; // 👈 Usas tu librería de React Icons
+import { InputNumber } from "antd";
 import { useAuthStore } from "../hooks/userStorage";
 import { useCartStore } from "../hooks/useCartStore";
 
@@ -27,14 +27,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onDelete,
   onEdit,
 }: ProductCardProps) => {
-
-    const [quantity, setQuantity] = useState<number>(1)
+  const [quantity, setQuantity] = useState<number>(1);
 
   const user = useAuthStore((state) => state.user);
   const addToCart = useCartStore((state) => state.addToCart);
 
-   return (
-    // 'elevation={3}' le da una sombra elegante. 'sx' permite añadir estilos rápidos.
+  return (
     <div style={{ backgroundColor: "orange" }}>
       <Card sx={{ maxWidth: 345, borderRadius: "12px", boxShadow: 3, m: 2 }}>
         <CardContent>
@@ -48,16 +46,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             {product.name}
           </Typography>
 
+          {/* IMG */}
           <Box
-            component="img" 
+            component="img"
             src={`${API_URL}${product.img}`}
             alt={product.name}
             sx={{
               width: "100%",
-              height: "160px", 
+              height: "160px",
               objectFit: "cover",
               borderTopLeftRadius: "8px",
-              borderTopRightRadius: "8px", 
+              borderTopRightRadius: "8px",
             }}
           ></Box>
 
@@ -72,11 +71,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </Typography>
 
           <Box sx={{ display: "flex", justifyContent: "space-between", mt: 1 }}>
-             {/* Precio */}
+            {/* Precio */}
             <Typography
               variant="subtitle1"
-              color="primary"
-              sx={{ fontWeight: "bold" }}
+              sx={{ fontWeight: "bold", color: "#60a5fa !important" }}
             >
               Precio: ${product.price}
             </Typography>
@@ -98,9 +96,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               <Button
                 size="small"
                 variant="outlined"
-                color="primary"
                 startIcon={<FaEdit />}
                 onClick={() => onEdit(product)}
+                sx={{ color: "#60a5fa !important" }}
               >
                 Editar
               </Button>
@@ -123,23 +121,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 variant="outlined"
                 color="primary"
                 startIcon={<FaCartPlus />}
-                onClick={() => addToCart(product,quantity)}
-                 disabled={product.stock <= 0}
+                onClick={() => addToCart(product, quantity)}
+                disabled={product.stock <= 0}
+                sx={{ color: "#60a5fa !important" }}
               ></Button>
 
               <InputNumber
                 placeholder="Elegí la cantidad"
                 min={1}
                 max={product.stock}
-                value={quantity} 
+                value={quantity}
                 onChange={(val) => setQuantity(val || 1)}
                 disabled={product.stock <= 0}
-                />
+              />
             </>
           )}
         </CardActions>
       </Card>
-  
     </div>
   );
 };

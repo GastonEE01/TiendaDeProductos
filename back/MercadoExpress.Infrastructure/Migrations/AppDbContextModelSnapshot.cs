@@ -211,6 +211,10 @@ namespace MercadoExpress.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("IMG")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Mail")
                         .IsRequired()
                         .HasColumnType("text");

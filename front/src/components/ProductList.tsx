@@ -12,10 +12,16 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
+  Box,
+  Typography
 } from "@mui/material";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch,FaTimes } from "react-icons/fa";
 
-export const ProductList: React.FC = () => {
+interface ProductListProps {
+  onClose: () => void;
+}
+
+export const ProductList: React.FC<ProductListProps> = ({onClose}) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [products, setProducts] = useState<ProductDtoRequest[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -150,6 +156,19 @@ export const ProductList: React.FC = () => {
     return product.name.toLowerCase().includes(normalizedSearch);
   });
 
+  const inputStyle = {
+  "& .MuiOutlinedInput-root": {
+    backgroundColor: "#111827", // Fondo medianoche para las cajas
+    color: "#f8fafc",            // Letras blancas al escribir
+    borderRadius: "8px",
+    "& fieldset": { borderColor: "rgba(255, 255, 255, 0.1)" },
+    "&:hover fieldset": { borderColor: "rgba(255, 255, 255, 0.2)" },
+    "&.Mui-focused fieldset": { borderColor: "#2563eb" }, // Borde azul eléctrico al escribir
+  },
+  "& .MuiInputLabel-root": { color: "#94a3b8" }, // Texto gris claro flotando
+  "& .MuiInputLabel-root.Mui-focused": { color: "#2563eb" }
+};
+
   return (
     <div
       style={{
@@ -157,7 +176,7 @@ export const ProductList: React.FC = () => {
         flexDirection: "column",
         gap: "20px",
         marginLeft: "15%",
-        width: "calc(100% - 250px)",
+        width: "82%",
         padding: "20px",
       }}
     >
@@ -172,16 +191,18 @@ export const ProductList: React.FC = () => {
           width: "100%",
         }}
       >
-        <FaSearch size={30} style={{ color: "#d8a6a6" }} />
+        <FaSearch size={24} style={{ color: "#2563eb" }} />
         <TextField
           label="Buscar producto"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           fullWidth
           sx={{
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "50px", // Estilo píldora/cápsula
-            },
+            ...inputStyle, // Hereda el fondo oscuro y letras blancas
+          "& .MuiOutlinedInput-root": {
+            ...inputStyle["& .MuiOutlinedInput-root"],
+            borderRadius: "50px",
+          }
           }}
         />
       </div>
@@ -211,10 +232,27 @@ export const ProductList: React.FC = () => {
         fullWidth
         maxWidth="sm"
       >
+
+              <Box sx={{ backgroundColor: "#1e293b", borderRadius: "16px", padding: "10px", width: "100%" }}>
+
         <form onSubmit={handleSaveEdit}>
-          <DialogTitle>Editar producto</DialogTitle>
+           <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", p: 2 }}>
+            <div style={{ width: "24px" }}></div> 
+            <Typography variant="h5" sx={{ fontWeight: "bold", color: "#f8fafc", flexGrow: 1, textAlign: "center" }}>
+              Editar producto
+            </Typography>
+            
+            {/* 🚀 RECTIFICADO: Pasamos una función de flecha limpia para limpiar el estado */}
+            <FaTimes 
+              size={24} 
+              onClick={() => setEditProduct(null)} 
+              style={{ cursor: "pointer", color: "#ef4444", transition: "color 0.2s" }}
+              onMouseOver={(e) => e.currentTarget.style.color = '#ff0000'}
+              onMouseOut={(e) => e.currentTarget.style.color = '#ef4444'}
+            />
+          </DialogTitle>
           <DialogContent
-            sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}
+            sx={{ display: "flex", flexDirection: "column", gap: 3, pt: 2 }}
           >
             <TextField
               name="name"
@@ -222,6 +260,8 @@ export const ProductList: React.FC = () => {
               value={editFormData.name}
               onChange={handleFieldChange}
               required
+              fullWidth
+              sx={inputStyle}
             />
             <TextField
               name="description"
@@ -229,6 +269,10 @@ export const ProductList: React.FC = () => {
               value={editFormData.description}
               onChange={handleFieldChange}
               required
+              fullWidth
+              multiline
+              rows={2}
+              sx={inputStyle}
             />
             <TextField
               name="nameCategoria"
@@ -236,24 +280,39 @@ export const ProductList: React.FC = () => {
               value={editFormData.nameCategoria}
               onChange={handleFieldChange}
               required
+              fullWidth
+               multiline
+              rows={2}
+              sx={inputStyle}
             />
 
-            <TextField
-              name="img"
-              label="Nueva imagen"
-              type="file"
-              onChange={(event) => {
-                if (event.target instanceof HTMLInputElement) {
-                  const file = event.target.files?.[0] ?? null;
+             <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              <Typography variant="caption" sx={{ color: "#94a3b8", fontWeight: "bold" }}>
+                Nueva imagen (Opcional)
+              </Typography>
+              <input
+                type="file"
+                onChange={(event) => {
+                  if (event.target instanceof HTMLInputElement) {
+                    const file = event.target.files?.[0] ?? null;
+                    setEditFormData((currentData) => ({
+                      ...currentData,
+                      img: file,
+                    }));
+                  }
+                }}
+                style={{
+                  color: "#94a3b8",
+                  backgroundColor: "#111827",
+                  padding: "12px",
+                  borderRadius: "8px",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  cursor: "pointer"
+                }}
+              />
+            </Box>
 
-                  setEditFormData((currentData) => ({
-                    ...currentData,
-                    img: file,
-                  }));
-                }
-              }}
-            />
-
+            <Box sx={{ display: "flex", gap: 2 }}>
             <TextField
               name="price"
               label="Precio"
@@ -261,6 +320,8 @@ export const ProductList: React.FC = () => {
               value={editFormData.price}
               onChange={handleFieldChange}
               required
+               fullWidth
+                sx={inputStyle}
             />
             <TextField
               name="stock"
@@ -269,15 +330,26 @@ export const ProductList: React.FC = () => {
               value={editFormData.stock}
               onChange={handleFieldChange}
               required
+               fullWidth
+                sx={inputStyle}
             />
+            </Box>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setEditProduct(null)}>Cancelar</Button>
-            <Button type="submit" variant="contained">
+           <DialogActions sx={{ p: 2, pr: 3, gap: 1 }}>
+            <Button onClick={() => setEditProduct(null)} sx={{ color: "#94a3b8", "&:hover": { color: "#f8fafc" } }}>Cancelar</Button>
+            <Button type="submit" variant="contained"  sx={{
+                backgroundColor: "#2563eb", // El mismo azul oficial de tus botones
+                color: "#ffffff",
+                fontWeight: "bold",
+                borderRadius: "8px",
+                padding: "8px 24px",
+                "&:hover": { backgroundColor: "#1d4ed8" }
+              }}>
               Guardar cambios
             </Button>
           </DialogActions>
         </form>
+         </Box>
       </Dialog>
     </div>
   );

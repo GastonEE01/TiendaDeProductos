@@ -25,9 +25,22 @@ namespace MercadoExpress.Infrastructure.Repositories
              await _context.SaveChangesAsync();
         }
 
+        public async Task<Usuario> GetUserById(Guid usuarioId)
+        {
+           return await _context.Usuarios.FirstOrDefaultAsync(e => e.Id == usuarioId);
+
+        }
+
         public async Task<Usuario> GetUserByMail(string email)
         {
             return  await _context.Usuarios.FirstOrDefaultAsync(e => e.Mail == email);
+        }
+
+        public async Task<Usuario> Update(Usuario searchUser)
+        {
+            _context.Usuarios.Update(searchUser);
+            await _context.SaveChangesAsync();
+            return searchUser;
         }
     }
 }

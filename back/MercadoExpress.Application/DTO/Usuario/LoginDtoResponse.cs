@@ -16,6 +16,8 @@ namespace MercadoExpress.Application.DTO.Usuario
         public string AliasCBU { get; set; } = string.Empty;
         public string MercadoPagoAccessToken { get; set; } = string.Empty;
         public string Message = string.Empty;
+        public string IMG { get; set; } = string.Empty;
+
 
     }
 }

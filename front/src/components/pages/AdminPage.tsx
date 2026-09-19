@@ -1,23 +1,36 @@
-import { useState } from 'react'
+import { useState } from "react";
 import { ProductHeader } from "../ProductHeader";
 import { Product } from "../Product";
 import { ProductList } from "../ProductList";
-import { Header } from "../Header"
+import { Header } from "../Header";
 
 export const AdminPage = () => {
-
-const [products,setProduct] = useState<"products" | "add">("products");
-
-
+  const [currentView, setCurrentView] = useState<"products" | "add">(
+    "products",
+  );
   return (
-    <div>
-      <Header/>
-      
-      <ProductHeader onShowProducts={() => setProduct("products")} onAddProduct={() => setProduct("add")} />
-      {products === "products" && <ProductList />}
+    <div style={{ backgroundColor: "#0f172a", minHeight: "100vh" }}>
+      <Header />
+
+      <ProductHeader
+        onShowProducts={() => setCurrentView("products")}
+        onAddProduct={() => setCurrentView("add")}
+      />
+
+      {currentView === "products" && (
+        <ProductList onClose={() => setCurrentView("products")} />
+      )}
+
+      {/* Formulario de creación (Agregar): Al cerrar, te devuelve a la lista */}
+      {currentView === "add" && (
+        <Product onClose={() => setCurrentView("products")} />
+      )}
+    </div>
+  );
+};
+
+/*
+{products === "products" && <ProductList />}
       {products === "add" && <Product onClose={() => setProduct("products")} />}
 
-    </div>
-  )
-}
-
+      */

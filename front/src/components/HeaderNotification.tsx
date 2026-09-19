@@ -1,6 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { NotificacionDtoResponse } from "../interfaces/NotificacionType";
-import { getNotificacionesAdmin, MarkNotificationsRead,updateOrdenShipped } from "../service/api";
+import {
+  getNotificacionesAdmin,
+  MarkNotificationsRead,
+  updateOrdenShipped,
+} from "../service/api";
 
 import {
   Badge,
@@ -45,55 +49,79 @@ export const HeaderNotification = () => {
     try {
       await MarkNotificationsRead();
 
-      // 3. Modificamos nuestro estado local para que pasen a "Read" en la pantalla
       setNotifications((prev) => prev.map((n) => ({ ...n, state: "Read" })));
-    } catch (error) {
-      console.error("Error al actualizar notificaciones:", error);
-    }
+    } catch (error) {}
   };
 
-
-  const handleUpdateOrdenShipped = async(ordenId: string) => {
-    try{
+  const handleUpdateOrdenShipped = async (ordenId: string) => {
+    try {
       await updateOrdenShipped(ordenId);
-          // 2. 🚀 SINCRO LOCAL: Modificamos el orderState en la memoria de React
-      setNotifications((prev) => 
-        prev.map((n) => 
-           n.ordenId === ordenId ? { ...n, orderState: "Shipped" } : n
-        )
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n.ordenId === ordenId ? { ...n, orderState: "Shipped" } : n,
+        ),
       );
-    } catch(error){
-      console.error("Error al enviar el pedido:", error);
-    }
+    } catch (error) {}
   };
 
   return (
     <>
-      {/* 🔔 ÍCONO DE LA CAMPANA */}
+      {loading && (
+        <Typography
+          variant="body2"
+          style={{
+            textAlign: "center",
+            marginBottom: "20px",
+            fontWeight: "bold",
+            color: "#2563eb",
+          }}
+        >
+          Cargando notificaciones, por favor espere...
+        </Typography>
+      )}
       <IconButton color="inherit" onClick={() => setIsDrawerOpen(true)}>
         <Badge badgeContent={unreadCount} color="error">
-          <FaBell size={24} style={{ color: "#d8a6a6" }} />
+          <FaBell size={35} style={{ color: "#2563eb" }} />
         </Badge>
       </IconButton>
 
-      {/* 🧱 2. BARRA LATERAL (DRAWER) QUE SE DESPLIEGA AL HACER CLIC */}
       <Drawer
         anchor="right" // Hace que salga desde la derecha
         open={isDrawerOpen}
-        onClose={handleCloseDrawer} // Al hacer clic afuera, se cierra
+        onClose={handleCloseDrawer}
+        slotProps={{
+          paper: {
+            sx: {
+              backgroundColor: "#111827",
+              color: "#f8fafc",
+              width: 360,
+              borderLeft: "1px solid rgba(255, 255, 255, 0.08)",
+            },
+          },
+        }}
       >
-        <Box sx={{ width: 350, padding: 3 }}>
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
+        <Box sx={{ padding: 3 }}>
+          <Typography
+            variant="h6"
+            sx={{
+              mb: 2,
+              fontWeight: "bold",
+              color: "#f8fafc",
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
             Notificaciones de Ventas 🔔
           </Typography>
-          <Divider sx={{ mb: 2 }} />
+          <Divider sx={{ mb: 2, borderColor: "rgba(255, 255, 255, 0.08)" }} />
 
           {notifications.length === 0 ? (
-            <Typography variant="body2" color="textSecondary">
+            <Typography variant="body2" sx={{ color: "#94a3b8" }}>
               No tienes ventas registradas aún.
             </Typography>
           ) : (
-            <List sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <List sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
               {notifications.map((notif) => (
                 <ListItem
                   key={notif.id}
@@ -102,66 +130,108 @@ export const HeaderNotification = () => {
                     flexDirection: "column",
                     alignItems: "flex-start",
                     backgroundColor:
-                      notif.state === "Unread" ? "#fff9f9" : "transparent",
-                    padding: 2,
-                    borderRadius: "8px",
-                    border: "1px solid #eee",
+                      notif.state === "Unread"
+                        ? "rgba(37, 99, 235, 0.08)"
+                        : "#1e293b",
+                    padding: 2.5,
+                    borderRadius: "12px",
+                    border:
+                      notif.state === "Unread"
+                        ? "1px solid rgba(37, 99, 235, 0.3)"
+                        : "1px solid rgba(255, 255, 255, 0.05)",
+                    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.2)",
                   }}
                 >
-                  {/* Mensaje principal armado por el Back */}
                   <Typography
                     variant="body2"
-                    sx={{ fontWeight: "bold", mb: 1 }}
+                    sx={{
+                      fontWeight: "bold",
+                      mb: 1.5,
+                      color: "#f8fafc",
+                      lineHeight: 1.4,
+                    }}
                   >
                     {notif.message}
                   </Typography>
 
-                  {/* Datos del Cliente */}
-                  <Typography variant="caption" color="textSecondary">
-                    📍 Dirección: {notif.customerAddress}
-                  </Typography>
                   <Typography
                     variant="caption"
-                    color="textSecondary"
-                    sx={{ mb: 1 }}
+                    sx={{ color: "#94a3b8", display: "block", mb: 0.5 }}
                   >
-                    📞 Tel: {notif.customerPhone}
+                    📍 Dirección:{" "}
+                    <span style={{ color: "#f1f5f9", fontWeight: "600" }}>
+                      {notif.customerAddress}
+                    </span>
+                  </Typography>
+
+                  <Typography
+                    variant="caption"
+                    sx={{ color: "#94a3b8", display: "block", mb: 2 }}
+                  >
+                    📞 Tel:{" "}
+                    <span style={{ color: "#f1f5f9", fontWeight: "600" }}>
+                      {notif.customerPhone}
+                    </span>
                   </Typography>
 
                   {notif.orderState === "Approved" ? (
                     <button
                       style={{
-                        marginTop: "10px",
-                        padding: "5px 10px",
-                        backgroundColor: "#007bff",
+                        marginTop: "4px",
+                        marginBottom: "12px",
+                        padding: "8px 16px",
+                        backgroundColor: "#2563eb", // Azul eléctrico oficial
                         color: "white",
                         border: "none",
-                        borderRadius: "5px",
+                        borderRadius: "6px",
                         cursor: "pointer",
+                        fontWeight: "bold",
+                        width: "100%",
+                        fontSize: "0.9rem",
                       }}
                       onClick={() => handleUpdateOrdenShipped(notif.ordenId)} // Aquí irá tu llamada PUT mañana
                     >
                       Marcar como Enviado 📦
                     </button>
                   ) : (
-                    <Typography
-                      variant="caption"
-                      color="textSecondary"
+                    <Box
                       sx={{
                         display: "block",
-                        mt: 1,
+                        width: "100%",
+                        mb: 1.5,
                         fontWeight: "bold",
+                        fontSize: "0.75rem",
+                        textAlign: "center",
                         color:
-                          notif.orderState === "Shipped" ? "orange" : "green",
+                          notif.orderState === "Shipped"
+                            ? "#f59e0b"
+                            : "#10b981",
+                        backgroundColor:
+                          notif.orderState === "Shipped"
+                            ? "rgba(245, 158, 11, 0.15)"
+                            : "rgba(16, 185, 129, 0.15)",
+                        padding: "6px 12px",
+                        borderRadius: "6px",
+                        border:
+                          notif.orderState === "Shipped"
+                            ? "1px solid rgba(245, 158, 11, 0.3)"
+                            : "1px solid rgba(16, 185, 129, 0.3)",
                       }}
                     >
-                       {notif.orderState === "Shipped" ? "🚚 Pedido en camino" : "✅ Entrega confirmada por el cliente"}
-
-                    </Typography>
+                      {notif.orderState === "Shipped"
+                        ? "🚚 Pedido en camino"
+                        : "✅ Entrega confirmada por el cliente"}
+                    </Box>
                   )}
 
-                  {/* Lista de productos que vienen en tu JSON plano */}
-                  <Box sx={{ width: "100%", mt: 1 }}>
+                  <Box
+                    sx={{
+                      width: "100%",
+                      mt: 1,
+                      borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+                      pt: 2,
+                    }}
+                  >
                     {notif.productos.map((prod) => (
                       <Box
                         key={prod.id}
@@ -176,21 +246,35 @@ export const HeaderNotification = () => {
                           src={`https://localhost:7197${prod.img}`}
                           alt={prod.name}
                           style={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: 4,
+                            width: 44,
+                            height: 44,
+                            borderRadius: 6,
                             objectFit: "cover",
+                            backgroundColor: "#334155",
                           }}
                         />
                         <Box>
                           <Typography
                             variant="caption"
-                            sx={{ display: "block", fontWeight: "bold" }}
+                            sx={{
+                              display: "block",
+                              fontWeight: "bold",
+                              color: "#f8fafc",
+                            }}
                           >
                             {prod.name}
                           </Typography>
-                          <Typography variant="caption" color="textSecondary">
-                            Cant: {prod.quantity} x ${prod.unitPrice}
+                          <Typography
+                            variant="caption"
+                            sx={{ color: "#94a3b8" }}
+                          >
+                            Cant:{" "}
+                            <span
+                              style={{ color: "#f8fafc", fontWeight: "bold" }}
+                            >
+                              {prod.quantity}
+                            </span>{" "}
+                            x \${prod.unitPrice}
                           </Typography>
                         </Box>
                       </Box>

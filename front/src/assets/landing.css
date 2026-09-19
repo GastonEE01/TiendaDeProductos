@@ -1,0 +1,232 @@
+/* ==========================================================================
+   🎯 CONFIGURACIÓN GLOBAL (Tema Oscuro Startup Premium)
+   ========================================================================== */
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #94a3b8;        /* Gris claro suave para textos secundarios */
+  background: #0f172a;   /* 🌌 Fondo azul medianoche profundo oficial */
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  background: #0f172a;   /* Sincronizado con el fondo general */
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ==========================================================================
+   🧱 ESTRUCTURAS Y CONTENEDORES
+   ========================================================================== */
+.container {
+  width: min(1120px, calc(100% - 48px));
+  margin: 0 auto;
+  /* 🧼 RECTIFICADO: Eliminamos el fondo rojo feo de prueba */
+}
+
+.section {
+  position: relative;
+  padding: 80px 0;
+}
+
+.section-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.split-wrap,
+.tiles-wrap {
+  display: grid;
+  gap: 32px;
+}
+
+/* Encabezados de las secciones */
+.section-header {
+  max-width: 680px;
+  margin: 0 auto 56px;
+  text-align: center;
+}
+
+.section-header h2 {
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 800;
+}
+
+.section-header p {
+  color: #94a3b8;
+  font-size: 1.125rem;
+  line-height: 1.7;
+}
+
+h1, h2, h3, h4 {
+  color: #f8fafc; /* ⚪ Blanco brillante para todos los títulos principales */
+  letter-spacing: -0.02em;
+}
+
+/* ==========================================================================
+   🔵 SECCIÓN 1: HERO (Bienvenida de la Landing)
+   ========================================================================== */
+.hero {
+  min-height: 640px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  /* 🚀 EFECTO PREMIUM: Un degradado radial sutil que simula iluminación tecnológica */
+  background: radial-gradient(circle at 80% 20%, #1e293b 0%, #0f172a 50%, #0b1329 100%);
+}
+
+.split-item {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr; /* Más espacio para el texto que para la foto */
+  gap: 64px;
+  align-items: center;
+}
+
+.hero-content h1 {
+  font-size: clamp(2.5rem, 5.5vw, 4rem);
+  line-height: 1.1;
+  font-weight: 800;
+  margin-bottom: 24px;
+}
+
+.hero-content p {
+  color: #94a3b8;
+  font-size: 1.25rem;
+  line-height: 1.6;
+  margin-bottom: 40px;
+}
+
+/* Imagen flotante del catálogo */
+.hero-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08); /* Bordecito elegante casi invisible */
+  /* 🔥 Sombra de software moderno */
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); 
+}
+
+/* ==========================================================================
+   🔘 COMPONENTES: BOTONES (Estilo SaaS Moderno)
+   ========================================================================== */
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 26px;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+}
+
+.button-primary {
+  color: #ffffff;
+  background: #2563eb; /* 🔵 Tu 10% de acento: El azul eléctrico de Startup */
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+}
+
+.button-dark {
+  color: #f8fafc;
+  background: #1e293b; /* Gris oscuro que combina con el fondo */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ==========================================================================
+   ⚙️ SECCIONES 2 Y 3: GRILLAS Y TARJETAS (Specifications y LifeCycle)
+   ========================================================================== */
+.tiles-wrap {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+}
+
+/* 🧱 Las tarjetas de características e historial */
+.tiles-item-inner {
+  height: 100%;
+  padding: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.05); /* Borde sutil */
+  border-radius: 16px;
+  background: #1e293b; /* 🧥 Gris contenedor elegante (Fondo "Paper" de MUI) */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+  transition: border-color .2s ease;
+}
+
+.tiles-item-inner:hover {
+  border-color: rgba(37, 99, 235, 0.4); /* El borde brilla en azul al pasar el mouse */
+}
+
+.tiles-item h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.tiles-item p {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* Clases de apoyo que manejan el fondo de los bloques */
+.has-bg-color {
+  background: #0f172a;
+}
+
+.invert-color {
+  background: #0b1329; /* Un tono apenas más oscuro para cortar secciones */
+}
+
+/* ==========================================================================
+   📱 RESPONSIVE DESIGN (Adaptación para celulares)
+   ========================================================================== */
+@media (max-width: 840px) {
+  .section {
+    padding: 56px 0;
+  }
+
+  .container {
+    width: min(100% - 32px, 640px);
+  }
+
+  .split-item {
+    grid-template-columns: 1fr; /* Pone el texto arriba y la foto abajo en celulares */
+    gap: 40px;
+    text-align: center;
+  }
+
+  .hero-content h1 {
+    max-width: 100%;
+  }
+
+  .hero-content p {
+    max-width: 100%;
+    font-size: 1.125rem;
+  }
+
+  .tiles-wrap {
+    grid-template-columns: 1fr; /* Las 3 tarjetas se apilan una abajo de la otra */
+    gap: 24px;
+  }
+  
+  .button-group {
+    justify-content: center;
+  }
+}

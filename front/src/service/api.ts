@@ -1,6 +1,5 @@
 import { ProductDtoRequest } from "../interfaces/ProductoType";
 import {
-  RegisterDtoRequest,
   LoginDtoRequest,
   LoginDtoResponse,
 } from "../interfaces/UsuarioType";
@@ -30,14 +29,11 @@ export interface UpdateProductResponse extends ApiResponse {
 
 // Usuario
 export const register = async (
-  credentials: RegisterDtoRequest,
+  credentials: FormData,
 ): Promise<ApiResponse> => {
   const rest = await fetch(`${API_URL}/api/Registro`, {
     method: "POST",
-    headers: {
-      "Content-type": "application/json",
-    },
-    body: JSON.stringify(credentials),
+    body: credentials,
   });
 
   if (!rest.ok) {
@@ -70,6 +66,31 @@ export const login = async (
   console.log(rest);
   return rest.json();
 };
+
+export const updatePerfil = async (
+  credentials: FormData,
+): Promise<LoginDtoResponse & ApiResponse> => {
+  const token = localStorage.getItem("token");
+
+  const rest = await fetch(`${API_URL}/Api/User/Update`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: credentials,
+  });
+
+  if (!rest.ok) {
+    const errorData = await rest.json().catch(() => ({}));
+    const messageError = errorData.Message || errorData.message;
+    throw new Error(messageError);
+  }
+
+  console.log(rest);
+
+  return rest.json();
+};
+
 
 // Producto
 export const addProduct = async (

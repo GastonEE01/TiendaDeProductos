@@ -4,6 +4,7 @@ import { LoginPage } from './components/pages/LoginPage'
 import { RegisterPage } from './components/pages/RegisterPage'
 import { ClientPage } from './components/pages/ClientPage'
 import { AdminPage } from './components/pages/AdminPage'
+import { LandingPage } from './components/pages/LandingPage'
 
 
 function App() {
@@ -11,8 +12,9 @@ function App() {
 return (
   <div >
       <Routes>
+        <Route path="/" element={ <LandingPage/>} />
+
         <Route path="/login" element={ <LoginPage/>} /> 
-        <Route path="/" element={ <LoginPage/>} />
         
         <Route path="/register" element={ <RegisterPage/>} /> 
 

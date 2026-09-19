@@ -1,4 +1,4 @@
-﻿using MercadoExpress.Application.UseCase.Notificaciones;
+using MercadoExpress.Application.UseCase.Notificaciones;
 using MercadoExpress.Application.UseCase.Productos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -34,7 +34,6 @@ namespace MercadoExpress.API.Controllers
         [HttpPut("MarkNotificationsRead")]
         public async Task<IActionResult> MarcarComoLeidas()
         {
-            // 1. Capturamos el ID del token de forma segura
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userIdClaim == null) return Unauthorized();
 

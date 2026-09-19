@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,5 +15,8 @@ namespace MercadoExpress.Application.DTO.Usuario
         public string UserName { get; set; } = string.Empty;
         public string AliasCBU { get; set; } = string.Empty;
         public string MercadoPagoAccessToken { get; set; } = string.Empty;
+        public IFormFile IMG { get; set; } = default!;
+        public string ImgPath { get; set; } = string.Empty;
+
     }
 }

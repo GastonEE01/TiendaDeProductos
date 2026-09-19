@@ -41,6 +41,7 @@ builder.Services.AddScoped<INotificacionRepository, NotificacionRepository>();
 // Casos de uso
 builder.Services.AddScoped<RegisterUserUseCase>();
 builder.Services.AddScoped<LoginUserUseCase>();
+builder.Services.AddScoped<UpdateUserUseCase>();
 
 builder.Services.AddScoped<AddProductoUseCase>();
 builder.Services.AddScoped<DeleteProductoUseCase>();
@@ -59,7 +60,6 @@ builder.Services.AddScoped<MarkNotificationsReadUseCase>();
 
 
 builder.Services.AddAutoMapper(cfg => { }, typeof(MercadoExpress.Application.Mapper.Mappers));
-//builder.Services.AddAutoMapper(typeof(MercadoExpress.Application.Mapper.Mappers));
 
 // Configuracion de la Base de Datos (PostgreSQL con Neon)
 var connectionString = Environment.GetEnvironmentVariable("NeonTech__connectionString");

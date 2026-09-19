@@ -1,4 +1,4 @@
-﻿using MercadoExpress.Application.DTO.Orden;
+using MercadoExpress.Application.DTO.Orden;
 using MercadoExpress.Application.UseCase.Ordenes;
 using MercadoExpress.Application.UseCase.Productos;
 using MercadoPago.Client.Preference;
@@ -42,7 +42,6 @@ namespace MercadoExpress.API.Controllers
             return Ok(response);
         }
 
-        // 🚀 ENDPOINT SIMULADOR DEL WEBHOOK
         [HttpPost("simulate-webhook/{preferenceId}")]
         public async Task<IActionResult> SimulateWebhook(string preferenceId)
         {

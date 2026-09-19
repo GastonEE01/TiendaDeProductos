@@ -21,7 +21,8 @@ export interface LoginDtoResponse{
     userName: string,
     mail: string,
     aliasCBU: string,
-    mercadoPagoAccessToken: string
+    mercadoPagoAccessToken: string,
+    img: string
 }
 
 export interface AutenticacionType{
@@ -29,4 +30,12 @@ export interface AutenticacionType{
     token: string | null;
     login: (userData: LoginDtoResponse, token: string) => void;
     logout: () => void; 
+}
+
+export interface ProfileDtoRequest{
+    userName: string,
+    email: string,
+    mercadoPagoAccessToken: string,
+    aliasCBU: string,
+    img: File | null,
 }

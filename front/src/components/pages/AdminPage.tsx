@@ -18,7 +18,7 @@ export const AdminPage = () => {
       />
 
       {currentView === "products" && (
-        <ProductList onClose={() => setCurrentView("products")} />
+        <ProductList />
       )}
 
       {/* Formulario de creación (Agregar): Al cerrar, te devuelve a la lista */}
@@ -28,9 +28,3 @@ export const AdminPage = () => {
     </div>
   );
 };
-
-/*
-{products === "products" && <ProductList />}
-      {products === "add" && <Product onClose={() => setProduct("products")} />}
-
-      */

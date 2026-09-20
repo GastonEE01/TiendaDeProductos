@@ -17,11 +17,8 @@ import {
 } from "@mui/material";
 import { FaSearch,FaTimes } from "react-icons/fa";
 
-interface ProductListProps {
-  onClose: () => void;
-}
 
-export const ProductList: React.FC<ProductListProps> = ({onClose}) => {
+export const ProductList: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [products, setProducts] = useState<ProductDtoRequest[]>([]);
   const [error, setError] = useState<string | null>(null);

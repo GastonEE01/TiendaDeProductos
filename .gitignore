@@ -39,3 +39,13 @@ obj/
 # OS
 .DS_Store
 Thumbs.db
+
+# User files
+*.user
+
+# Local secrets
+appsettings.Development.json
+
+# Azure publish profiles
+Properties/PublishProfiles/
+

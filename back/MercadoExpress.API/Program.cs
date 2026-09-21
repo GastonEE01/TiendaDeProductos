@@ -144,7 +144,7 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
                 "http://localhost:5173",                  // Tu React en tu PC
-                "https://app-peliculas-three.vercel.app"   // Tu React publicado en Vercel
+                "https://tienda-de-productos-ivory.vercel.app/"   // Tu React publicado en Vercel
               )
               .AllowAnyHeader()
               .AllowAnyMethod();

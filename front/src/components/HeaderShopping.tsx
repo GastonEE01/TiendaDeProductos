@@ -15,7 +15,6 @@ import toast from "react-hot-toast";
 import { useAuthStore } from "../hooks/userStorage";
 
 export const HeaderShopping = () => {
-  const email = localStorage.getItem("customerEmail");
   const [loading, setLoading] = useState(false);
   const [shopping, setShopping] = useState<CustomerPurchasesDtoResponse[]>([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);

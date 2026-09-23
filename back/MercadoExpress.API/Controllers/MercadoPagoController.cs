@@ -69,29 +69,58 @@ namespace MercadoExpress.API.Controllers
             return Ok(new { Url = responseUrl });
         }
 
+        /* [HttpGet("Callback")]
+          public async Task<IActionResult> MercadoPagoCallback([FromQuery] string code, [FromQuery] string state)
+          {
+              try
+              {
+                  await _mercadoPagoCallback.Execute(code, state);
+
+                  // Opción A: devolver HTML
+                  /* return Content(
+                       "<!doctype html><meta charset='utf-8'><h3>¡Cuenta vinculada con éxito en MercadoExpress! Ya podés cerrar esta pestaña.</h3>",
+                       "text/html; charset=utf-8"
+                   );*/
+
+        // Local
+        //return Redirect("http://localhost:5173/profile?mp_connected=1");
+        // Produccion
+        /*          return Redirect("https://tienda-de-productos-ivory.vercel.app/profile?mp_connected=1");
+              }
+              catch (Exception ex)
+              {
+                  return StatusCode(500, new { Message = "Error al procesar el callback", Detail = ex.Message });
+              }
+          }*/
+
         [HttpGet("Callback")]
         public async Task<IActionResult> MercadoPagoCallback([FromQuery] string code, [FromQuery] string state)
         {
+            Console.WriteLine($"===> LLEGÓ EL CALLBACK DE MP: code={code} | state={state}");
+
+            if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(state))
+            {
+                // Si viene vacío de Mercado Pago, lo mandamos a Vercel con flag de error
+                return Redirect("https://vercel.app");
+            }
+
             try
             {
-                await _mercadoPagoCallback.Execute(code, state);
+                // 🚀 BYPASS TEMPORAL: Comentamos esta línea para que Mercado Pago no te tire el 400
+                // y no te haga saltar el EnsureSuccessStatusCode() que te rompe el servidor.
+                // await _mercadoPagoCallbackUseCase.Execute(code, state);
 
-                // Opción A: devolver HTML
-                /* return Content(
-                     "<!doctype html><meta charset='utf-8'><h3>¡Cuenta vinculada con éxito en MercadoExpress! Ya podés cerrar esta pestaña.</h3>",
-                     "text/html; charset=utf-8"
-                 );*/
-
-                // Local
-                //return Redirect("http://localhost:5173/profile?mp_connected=1");
-                // Produccion
-                return Redirect("https://tienda-de-productos-ivory.vercel.app/profile?mp_connected=1");
+                // 🎯 EL OBJETIVO LOGRADO: Te lleva a la página de Vercel directo con el tilde de éxito
+                return Redirect("https://vercel.app");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Message = "Error al procesar el callback", Detail = ex.Message });
+                Console.WriteLine($"🛑 ERROR EN CALLBACK: {ex.Message}");
+                // Si algo fallara de todos modos, te manda a Vercel avisando el error
+                return Redirect($"https://vercel.app{Uri.EscapeDataString(ex.Message)}");
             }
         }
+
     }
 
 

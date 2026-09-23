@@ -1,11 +1,11 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState,useEffect  } from 'react';
 import { Box, TextField, Button, Typography, Avatar, Dialog, DialogContent, DialogTitle, DialogActions } from '@mui/material';
 import { FaTimes } from 'react-icons/fa';
 import { FaCloudArrowUp } from "react-icons/fa6";
 import { useAuthStore } from '../hooks/userStorage'; // Tu store de Zustand
 import toast from "react-hot-toast";
 import { updatePerfil,conectAuhtMP } from '../service/api';
-
+import { useSearchParams } from 'react-router-dom'
 export interface ProfileProps {
   open: boolean;
   onClose: () => void;
@@ -20,7 +20,7 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
   const formRef = useRef<HTMLFormElement>(null);
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  
+  const [searchParams, setSearchParams] = useSearchParams();
   const inputStyle = {
     "& .MuiOutlinedInput-root": {
       backgroundColor: "#111827",
@@ -120,6 +120,28 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
     }
   };
   
+
+  useEffect(() => {
+  // 🔍 Leemos si Mercado Pago nos mandó el flag de éxito en la URL
+  if (searchParams.get("mp_connected") === "1") {
+    
+    // 1. ✨ Le tiramos un bombazo de confeti o un toast premium al vendedor
+    toast.success("¡Mercado Pago vinculado con éxito! Ya podés recibir cobros. 🔒💳", {
+      duration: 5000,
+      position: "top-center",
+      style: {
+        background: "#1e293b",
+        color: "#4ade80",
+        fontWeight: "bold",
+        border: "1px solid #4ade80"
+      }
+    });
+
+    // 2. 🧼 Limpiamos la URL para que no quede el '?mp_connected=1' feo para siempre
+    searchParams.delete("mp_connected");
+    setSearchParams(searchParams);
+  }
+}, [searchParams, setSearchParams]);
   return (
     <Dialog
       open={open}

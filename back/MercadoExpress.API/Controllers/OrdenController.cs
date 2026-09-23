@@ -31,8 +31,26 @@ namespace MercadoExpress.API.Controllers
         [HttpPost("Add")]
         public async Task<IActionResult> Add([FromBody] OrdenDtoRequest dto)
         {
-            var response = await _addOrden.AddOrden(dto);
-            return Ok(response);
+            //var response = await _addOrden.AddOrden(dto);
+            //return Ok(response);
+            try
+            {
+                var response = await _addOrden.AddOrden(dto);
+                return Ok(response);
+            }
+            // Captura si el SDK de Mercado Pago chilla por algún campo numérico
+            catch (MercadoPago.Error.MercadoPagoException mpEx)
+            {
+                Console.WriteLine("🛑 EXCEPCIÓN DE MERCADO PAGO EN LA ORDEN:");
+                Console.WriteLine(mpEx.Message);
+                return StatusCode(500, new { Message = "Error de pasarela", Detail = mpEx.Message });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("🛑 ERROR GENERAL DEL BACKEND:");
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, new { Message = "Error interno del servidor", Detail = ex.Message });
+            }
         }
 
         [HttpGet("GetCustomerCartClient/{email}")]

@@ -2,6 +2,7 @@ using AutoMapper;
 using Azure.Identity;
 using MercadoExpress.API.Middlewares;
 using MercadoExpress.Application.Interface;
+using MercadoExpress.Application.UseCase.MercadoPagos;
 using MercadoExpress.Application.UseCase.Notificaciones;
 using MercadoExpress.Application.UseCase.Ordenes;
 using MercadoExpress.Application.UseCase.Productos;
@@ -18,17 +19,10 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-var mpToken = builder.Configuration.GetSection("MercadoPago:AccessToken").Value;
-
-// Se lo asignás a la configuración global de Mercado Pago
-MercadoPagoConfig.AccessToken = mpToken;
-
-
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<IJwtTokenGenerator, JWTService>();
 // Repositorios
 builder.Services.AddScoped<IUsuarioRepository,UsuarioRepository>();
@@ -36,7 +30,8 @@ builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<IOrdenRepository, OrdenRepository>();
 builder.Services.AddScoped<INotificacionRepository, NotificacionRepository>();
-
+builder.Services.AddScoped<IOauthStateRepository, OauthStateRepository>();
+builder.Services.AddScoped<IMercadoPagoAuthRepository, MercadoPagoAuthRepository>();
 
 // Casos de uso
 builder.Services.AddScoped<RegisterUserUseCase>();
@@ -58,6 +53,8 @@ builder.Services.AddScoped<UpdateOrdenDeliveredUseCase>();
 builder.Services.AddScoped<GetNotificacionUserAdminUseCase>();
 builder.Services.AddScoped<MarkNotificationsReadUseCase>();
 
+builder.Services.AddScoped<ConnectMercadoPagoUseCase>();
+builder.Services.AddScoped<MercadoPagoCallbackUseCase>();
 
 builder.Services.AddAutoMapper(cfg => { }, typeof(MercadoExpress.Application.Mapper.Mappers));
 
@@ -184,6 +181,21 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     dbContext.Database.Migrate();
 }
+
+var tokenMercadoPago = Environment.GetEnvironmentVariable("MercadoPago__AccessToken")
+                    ?? Environment.GetEnvironmentVariable("MercadoPago:AccessToken");
+
+// Si no lo encuentra en las variables manuales de la nube, recurre al sistema automático del appsettings local
+if (string.IsNullOrEmpty(tokenMercadoPago))
+{
+    tokenMercadoPago = app.Configuration.GetSection("MercadoPago:AccessToken").Value;
+}
+
+Console.WriteLine($"===> CONFIGURANDO SDK DE MERCADO PAGO. ¿Posee Token?: {!string.IsNullOrEmpty(tokenMercadoPago)}");
+
+// Inicializamos el SDK con la credencial masticada y cargada al 100%
+//MercadoPagoConfig.AccessToken = tokenMercadoPago;
+MercadoPagoConfig.AccessToken = tokenMercadoPago?.Trim();
 
 
 app.Run();

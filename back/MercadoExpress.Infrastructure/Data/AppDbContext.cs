@@ -20,7 +20,7 @@ namespace MercadoExpress.Infrastructure.Data
         public DbSet<DetalleOrden> DetallesOrden { get; set; }
         public DbSet<Orden> Ordenes { get; set; }
         public DbSet<Notificacion> Notificaciones { get; set; }
-
-
+        public DbSet<MercadoPagoAuth> AutenticacionesMP { get; set; }
+        public DbSet<OAuthState> OAuthStates { get; set; }
     }
 }

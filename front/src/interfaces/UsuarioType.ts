@@ -21,7 +21,6 @@ export interface LoginDtoResponse{
     userName: string,
     mail: string,
     aliasCBU: string,
-    mercadoPagoAccessToken: string,
     img: string
 }
 

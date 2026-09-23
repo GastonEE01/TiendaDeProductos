@@ -3,6 +3,7 @@ using System;
 using MercadoExpress.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MercadoExpress.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260922180407_AddTablaAutenticacionesMP")]
+    partial class AddTablaAutenticacionesMP
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -131,32 +134,6 @@ namespace MercadoExpress.Infrastructure.Migrations
                     b.HasIndex("UsuarioId");
 
                     b.ToTable("Notificaciones");
-                });
-
-            modelBuilder.Entity("MercadoExpress.Domain.Entities.OAuthState", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("ExpiresAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("State")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("UsedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("UsuarioId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UsuarioId");
-
-                    b.ToTable("OAuthStates");
                 });
 
             modelBuilder.Entity("MercadoExpress.Domain.Entities.Orden", b =>
@@ -348,17 +325,6 @@ namespace MercadoExpress.Infrastructure.Migrations
                     b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("MercadoExpress.Domain.Entities.OAuthState", b =>
-                {
-                    b.HasOne("MercadoExpress.Domain.Entities.Usuario", "Usuario")
-                        .WithMany("OAuthStates")
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Usuario");
-                });
-
             modelBuilder.Entity("MercadoExpress.Domain.Entities.Producto", b =>
                 {
                     b.HasOne("MercadoExpress.Domain.Entities.Categoria", "Categoria")
@@ -391,8 +357,6 @@ namespace MercadoExpress.Infrastructure.Migrations
             modelBuilder.Entity("MercadoExpress.Domain.Entities.Usuario", b =>
                 {
                     b.Navigation("MercadoPagoAuth");
-
-                    b.Navigation("OAuthStates");
 
                     b.Navigation("Productos");
                 });

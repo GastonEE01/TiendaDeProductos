@@ -87,14 +87,14 @@ const obtenerInicial = () => {
 
     
 </div>
-          {user?.rol !== "Admin" && ( 
+          {user?.rol !== "Seller" && ( 
             <>
             <FaShoppingCart   onClick={handleOpenCart}  fontSize={35} style={{ cursor: "pointer", color: "white"}} />
             <HeaderShopping />
             </>
           ) }
 
-           {user?.rol == "Admin" && ( 
+           {user?.rol == "Seller" && ( 
               <HeaderNotification />
             
            )}

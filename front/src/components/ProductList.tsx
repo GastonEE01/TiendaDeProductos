@@ -50,7 +50,7 @@ export const ProductList: React.FC = () => {
       try {
         setLoading(true);
          let data;
-         if (user?.rol === "Admin") {
+         if (user?.rol === "Seller") {
         data = await getProductsSeller(); 
       } else {
         data = await getProducts(); 

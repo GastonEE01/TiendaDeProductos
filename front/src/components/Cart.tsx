@@ -32,9 +32,18 @@ export const Cart = () => {
   const clearCart = useCartStore((state) => state.clearCart);
   const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
+  const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [customerAddress, setCustomerAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+
   const handleSelectChange = (event: SelectChangeEvent) => {
     setDeliveryMethod(event.target.value);
   };
+
+
 
   const handleSumit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -49,7 +58,7 @@ export const Cart = () => {
 
     const formData = new FormData(e.currentTarget);
 
-    const cartItems: CartItemDto[] = cart.map((item) => ({
+   const cartItems: CartItemDto[] = cart.map((item) => ({
       productId: item.id,
       quantity: item.quantity,
     }));
@@ -59,7 +68,6 @@ export const Cart = () => {
     const orden: OrdenDtoRequest = {
       customerName: formData.get("customerName") as string,
       customerEmail: formData.get("customerEmail") as string,
-
       customerPhone: Number(formData.get("customerPhone")),
       deliveryMethod: deliveryMethod,
       customerAddress: isPickup
@@ -69,13 +77,16 @@ export const Cart = () => {
       postalCode: isPickup ? "N/A" : (formData.get("postalCode") as string),
       items: cartItems,
     };
+
     localStorage.setItem("customerEmail", orden.customerEmail);
+    console.log("Items carrito: ", cartItems)
+    console.log("Orden: " ,orden);
     try {
       const response = await addOrden(orden);
+      console.log("Respuesta:", response)
       toast.success(response.message);
  console.log("JSON recibido crudo en el front:", response);
      
-   // 🚀 LEEMOS DIRECTAMENTE DE LA RAÍZ (Quitamos el .data? que no existe en tu objeto real)
   const urlDePago = (response as any).paymentUrl;
   const idDirecto = (response as any).preferenceId;
 
@@ -88,7 +99,6 @@ export const Cart = () => {
 
      if (urlDePago) {
     console.log("Redirigiendo a la pasarela externa de Mercado Pago...", urlDePago);
-    // 🔥 Forzamos la redirección en pantalla completa para ganarle al bloqueo de Chrome
     window.location.href = urlDePago; 
   } else {
     setFormError("No se encontró la URL de pago ('paymentUrl') en el servidor.");
@@ -189,8 +199,8 @@ export const Cart = () => {
                   Datos de envio y contacto
                 </Typography>
 
-                <FormControl
-                  component="form"
+                <form
+                  ref={formRef} 
                   onSubmit={handleSumit}
                   style={{
                     display: "flex",
@@ -198,6 +208,8 @@ export const Cart = () => {
                     gap: "20px",
                   }}
                 >
+
+                   {/* 👤 NOMBRE */}
                   <div
                     style={{
                       display: "flex",
@@ -212,11 +224,14 @@ export const Cart = () => {
                       variant="standard"
                       type="text"
                       name="customerName"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)} 
                       fullWidth
                       required
                     />
                   </div>
 
+                  {/* 📧 EMAIL */}
                   <div
                     style={{
                       display: "flex",
@@ -234,11 +249,14 @@ export const Cart = () => {
                       variant="standard"
                       type="text"
                       name="customerEmail"
+                      value={customerEmail}
+                      onChange={(e) => setCustomerEmail(e.target.value)} 
                       fullWidth
                       required
                     />
                   </div>
 
+                   {/* 📞 TELEFONO */}
                   <div
                     style={{
                       display: "flex",
@@ -253,11 +271,15 @@ export const Cart = () => {
                       variant="standard"
                       type="number"
                       name="customerPhone"
+                      value={customerPhone}
+                                            onChange={(e) => setCustomerPhone(e.target.value)} 
+
                       fullWidth
                       required
                     />
                   </div>
 
+                  {/* 📍 DIRECCIÓN */}
                   <div
                     style={{
                       display: "flex",
@@ -272,11 +294,16 @@ export const Cart = () => {
                       variant="standard"
                       type="text"
                       name="customerAddress"
+                                            value={customerAddress}
+                                                                  onChange={(e) => setCustomerAddress(e.target.value)} 
+
+
                       fullWidth
                       required
                     />
                   </div>
 
+                   {/* 🏙️ CIUDAD */}
                   <div
                     style={{
                       display: "flex",
@@ -293,9 +320,14 @@ export const Cart = () => {
                       name="city"
                       fullWidth
                       required
+                         value={city}
+
+                                               onChange={(e) => setCity(e.target.value)} 
+
                     />
                   </div>
 
+                    {/* 📦 CÓDIGO POSTAL */}
                   <div
                     style={{
                       display: "flex",
@@ -312,17 +344,21 @@ export const Cart = () => {
                       name="postalCode"
                       fullWidth
                       required
+                       value={postalCode}
+                                             onChange={(e) => setPostalCode(e.target.value)} 
+
                     />
                   </div>
 
-                  <div
+                  {/*<div
                     style={{
                       display: "flex",
                       alignItems: "center",
                       gap: "10px",
                     }}
-                  ></div>
+                  ></div>*/}
 
+                  {/* 🚚 TIPO DE ENVÍO */}
                   <Box sx={{ minWidth: 120 }}>
                     <FormControl variant="standard" fullWidth required>
                       <InputLabel id="delivery-method-label">
@@ -341,6 +377,7 @@ export const Cart = () => {
                       </Select>
                     </FormControl>
                   </Box>
+                   {/* BOTONES DE ACCIÓN */}
                   <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
                     {/* Botón para volver atrás si quiere revisar el carrito */}
                     <Button
@@ -398,7 +435,7 @@ export const Cart = () => {
                       ❌ {formError}
                     </div>
                   )}
-                </FormControl>
+                </form>
               </Box>
             )}
           </Box>

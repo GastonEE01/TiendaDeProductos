@@ -13,10 +13,14 @@ namespace MercadoExpress.Domain.Entities
         public string Password { get; set; } = string.Empty;
         public string UserName { get; set; } = string.Empty;
         public string Rol { get; set; } = string.Empty;
-        public string AliasCBU { get; set; } = string.Empty;
-        public string MercadoPagoAccessToken { get; set; } = string.Empty;
+         public string AliasCBU { get; set; } = string.Empty;
+        // public string MercadoPagoAccessToken { get; set; } = string.Empty;
         public string IMG { get; set; } = string.Empty;
-
+        public MercadoPagoAuth? MercadoPagoAuth { get; set; }
+        // Adentro de tu Usuario.cs, abajo de todo agregá:
+        public List<OAuthState>? OAuthStates { get; set; } = new List<OAuthState>();
         public List<Producto>? Productos { get; set; } = new List<Producto>();
+
     }
+
 }

@@ -92,6 +92,33 @@ export const updatePerfil = async (
 };
 
 
+export const conectAuhtMP = async (token: string): Promise<any> => {
+  const rest = await fetch(`${API_URL}/Api/MercadoPago/Auth`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    }//,
+   // body: token,
+  });
+// boton En el front, en el click del botón, hacés window.location.href = data.url.
+
+  const responseData = await rest.json().catch(() => ({}));
+  if (!rest.ok) {
+    const validationMessage = responseData.errors
+      ? Object.values(responseData.errors).flat().join(" ")
+      : undefined;
+    const messageError =
+      validationMessage ||
+      responseData.Message ||
+      responseData.message ||
+      responseData.title ||
+      "Error al agregar el producto";
+    throw new Error(messageError);
+  }
+  return responseData;
+};
+
 // Producto
 export const addProduct = async (
   credentials: FormData,

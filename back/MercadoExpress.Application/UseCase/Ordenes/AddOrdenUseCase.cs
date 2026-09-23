@@ -77,6 +77,8 @@ namespace MercadoExpress.Application.UseCase.Ordenes
 
             // Procesamos cada tienda de forma independiente
             // Creamos una preferencia de MP para devolverla en el front 
+            var pagos = new List<PagoPorVendedorDto>();
+
             Preference preference = new Preference();
             foreach (var item in detallesAgrupadoPorVendedor)
             {
@@ -113,6 +115,7 @@ namespace MercadoExpress.Application.UseCase.Ordenes
                 // Crea el objeto de request de la preference
                 // 1. Armamos la lista de items reales con lo que compró de ESTE vendedor
                 var mpItems = new List<PreferenceItemRequest>();
+
                 foreach (var det in detalleOrdenPorVendedor)
                 {
                     mpItems.Add(new PreferenceItemRequest
@@ -120,25 +123,25 @@ namespace MercadoExpress.Application.UseCase.Ordenes
                         Title = det.Producto.Name,
                         Quantity = det.Quantity,
                         CurrencyId = "ARS",
-                        UnitPrice = det.UnitPrice,
+                        UnitPrice = Convert.ToDecimal(det.UnitPrice),
                     });
                 }
 
-                var request = new PreferenceRequest
-                {
-                    Items = mpItems,
-                    // ⚡ El Split Automático: MP te deposita a vos el 3% en este instante
-                    MarketplaceFee = commissionAmount,
-                    BackUrls = new PreferenceBackUrlsRequest
-                    {
-                        // Apuntan a las rutas que vas a crear en tu React local (Vite)
-                        Success = "https://google.com",
-                        Failure = "https://google.com",
-                        Pending = "https://google.com"
-                    },
-                    AutoReturn = "approved" // Si el pago se aprueba, MP redirige solo a los 3 segundos
+                  var request = new PreferenceRequest
+                  {
+                      Items = mpItems,
+                      // ⚡ El Split Automático: MP te deposita a vos el 3% en este instante
+                     // MarketplaceFee = commissionAmount,
+                      BackUrls = new PreferenceBackUrlsRequest
+                      {
+                          // Apuntan a las rutas que vas a crear en tu React local (Vite)
+                          Success = "https://tienda-de-productos-ivory.vercel.app/client",
+                          Failure = "https://tienda-de-productos-ivory.vercel.app/client",
+                          Pending = "https://tienda-de-productos-ivory.vercel.app/client"
+                      },
+                      AutoReturn = "approved" // Si el pago se aprueba, MP redirige solo a los 3 segundos
 
-                };
+                  };
                 var client = new PreferenceClient();
                 // TODO: En el futuro usarás el Token guardado en Neon: 
                 // string sellerToken = detalleOrdenPorVendedor.First().Producto.Usuario.MercadoPagoAccessToken;
@@ -157,6 +160,15 @@ namespace MercadoExpress.Application.UseCase.Ordenes
                 await _ordenRepository.Add(ordenIndividual);
                 ordenesCreadas.Add(ordenIndividual);
 
+                pagos.Add(new PagoPorVendedorDto
+                {
+                    VendedorId = vendedorId,
+                    OrdenId = ordenIndividual.Id,
+                    PreferenceId = ordenIndividual.MercadoPagoPreferenceId,
+                    PaymentUrl = ordenIndividual.PaymentUrl,
+                    Total = ordenIndividual.Total
+                });
+
                 string menssageNotificacion = $"¡Nueva venta registrada! El cliente {ordenIndividual.CustomerName} ordenó productos de tu tienda por un total de ${ordenIndividual.Total}.";
 
                 // Creamos la notificacion para el usuario vendedor
@@ -174,7 +186,15 @@ namespace MercadoExpress.Application.UseCase.Ordenes
 
 
             }
+
             var response = new OrdenDtoResponse
+            {
+                Message = $"Pedido completado. Se generaron {ordenesCreadas.Count} órdenes de pago.",
+                Pagos = pagos
+            };
+
+            return response;
+            /*var response = new OrdenDtoResponse
             {
                 Message = $"Pedido completado. Se generaron {ordenesCreadas.Count} órdenes de pago.",
                 // Pasamos el InitPoint de la primera orden para que React pueda redirigir en tus pruebas actuales
@@ -182,7 +202,7 @@ namespace MercadoExpress.Application.UseCase.Ordenes
                 PreferenceId = ordenesCreadas.First().MercadoPagoPreferenceId
 
             };
-            return response;
+            return response;*/
         }
     }
 

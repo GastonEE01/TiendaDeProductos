@@ -51,9 +51,6 @@ namespace MercadoExpress.Application.UseCase.Usuarios
 
             if (dto.IMG == null || dto.IMG.Length == 0) throw new ArgumentException("Suba una IMG del producto");
 
-            if ((string.IsNullOrEmpty(dto.MercadoPagoAccessToken)) && (string.IsNullOrEmpty(dto.AliasCBU))) throw new ArgumentException("Debe ingresar al menos 1 metodo para recibir el dinero de los productos");
-
-
             var user = _mapper.Map<Usuario>(dto);
             user.IMG = dto.ImgPath;
 
@@ -61,7 +58,7 @@ namespace MercadoExpress.Application.UseCase.Usuarios
             string passworHasherConfirm = passworHasher.HashPassword(user, dto.Password);
 
             user.Password = passworHasherConfirm;
-            user.Rol = "Admin";
+            user.Rol = "Seller";
 
             await _usuarioRepository.Add(user);
 

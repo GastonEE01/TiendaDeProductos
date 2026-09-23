@@ -4,7 +4,7 @@ import { FaTimes } from 'react-icons/fa';
 import { FaCloudArrowUp } from "react-icons/fa6";
 import { useAuthStore } from '../hooks/userStorage'; // Tu store de Zustand
 import toast from "react-hot-toast";
-import { updatePerfil } from '../service/api';
+import { updatePerfil,conectAuhtMP } from '../service/api';
 
 export interface ProfileProps {
   open: boolean;
@@ -48,7 +48,6 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
     profileData.append("UserName", formData.get("userName") as string);
     profileData.append("Mail", formData.get("mail") as string);
     profileData.append("AliasCBU", formData.get("aliasCBU") as string);
-    profileData.append("MercadoPagoAccessToken", formData.get("mercadoPagoAccessToken") as string);
     
     if (image instanceof File) {
       profileData.append("IMG", image);
@@ -70,7 +69,6 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
   userName: response.userName,      
   mail: response.mail,              
   aliasCBU: response.aliasCBU,      
-  mercadoPagoAccessToken: response.mercadoPagoAccessToken, 
   
   // 🎯 CONEXIÓN PERFECTA: Guardamos el string 'img' del back 
   // adentro de la casilla 'imgPath' que exige tu interfaz de Zustand.
@@ -88,6 +86,40 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
     }
   };
 
+  const handleConectMP = async () => {
+    setLoading(true);
+    setFormError(null);
+
+    if (!token) {
+    toast.error("Sesión inválida. Por favor, vuelva a iniciar sesión.");
+    setLoading(false);
+    return;
+  }
+
+    try{
+      const response =  await conectAuhtMP(token);
+      console.log("JSON recibido del backend:", response);
+
+ // const urlDeVinculacion = response.url || response.Url;
+     if (response.url) {
+      toast.success("Redirigiendo a Mercado Pago de forma segura... 🔒");
+              // 3. 🔥 ¡EL EYECTOR DEFINITIVO!: Forzamos al navegador a viajar a la pantalla azul
+      setTimeout(() => {
+        window.location.href = response.url;
+      }, 1000);
+      } else {
+      setFormError("El servidor no devolvió la propiedad 'url' en la respuesta.");
+      toast.error("Error en la respuesta del servidor.");
+    }
+    }catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Error al actualizar";
+      setFormError(message);
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   return (
     <Dialog
       open={open}
@@ -99,7 +131,7 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
         <form onSubmit={handleSaveEdit} ref={formRef}>
           
           {/* 🏷️ ENCABEZADO CON CRUZ ROJA */}
-          <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", p: 2 }}>
+          <DialogTitle component="div" sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", p: 2 }}>
             <div style={{ width: "24px" }}></div> 
             <Typography variant="h5" sx={{ fontWeight: "bold", color: "#f8fafc", flexGrow: 1, textAlign: "center" }}>
               Mi Perfil
@@ -139,7 +171,6 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
             <TextField label="Nombre de Usuario" name="userName" defaultValue={user?.userName} sx={inputStyle} fullWidth required />
             <TextField label="Correo Electrónico" name="mail" defaultValue={user?.mail} sx={inputStyle} fullWidth required />
             <TextField label="Alias Homebanking / CBU" name="aliasCBU" defaultValue={user?.aliasCBU} sx={inputStyle} fullWidth />
-            <TextField label="Mercado Pago Access Token" name="mercadoPagoAccessToken" defaultValue={user?.mercadoPagoAccessToken} sx={inputStyle} fullWidth />
 
             {formError && (
               <Typography variant="body2" sx={{ color: "#ef4444", fontWeight: "bold", mt: 1 }}>
@@ -171,6 +202,42 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
           </DialogActions>
 
         </form>
+        {/* 👤 BOTÓN OFICIAL DE VINCULACIÓN OAUTH MERCADO PAGO */}
+<Box sx={{ mt: 1, mb: 1 }}>
+  <Button
+    variant="contained"
+    fullWidth
+    // startIcon={<FaHandshake />} // Podés importar FaHandshake de react-icons/fa
+    onClick={handleConectMP}
+   disabled={loading}
+    sx={{
+      backgroundColor: "#009ee3", // 🔵 El Azul Oficial de la marca Mercado Pago
+      color: "#ffffff",
+      fontWeight: "bold",
+      fontSize: "0.95rem",
+      borderRadius: "8px",
+      padding: "10px 16px",
+      textTransform: "none", // Evita que MUI te lo ponga todo en mayúsculas estresantes
+      boxShadow: "0 4px 12px rgba(0, 158, 227, 0.2)",
+      transition: "all 0.2s ease-in-out",
+      "&:hover": {
+        backgroundColor: "#1289c4", // Azul un poco más oscuro al pasar el mouse
+        boxShadow: "0 6px 16px rgba(0, 158, 227, 0.4)",
+        transform: "translateY(-1px)" // Efecto sutil flotante de Startup premium
+      },
+      "&:active": {
+        transform: "translateY(0)"
+      }
+    }}
+  >
+    Conectar con Mercado Pago
+  </Button>
+  
+  <Typography variant="caption" sx={{ color: "#64748b", display: "block", mt: 0.5, textAlign: "center" }}>
+    🔒 Vinculación segura mediante protocolo oficial OAuth 2.0
+  </Typography>
+</Box>
+
       </Box>
     </Dialog>
   );

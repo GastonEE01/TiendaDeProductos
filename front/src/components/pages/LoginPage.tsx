@@ -39,7 +39,6 @@ export const LoginPage: React.FC = () => {
             userName: response.userName,
             mail: response.mail,
             aliasCBU: response.aliasCBU,
-            mercadoPagoAccessToken: response.mercadoPagoAccessToken,
             img: response.img
           },
           response.token,

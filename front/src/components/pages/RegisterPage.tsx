@@ -3,7 +3,7 @@ import React, { useState, useRef } from "react";
 // style
 import { Button, TextField, Typography, Box } from "@mui/material";
 import { MdOutlineMailLock } from "react-icons/md";
-import { FaUserAlt, FaWallet, FaUniversity,FaFileImage  } from "react-icons/fa";
+import { FaUserAlt, FaUniversity,FaFileImage  } from "react-icons/fa";
 import { RiLockPasswordFill } from "react-icons/ri";
 
 import { Link } from "react-router-dom";
@@ -30,15 +30,7 @@ export const RegisterPage: React.FC = () => {
     userData.append("UserName", formData.get("userName") as string);
     userData.append("Mail", formData.get("mail") as string);
     userData.append("Password", formData.get("password") as string);
-    userData.append(
-      "ConfirmPassword",
-      formData.get("confirmPassword") as string,
-    );
-    userData.append("AliasCBU", formData.get("aliasCBU") as string);
-    userData.append(
-      "MercadoPagoAccessToken",
-      formData.get("mercadoPagoAccessToken") as string,
-    );
+    userData.append("ConfirmPassword", formData.get("confirmPassword") as string,);
     if (image instanceof File) {
       userData.append("IMG", image);
     }
@@ -180,32 +172,14 @@ export const RegisterPage: React.FC = () => {
               />
             </div>
 
-            <label
-              style={{ fontSize: "12px", color: "#94a3b8", marginTop: "5px" }}
-            >
-              No es necesario que pongas ambas,almenos 1 de esas 2
-            </label>
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <FaUniversity fontSize={28} style={{ color: "#94a3b8" }} />
               <TextField
                 id="standard-basic"
-                label="Ingrese su alias de su homebanking"
+                label="Ingrese su alias de su homebanking (opcional)"
                 variant="standard"
                 type="text"
                 name="aliasCBU"
-                fullWidth
-                sx={inputStyle}
-              />
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <FaWallet fontSize={28} style={{ color: "94a3b8" }} />
-              <TextField
-                id="standard-basic"
-                label="Ingrese su alias de mercado pago"
-                variant="standard"
-                type="text"
-                name="mercadoPagoAccessToken"
                 fullWidth
                 sx={inputStyle}
               />

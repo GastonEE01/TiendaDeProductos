@@ -243,12 +243,12 @@ export const updateProduct = async (
 
 // Oden
 export const addOrden = async (
-  credentials: OrdenDtoRequest,): Promise<ApiResponse<OrdenResponseData>> => {
+  credentials: OrdenDtoRequest,): Promise<OrdenResponseData> => {
   //const token = localStorage.getItem("token");
-  const rest = await fetch(`${API_URL}/Api/Orden/Add`, {
+  const rest = await fetch(`${API_URL}/Api/Orden/Add`, { //248
     method: "POST",
     headers: {
-      "Content-type": "application/json",
+     "Content-Type": "application/json",
     },
          body: JSON.stringify(credentials),
 
@@ -259,9 +259,11 @@ export const addOrden = async (
     const messageError = errorData.Message || errorData.message;
     throw new Error(messageError);
   }
-  console.log(rest);
-  return rest.json();
-    
+  
+  const jsonResponse = await rest.json();
+     // Imprimimos para que verifiques en consola el objeto Limpio con { message, data }
+  console.log("JSON real de .NET Core extraído en api.ts:", jsonResponse);
+  return jsonResponse;
 }
 
 export const getNotificacionesAdmin = async (): Promise<NotificacionDtoResponse[]> => {

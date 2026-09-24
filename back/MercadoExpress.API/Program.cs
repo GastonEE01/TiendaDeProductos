@@ -144,7 +144,8 @@ builder.Services.AddCors(options =>
                 "https://tienda-de-productos-ivory.vercel.app/"   // Tu React publicado en Vercel
               )
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 

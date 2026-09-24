@@ -43,8 +43,6 @@ export const Cart = () => {
     setDeliveryMethod(event.target.value);
   };
 
-
-
   const handleSumit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -58,7 +56,7 @@ export const Cart = () => {
 
     const formData = new FormData(e.currentTarget);
 
-   const cartItems: CartItemDto[] = cart.map((item) => ({
+    const cartItems: CartItemDto[] = cart.map((item) => ({
       productId: item.id,
       quantity: item.quantity,
     }));
@@ -79,30 +77,62 @@ export const Cart = () => {
     };
 
     localStorage.setItem("customerEmail", orden.customerEmail);
-    console.log("Items carrito: ", cartItems)
-    console.log("Orden: " ,orden);
+    console.log("Items carrito: ", cartItems);
+    console.log("Orden: ", orden);
     try {
       const response = await addOrden(orden);
-      console.log("Respuesta:", response)
+      console.log("Respuesta:", response);
+       const listaPagos = response.pagos;
+
+       if (listaPagos && listaPagos.length > 0) {
       toast.success(response.message);
- console.log("JSON recibido crudo en el front:", response);
-     
-  const urlDePago = (response as any).paymentUrl;
-  const idDirecto = (response as any).preferenceId;
+      localStorage.setItem("cola_pagos_vendedores", JSON.stringify(listaPagos));
 
-     if (idDirecto) {
-    setPreferenceId(idDirecto);
-    console.log("¡ID de preferencia guardado con éxito!", idDirecto);
-  } else {
-    console.warn("No se recibió el preferenceId en la raíz del objeto.");
-  }
+       // 4. 🔍 LEEMOS EL PRIMER PAGO DE LA LISTA
+      const primerPago = listaPagos[0]; // Captura el primer elemento del array
 
-     if (urlDePago) {
-    console.log("Redirigiendo a la pasarela externa de Mercado Pago...", urlDePago);
-    window.location.href = urlDePago; 
-  } else {
-    setFormError("No se encontró la URL de pago ('paymentUrl') en el servidor.");
-  }
+      // Guardamos el preferenceId en el estado para activar el botón Wallet si el usuario regresa
+      if (primerPago.preferenceId) {
+        setPreferenceId(primerPago.preferenceId);
+      }
+
+       // 5. 🔥 ¡EL ADELANTADO DE LA SECUENCIA!:
+      // Si el primer pago tiene URL, forzamos el viaje directo a Mercado Pago de una
+      if (primerPago.paymentUrl) {
+        console.log("Redirigiendo al primer checkout...", primerPago.paymentUrl);
+        
+        setTimeout(() => {
+          window.location.href = primerPago.paymentUrl; // Lo catapulta directo a MP
+        }, 1000);
+      } else {
+        setFormError("La primera orden de la lista no posee una URL de pago válida.");
+      }
+
+    } else {
+      setFormError("El servidor procesó la orden pero el array de 'pagos' llegó vacío.");
+    }
+    
+     /* const urlDePago = (response as any).paymentUrl;
+      const idDirecto = (response as any).preferenceId;
+
+      if (idDirecto) {
+        setPreferenceId(idDirecto);
+        console.log("¡ID de preferencia guardado con éxito!", idDirecto);
+      } else {
+        console.warn("No se recibió el preferenceId en la raíz del objeto.");
+      }
+
+      if (urlDePago) {
+        console.log(
+          "Redirigiendo a la pasarela externa de Mercado Pago...",
+          urlDePago,
+        );
+        window.location.href = urlDePago;
+      } else {
+        setFormError(
+          "No se encontró la URL de pago ('paymentUrl') en el servidor.",
+        );
+      }*/
 
       formRef.current?.reset();
     } catch (error: unknown) {
@@ -113,10 +143,23 @@ export const Cart = () => {
     }
   };
 
+  const inputStyle = {
+    "& .MuiOutlinedInput-root": {
+      backgroundColor: "#111827", // Fondo medianoche para las cajas
+      color: "#f8fafc", // Letras blancas al escribir
+      borderRadius: "8px",
+      "& fieldset": { borderColor: "rgba(255, 255, 255, 0.1)" },
+      "&:hover fieldset": { borderColor: "rgba(255, 255, 255, 0.2)" },
+      "&.Mui-focused fieldset": { borderColor: "#2563eb" }, // Borde azul al escribir
+    },
+    "& .MuiInputLabel-root": { color: "#94a3b8" }, // Texto gris claro flotando
+    "& .MuiInputLabel-root.Mui-focused": { color: "#2563eb" },
+  };
+
   return (
     <div
       style={{
-        background: "rgba(172, 164, 156, 0.96)",
+        // background: "rgba(172, 164, 156, 0.96)",
         margin: 0,
         minHeight: "180px",
         borderRadius: "16px",
@@ -127,14 +170,18 @@ export const Cart = () => {
       <Box
         sx={{
           padding: "20px",
-          border: "1px solid rgba(10, 10, 10, 0.45)",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
           borderRadius: "12px",
           marginTop: 0,
-          backgroundColor: "rgb(255, 255, 255)",
-          color: "#2b1708",
+          backgroundColor: "#1e293b",
+          color: "#f8fafc",
         }}
       >
-        <Typography variant="h5" gutterBottom style={{ textAlign: "center" }}>
+        <Typography
+          variant="h5"
+          gutterBottom
+          style={{ textAlign: "center", fontWeight: "bold" }}
+        >
           Carrito
         </Typography>
 
@@ -200,7 +247,7 @@ export const Cart = () => {
                 </Typography>
 
                 <form
-                  ref={formRef} 
+                  ref={formRef}
                   onSubmit={handleSumit}
                   style={{
                     display: "flex",
@@ -208,8 +255,7 @@ export const Cart = () => {
                     gap: "20px",
                   }}
                 >
-
-                   {/* 👤 NOMBRE */}
+                  {/* 👤 NOMBRE */}
                   <div
                     style={{
                       display: "flex",
@@ -221,13 +267,13 @@ export const Cart = () => {
                     <TextField
                       id="standard-basic"
                       label="Nombre"
-                      variant="standard"
                       type="text"
                       name="customerName"
                       value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)} 
+                      onChange={(e) => setCustomerName(e.target.value)}
                       fullWidth
                       required
+                      sx={inputStyle}
                     />
                   </div>
 
@@ -246,17 +292,17 @@ export const Cart = () => {
                     <TextField
                       id="standard-basic"
                       label="Email"
-                      variant="standard"
                       type="text"
                       name="customerEmail"
                       value={customerEmail}
-                      onChange={(e) => setCustomerEmail(e.target.value)} 
+                      onChange={(e) => setCustomerEmail(e.target.value)}
                       fullWidth
                       required
+                      sx={inputStyle}
                     />
                   </div>
 
-                   {/* 📞 TELEFONO */}
+                  {/* 📞 TELEFONO */}
                   <div
                     style={{
                       display: "flex",
@@ -268,14 +314,13 @@ export const Cart = () => {
                     <TextField
                       id="standard-basic"
                       label="Telefono"
-                      variant="standard"
                       type="number"
                       name="customerPhone"
                       value={customerPhone}
-                                            onChange={(e) => setCustomerPhone(e.target.value)} 
-
+                      onChange={(e) => setCustomerPhone(e.target.value)}
                       fullWidth
                       required
+                      sx={inputStyle}
                     />
                   </div>
 
@@ -291,19 +336,17 @@ export const Cart = () => {
                     <TextField
                       id="standard-basic"
                       label="Direccion"
-                      variant="standard"
                       type="text"
                       name="customerAddress"
-                                            value={customerAddress}
-                                                                  onChange={(e) => setCustomerAddress(e.target.value)} 
-
-
+                      value={customerAddress}
+                      sx={inputStyle}
+                      onChange={(e) => setCustomerAddress(e.target.value)}
                       fullWidth
                       required
                     />
                   </div>
 
-                   {/* 🏙️ CIUDAD */}
+                  {/* 🏙️ CIUDAD */}
                   <div
                     style={{
                       display: "flex",
@@ -315,19 +358,17 @@ export const Cart = () => {
                     <TextField
                       id="standard-basic"
                       label="Cuidad"
-                      variant="standard"
                       type="text"
                       name="city"
                       fullWidth
                       required
-                         value={city}
-
-                                               onChange={(e) => setCity(e.target.value)} 
-
+                      value={city}
+                      sx={inputStyle}
+                      onChange={(e) => setCity(e.target.value)}
                     />
                   </div>
 
-                    {/* 📦 CÓDIGO POSTAL */}
+                  {/* 📦 CÓDIGO POSTAL */}
                   <div
                     style={{
                       display: "flex",
@@ -339,28 +380,18 @@ export const Cart = () => {
                     <TextField
                       id="standard-basic"
                       label="Codigo postal"
-                      variant="standard"
                       type="text"
                       name="postalCode"
                       fullWidth
                       required
-                       value={postalCode}
-                                             onChange={(e) => setPostalCode(e.target.value)} 
-
+                      value={postalCode}
+                      onChange={(e) => setPostalCode(e.target.value)}
                     />
                   </div>
-
-                  {/*<div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                    }}
-                  ></div>*/}
-
+         
                   {/* 🚚 TIPO DE ENVÍO */}
                   <Box sx={{ minWidth: 120 }}>
-                    <FormControl variant="standard" fullWidth required>
+                    <FormControl fullWidth required>
                       <InputLabel id="delivery-method-label">
                         Tipo de envio
                       </InputLabel>
@@ -377,9 +408,9 @@ export const Cart = () => {
                       </Select>
                     </FormControl>
                   </Box>
-                   {/* BOTONES DE ACCIÓN */}
+
+                  {/* BOTONES DE ACCIÓN */}
                   <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-                    {/* Botón para volver atrás si quiere revisar el carrito */}
                     <Button
                       variant="text"
                       onClick={() => setPay(false)}
@@ -387,6 +418,7 @@ export const Cart = () => {
                     >
                       Volver al carrito
                     </Button>
+
                     <div>
                       <Button
                         type="submit"

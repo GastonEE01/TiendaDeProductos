@@ -2,6 +2,7 @@
 using MercadoExpress.Application.DTO.Orden;
 using MercadoExpress.Application.Interface;
 using MercadoExpress.Domain.Entities;
+using MercadoPago.Client;
 using MercadoPago.Client.Preference;
 using MercadoPago.Resource.Preference;
 using System;
@@ -19,13 +20,15 @@ namespace MercadoExpress.Application.UseCase.Ordenes
         private readonly IProductoRepository _productRepository;
         private readonly IMapper _mapper;
         private INotificacionRepository _notificacionRepository;
+        private readonly IMercadoPagoAuthRepository _mpAuthRepo;
 
-        public AddOrdenUseCase(IOrdenRepository ordenRepository, IProductoRepository productRepository, INotificacionRepository notificacionRepository, IMapper mapper)
+        public AddOrdenUseCase(IOrdenRepository ordenRepository, IProductoRepository productRepository, INotificacionRepository notificacionRepository, IMercadoPagoAuthRepository mpAuthRepo, IMapper mapper)
         {
             _ordenRepository = ordenRepository;
             _productRepository = productRepository;
             _notificacionRepository = notificacionRepository;
             _mapper = mapper;
+            _mpAuthRepo = mpAuthRepo;
         }
 
         public async Task<OrdenDtoResponse> AddOrden(OrdenDtoRequest dto)
@@ -127,12 +130,24 @@ namespace MercadoExpress.Application.UseCase.Ordenes
                     });
                 }
 
-                  var request = new PreferenceRequest
+                // IMPLEMENTAR 
+                // 1. 🔍 Buscamos las credenciales OAuth del vendedor dueño de este paquete de productos
+                // 'vendedorId' sale del GroupBy que hiciste arriba: Guid vendedorId = item.Key;
+                var vendedorAuth = await _mpAuthRepo.GetByUsuarioId(vendedorId);
+
+                if (vendedorAuth == null || string.IsNullOrEmpty(vendedorAuth.AccessToken))
+                {
+                    throw new InvalidOperationException($"El vendedor dueño de estos productos no tiene su cuenta de Mercado Pago vinculada.");
+                }
+
+
+                var request = new PreferenceRequest
                   {
-                      Items = mpItems,
-                      // ⚡ El Split Automático: MP te deposita a vos el 3% en este instante
-                     // MarketplaceFee = commissionAmount,
-                      BackUrls = new PreferenceBackUrlsRequest
+                    Items = mpItems,
+                    MarketplaceFee = commissionAmount, //NEW 24/9
+                    // ⚡ El Split Automático: MP te deposita a vos el 3% en este instante
+                    // MarketplaceFee = commissionAmount,
+                    BackUrls = new PreferenceBackUrlsRequest
                       {
                           // Apuntan a las rutas que vas a crear en tu React local (Vite)
                           Success = "https://tienda-de-productos-ivory.vercel.app/client",
@@ -147,12 +162,14 @@ namespace MercadoExpress.Application.UseCase.Ordenes
                 // string sellerToken = detalleOrdenPorVendedor.First().Producto.Usuario.MercadoPagoAccessToken;
                 // Preference preferenceMp = await client.CreateAsync(request, new RequestOptions { AccessToken = sellerToken });
 
-                Preference preferenceMp = await client.CreateAsync(request); // Tu línea actual de pruebas
+                // Preference preferenceMp = await client.CreateAsync(request); // Tu línea actual de pruebas
+                // NEW 24/9
+                Preference preferenceMp = await client.CreateAsync(request, new RequestOptions
+                {
+                    AccessToken = vendedorAuth.AccessToken
+                });
 
-                // Guardamos los datos de Mercado Pago en la entidad antes de persistir
                 ordenIndividual.MercadoPagoPreferenceId = preferenceMp.Id;
-                //ordenIndividual.PaymentUrl = preferenceMp.SandboxInitPoint;
-
                 ordenIndividual.PaymentUrl = preferenceMp.InitPoint; // 💡 InitPoint es el link real de cobro
                 // la respuesta de esta preferencia genera un id que ese id se usa en el front 
 

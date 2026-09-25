@@ -19,7 +19,6 @@ import { addOrden } from "../service/api";
 import { CartItemDto } from "../interfaces/CartType";
 
 initMercadoPago("APP_USR-e8b4cfda-bf2e-4ac7-88e5-46bf4f4afc5a");
-
 export const Cart = () => {
   const formRef = useRef<HTMLFormElement>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -98,7 +97,7 @@ export const Cart = () => {
 
        // 5. 🔥 ¡EL ADELANTADO DE LA SECUENCIA!:
       // Si el primer pago tiene URL, forzamos el viaje directo a Mercado Pago de una
-      if (primerPago.paymentUrl) {
+     /* if (primerPago.paymentUrl) {
         console.log("Redirigiendo al primer checkout...", primerPago.paymentUrl);
         
         setTimeout(() => {
@@ -110,7 +109,15 @@ export const Cart = () => {
 
     } else {
       setFormError("El servidor procesó la orden pero el array de 'pagos' llegó vacío.");
+    }*/
+    if (primerPago.paymentUrl) {
+      console.log("--> Redirigiendo automáticamente a:", primerPago.paymentUrl);
+      window.location.href = primerPago.paymentUrl;
     }
+
+  } else {
+    setFormError("El array de pagos llegó vacío.");
+  }
     
      /* const urlDePago = (response as any).paymentUrl;
       const idDirecto = (response as any).preferenceId;

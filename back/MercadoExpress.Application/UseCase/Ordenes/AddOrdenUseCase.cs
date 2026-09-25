@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MercadoExpress.Application.DTO.Orden;
 using MercadoExpress.Application.Interface;
+using MercadoExpress.Application.Mapper;
 using MercadoExpress.Domain.Entities;
 using MercadoPago.Client;
 using MercadoPago.Client.Preference;
@@ -40,9 +41,7 @@ namespace MercadoExpress.Application.UseCase.Ordenes
             if ((dto.DeliveryMethod != "presencial") && dto.DeliveryMethod != "domicilio") throw new ArgumentException("Elija una opcion");
             if (string.IsNullOrEmpty(dto.City)) throw new ArgumentException("La ciudad es obligatorio");
             if (string.IsNullOrEmpty(dto.PostalCode)) throw new ArgumentException("El codigo postal es obligatorio");
-
             // FASE 1: VALIDACIÓN ATÓMICA DE TODO EL CARRITO
-
             decimal totalGeneral = 0;
             var detallesDeLaOrden = new List<DetalleOrden>();
             foreach (var item in dto.Items)
@@ -50,14 +49,10 @@ namespace MercadoExpress.Application.UseCase.Ordenes
                 Producto searchProduct = await _productRepository.GetProductoById(item.ProductId);
                 if (searchProduct == null) throw new KeyNotFoundException("No se encontro el producto");
                 if (searchProduct.Stock < item.Quantity) throw new InvalidOperationException("No hay sufiente stock para hacer la operacion");
-
                 // Descontamos stock directamente en la base de datos (Compra segura)
                 searchProduct.Stock -= item.Quantity;
                 await _productRepository.Update(searchProduct);
-
-
                 totalGeneral += item.Quantity * searchProduct.Price;
-
                 // Creamos el detalle huérfano (sin OrdenId todavía) pero con la info del producto
                 var detalleOrden = new DetalleOrden
                 {
@@ -70,30 +65,23 @@ namespace MercadoExpress.Application.UseCase.Ordenes
                 };
                 detallesDeLaOrden.Add(detalleOrden);
             }
-
             // FASE 2: SPLIT DE CARRITO (MÚLTIPLES TIENDAS)
-
             // Agrupamos todos los detalles en "paquetes" según el ID del vendedor dueño del producto
             var detallesAgrupadoPorVendedor = detallesDeLaOrden
                  .GroupBy(d => d.Producto.UsuarioId);
             var ordenesCreadas = new List<Orden>();
-
             // Procesamos cada tienda de forma independiente
             // Creamos una preferencia de MP para devolverla en el front 
             var pagos = new List<PagoPorVendedorDto>();
-
             Preference preference = new Preference();
             foreach (var item in detallesAgrupadoPorVendedor)
             {
                 Guid vendedorId = item.Key;
                 List<DetalleOrden> detalleOrdenPorVendedor = item.ToList();
-
                 // Cálculo de finanzas histórico exclusivo de este vendedor
                 decimal totalVendedor = detalleOrdenPorVendedor.Sum(d => d.Quantity * d.UnitPrice);
-
                 decimal commissionAmount = (totalVendedor * 3) / 100; // 3% comisión plataforma
                 decimal dineroAdmin = totalVendedor - commissionAmount; // Neto para el vendedor
-
                 // Creamos la Orden principal para este vendedor
                 var ordenIndividual = _mapper.Map<Orden>(dto);
                 ordenIndividual.Id = Guid.NewGuid();
@@ -103,7 +91,6 @@ namespace MercadoExpress.Application.UseCase.Ordenes
                 ordenIndividual.SellerAmount = dineroAdmin;
                 ordenIndividual.State = "Pending";
                 ordenIndividual.CreationDate = DateTime.UtcNow;
-
                 // VINCULACIÓN: Casamos los detalles huérfanos con su nueva Orden correspondiente
                 foreach (var detalle in detalleOrdenPorVendedor)
                 {
@@ -111,12 +98,10 @@ namespace MercadoExpress.Application.UseCase.Ordenes
                     detalle.Orden = ordenIndividual;
                 }
                 ordenIndividual.Detalles = detalleOrdenPorVendedor;
-
                 // FASE 3: Mercado pago
                 // Crear un preferencia de pago por cada producto de mismo vendedor
-
-                // Crea el objeto de request de la preference
-                // 1. Armamos la lista de items reales con lo que compró de ESTE vendedor
+                // FASE 3: Mercado pago
+                // Crear una preferencia de pago por cada producto del mismo vendedor
                 var mpItems = new List<PreferenceItemRequest>();
 
                 foreach (var det in detalleOrdenPorVendedor)
@@ -130,48 +115,47 @@ namespace MercadoExpress.Application.UseCase.Ordenes
                     });
                 }
 
-                // IMPLEMENTAR 
-                // 1. 🔍 Buscamos las credenciales OAuth del vendedor dueño de este paquete de productos
-                // 'vendedorId' sale del GroupBy que hiciste arriba: Guid vendedorId = item.Key;
                 var vendedorAuth = await _mpAuthRepo.GetByUsuarioId(vendedorId);
-
                 if (vendedorAuth == null || string.IsNullOrEmpty(vendedorAuth.AccessToken))
                 {
                     throw new InvalidOperationException($"El vendedor dueño de estos productos no tiene su cuenta de Mercado Pago vinculada.");
                 }
 
-
                 var request = new PreferenceRequest
-                  {
+                {
                     Items = mpItems,
-                    MarketplaceFee = commissionAmount, //NEW 24/9
-                    // ⚡ El Split Automático: MP te deposita a vos el 3% en este instante
-                    // MarketplaceFee = commissionAmount,
+                    MarketplaceFee = commissionAmount,
                     BackUrls = new PreferenceBackUrlsRequest
-                      {
-                          // Apuntan a las rutas que vas a crear en tu React local (Vite)
-                          Success = "https://tienda-de-productos-ivory.vercel.app/client",
-                          Failure = "https://tienda-de-productos-ivory.vercel.app/client",
-                          Pending = "https://tienda-de-productos-ivory.vercel.app/client"
-                      },
-                      AutoReturn = "approved" // Si el pago se aprueba, MP redirige solo a los 3 segundos
+                    {
+                        Success = "https://tienda-de-productos-ivory.vercel.app/client",
+                        Failure = "https://tienda-de-productos-ivory.vercel.app/client",
+                        Pending = "https://tienda-de-productos-ivory.vercel.app/client"
+                    },
+                    AutoReturn = "approved"
+                };
 
-                  };
                 var client = new PreferenceClient();
-                // TODO: En el futuro usarás el Token guardado en Neon: 
-                // string sellerToken = detalleOrdenPorVendedor.First().Producto.Usuario.MercadoPagoAccessToken;
-                // Preference preferenceMp = await client.CreateAsync(request, new RequestOptions { AccessToken = sellerToken });
 
-                // Preference preferenceMp = await client.CreateAsync(request); // Tu línea actual de pruebas
-                // NEW 24/9
+                // Firmamos la preferencia con las credenciales del vendedor
                 Preference preferenceMp = await client.CreateAsync(request, new RequestOptions
                 {
                     AccessToken = vendedorAuth.AccessToken
                 });
 
+                // 🎯 RECTIFICADO: Dejamos SOLAMENTE la regla inteligente basada en el Token del Vendedor. El if del environment SE BORRA.
+                /*  if (vendedorAuth.AccessToken.StartsWith("TEST-") || vendedorAuth.AccessToken.Contains("test") || vendedorAuth.AccessToken.Contains("TEST"))
+                  {
+                      // 🧪 Entorno Seguro de Simulación (Sandbox)
+                      ordenIndividual.PaymentUrl = preferenceMp.SandboxInitPoint;
+                  }
+                  else
+                  {
+                      // 🌍 Entorno Real con dinero verdadero (Producción)
+                      ordenIndividual.PaymentUrl = preferenceMp.InitPoint;
+                  }*/
+                ordenIndividual.PaymentUrl = preferenceMp.InitPoint;
+
                 ordenIndividual.MercadoPagoPreferenceId = preferenceMp.Id;
-                ordenIndividual.PaymentUrl = preferenceMp.InitPoint; // 💡 InitPoint es el link real de cobro
-                // la respuesta de esta preferencia genera un id que ese id se usa en el front 
 
                 // PERSISTENCIA: Al guardar la orden, EF Core guarda automáticamente todos sus detalles vinculados
                 await _ordenRepository.Add(ordenIndividual);
@@ -186,23 +170,20 @@ namespace MercadoExpress.Application.UseCase.Ordenes
                     Total = ordenIndividual.Total
                 });
 
-                string menssageNotificacion = $"¡Nueva venta registrada! El cliente {ordenIndividual.CustomerName} ordenó productos de tu tienda por un total de ${ordenIndividual.Total}.";
+                string mensageNotificacion = $"¡Nueva venta registrada! El cliente {ordenIndividual.CustomerName} ordenó productos de tu tienda por un total de ${ordenIndividual.Total}.";
 
-                // Creamos la notificacion para el usuario vendedor
+                // Creamos la notificación para el usuario vendedor
                 var notificacion = new Notificacion
                 {
-                   Id = Guid.NewGuid(),
-                   OrdenId = ordenIndividual.Id,
-                   UsuarioId = vendedorId,
-                   Message = menssageNotificacion,
-                   State = "Unread",
-                   CreationDate = DateTime.UtcNow
+                    Id = Guid.NewGuid(),
+                    OrdenId = ordenIndividual.Id,
+                    UsuarioId = vendedorId,
+                    Message = mensageNotificacion,
+                    State = "Unread",
+                    CreationDate = DateTime.UtcNow
                 };
-               
                 await _notificacionRepository.Add(notificacion);
-
-
-            }
+            } // Fin del foreach tiendas
 
             var response = new OrdenDtoResponse
             {
@@ -211,15 +192,7 @@ namespace MercadoExpress.Application.UseCase.Ordenes
             };
 
             return response;
-            /*var response = new OrdenDtoResponse
-            {
-                Message = $"Pedido completado. Se generaron {ordenesCreadas.Count} órdenes de pago.",
-                // Pasamos el InitPoint de la primera orden para que React pueda redirigir en tus pruebas actuales
-                PaymentUrl = ordenesCreadas.First().PaymentUrl,
-                PreferenceId = ordenesCreadas.First().MercadoPagoPreferenceId
 
-            };
-            return response;*/
         }
     }
 

@@ -53,7 +53,7 @@ La autorización se hace contra: endpoint de autorización (flujo “authorizati
             await _oauthStateRepository.Add(auth);
 
             var clientId = _config["MercadoPago:ClientId"];
-            var redirectUri = _config["MercadoPago:RedirectUri"]; // tu callback del backend
+            var redirectUri = _config["MercadoPago:RedirectUri"];
 
             var url =
                 "https://auth.mercadopago.com/authorization"

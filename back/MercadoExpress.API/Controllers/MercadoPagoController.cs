@@ -7,6 +7,7 @@ using MercadoPago.Config;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace MercadoExpress.API.Controllers
 {
@@ -165,45 +166,51 @@ namespace MercadoExpress.API.Controllers
                 return Ok(new { error = "Processed with internal logging" });
             }
         }*/
+
         [AllowAnonymous]
         [HttpPost("Webhook")]
-        public async Task<IActionResult> MercadoPagoWebhook([FromQuery] string? type, [FromQuery] long? data_id)
+        public async Task<IActionResult> MercadoPagoWebhook([FromBody] JsonElement body)
         {
-            // 🎯 RECTIFICADO HISTÓRICO: Si Mercado Pago le pega automático, los datos vienen con otros nombres.
-            // Si vinieron vacíos en la URL común, intentamos pescar los nombres alternativos del banco (action y data.id)
-            if (string.IsNullOrEmpty(type))
-            {
-                type = Request.Query["action"].ToString(); // Mercado Pago a veces manda "payment.created" o "payment.updated"
-                if (type.Contains("payment")) type = "payment";
-            }
-
-            if (!data_id.HasValue)
-            {
-                long.TryParse(Request.Query["data.id"].ToString(), out long idFalsificado);
-                if (idFalsificado > 0) data_id = idFalsificado;
-            }
-
-            // 🔒 Verificación final antes de ir al UseCase
-            if (string.IsNullOrEmpty(type) || !data_id.HasValue)
-            {
-                // Le devolvemos 200 de todas formas para inspección, pero registramos el paso en falso
-                Console.WriteLine("===> WEBHOOK: Llegó una ráfaga vacía o con formato no reconocido.");
-                return Ok();
-            }
-
             try
             {
-                // 🏃‍♂️ Delegamos al UseCase que ya tiene el .ToLower().Trim() y MailKit
-                await _processWebhookUseCase.Execute(type, data_id.Value);
-                return Ok();
+                // 🕵️‍♂️ PESCAMOS LOS DATOS DESDE EL BODY (Como lo manda Mercado Pago de verdad)
+                string? type = body.TryGetProperty("type", out var tProp) ? tProp.GetString() : null;
+
+                long? dataId = null;
+                if (body.TryGetProperty("data", out var dataProp) && dataProp.TryGetProperty("id", out var idProp))
+                {
+                    // Mercado Pago manda el ID como un string numérico o un número directo en el JSON
+                    if (idProp.ValueKind == JsonValueKind.String)
+                    {
+                        if (long.TryParse(idProp.GetString(), out long parsedId)) dataId = parsedId;
+                    }
+                    else if (idProp.ValueKind == JsonValueKind.Number)
+                    {
+                        dataId = idProp.GetInt64();
+                    }
+                }
+
+                // 🛡️ Filtro de seguridad: Si no es un pago, respondemos 200 y salimos rápido sin romper nada
+                if (string.IsNullOrEmpty(type) || type.ToLower().Trim() != "payment" || !dataId.HasValue)
+                {
+                    Console.WriteLine("===> WEBHOOK: Se recibió una notificación automática que no es de pagos o está vacía.");
+                    return Ok();
+                }
+
+                // 🚀 MANDAMOS LOS DATOS LIMPIOS AL USECASE DE SIEMPRE
+                await _processWebhookUseCase.Execute(type.ToLower().Trim(), dataId.Value);
+
+                return Ok(); // Todo salió impecable
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error interno procesando Webhook de MP: {ex.Message}");
-                return Ok();
+                Console.WriteLine($"===> ERROR CRÍTICO PROCESANDO WEBHOOK EN AZURE: {ex.Message}");
+
+                // 🚨 SEGUIMOS EL CONSEJO SENIOR: Si el backend explotó de verdad por un nulo o base de datos, 
+                // devolvemos un Error 500 para que Mercado Pago sepa que falló y nos vuelva a mandar la notificación más tarde.
+                return StatusCode(500, new { message = "Error interno en el servidor", details = ex.Message });
             }
         }
-
     }
 
 

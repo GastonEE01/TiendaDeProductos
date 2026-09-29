@@ -37,12 +37,12 @@ namespace MercadoExpress.Application.UseCase.Ordenes
             // 🛡️ PASO 0: REGLA DE NEGOCIO (Bloquear Multi-Vendedor)
             var detallesDeLaOrden = new List<DetalleOrden>();
             var listaDeVendedores = new List<Guid>();
-            Guid ordenIdDeLaCompra = Guid.NewGuid();
-
+            Guid ordenIdDeLaCompra = Guid.NewGuid();  
+                                             
             var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
             string frontendBaseUrl = env == "Development"
-                ? "https://ngrok-free.dev"
+                ? "http://localhost:5173"
                 : "https://tienda-de-productos-ivory.vercel.app";
 
             foreach (var itemDto in dto.Items)

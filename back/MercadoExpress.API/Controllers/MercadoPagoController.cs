@@ -146,7 +146,7 @@ namespace MercadoExpress.API.Controllers
             });
         }
 
-        [AllowAnonymous]
+        /*[AllowAnonymous]
         [HttpPost("Webhook")]
         public async Task<IActionResult> MercadoPagoWebhook([FromQuery] string type, [FromQuery] long? data_id)
         {
@@ -164,7 +164,46 @@ namespace MercadoExpress.API.Controllers
                 Console.WriteLine($"Error interno procesando Webhook de MP: {ex.Message}");
                 return Ok(new { error = "Processed with internal logging" });
             }
+        }*/
+        [AllowAnonymous]
+        [HttpPost("Webhook")]
+        public async Task<IActionResult> MercadoPagoWebhook([FromQuery] string? type, [FromQuery] long? data_id)
+        {
+            // 🎯 RECTIFICADO HISTÓRICO: Si Mercado Pago le pega automático, los datos vienen con otros nombres.
+            // Si vinieron vacíos en la URL común, intentamos pescar los nombres alternativos del banco (action y data.id)
+            if (string.IsNullOrEmpty(type))
+            {
+                type = Request.Query["action"].ToString(); // Mercado Pago a veces manda "payment.created" o "payment.updated"
+                if (type.Contains("payment")) type = "payment";
+            }
+
+            if (!data_id.HasValue)
+            {
+                long.TryParse(Request.Query["data.id"].ToString(), out long idFalsificado);
+                if (idFalsificado > 0) data_id = idFalsificado;
+            }
+
+            // 🔒 Verificación final antes de ir al UseCase
+            if (string.IsNullOrEmpty(type) || !data_id.HasValue)
+            {
+                // Le devolvemos 200 de todas formas para inspección, pero registramos el paso en falso
+                Console.WriteLine("===> WEBHOOK: Llegó una ráfaga vacía o con formato no reconocido.");
+                return Ok();
+            }
+
+            try
+            {
+                // 🏃‍♂️ Delegamos al UseCase que ya tiene el .ToLower().Trim() y MailKit
+                await _processWebhookUseCase.Execute(type, data_id.Value);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error interno procesando Webhook de MP: {ex.Message}");
+                return Ok();
+            }
         }
+
     }
 
 

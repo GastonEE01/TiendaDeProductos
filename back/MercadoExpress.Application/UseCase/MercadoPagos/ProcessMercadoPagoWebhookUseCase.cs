@@ -27,7 +27,7 @@ namespace MercadoExpress.Application.UseCase.MercadoPagos
 
         public async Task Execute(string type, long dataId)
         {
-            if (type != "payment") return;
+            if (string.IsNullOrEmpty(type) || type.ToLower().Trim() != "payment") return;
 
             var paymentClient = new PaymentClient();
             var paymentInfo = await paymentClient.GetAsync(dataId);

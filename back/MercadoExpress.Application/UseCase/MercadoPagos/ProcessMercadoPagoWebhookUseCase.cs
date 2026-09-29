@@ -15,14 +15,17 @@ namespace MercadoExpress.Application.UseCase.MercadoPagos
         private readonly INotificacionRepository _notificacionRepository;
         private readonly IEmailService _emailService;
         private readonly IUsuarioRepository _usuarioRepository;
+        private readonly IProductoRepository _productRepository;
+
         public ProcessMercadoPagoWebhookUseCase(
            IOrdenRepository ordenRepository,
-           INotificacionRepository notificacionRepository, IEmailService emailService, IUsuarioRepository usuarioRepository)
+           INotificacionRepository notificacionRepository, IEmailService emailService, IUsuarioRepository usuarioRepository, IProductoRepository productRepository)
         {
             _ordenRepository = ordenRepository;
             _notificacionRepository = notificacionRepository;
             _emailService = emailService;
             _usuarioRepository = usuarioRepository;
+            _productRepository = productRepository;
         }
 
         public async Task Execute(string type, long dataId)
@@ -50,7 +53,24 @@ namespace MercadoExpress.Application.UseCase.MercadoPagos
                     if (ordenEnBase != null && ordenEnBase.State == "Pending")
                     {
                         ordenEnBase.State = "Paid";
-                        await _ordenRepository.Update(ordenEnBase);
+
+                        foreach (var detalle in ordenEnBase.Detalles)
+                        {
+                            var productoEnBase = await _productRepository.GetProductoById(detalle.ProductoId);
+                            if (productoEnBase != null)
+                            {
+                                // Le restamos las unidades que se lleva el comprador
+                                productoEnBase.Stock -= detalle.Quantity;
+
+                                // Si el stock llega a quedar negativo por error, lo blindamos en cero
+                                if (productoEnBase.Stock < 0) productoEnBase.Stock = 0;
+
+                                // Guardamos el nuevo stock físico en Neon
+                                await _productRepository.Update(productoEnBase);
+                            }
+                        }
+
+                            await _ordenRepository.Update(ordenEnBase);
 
                         var notificacion = await _notificacionRepository.GetByOrdenId(ordenEnBase.Id);
                         if (notificacion != null)

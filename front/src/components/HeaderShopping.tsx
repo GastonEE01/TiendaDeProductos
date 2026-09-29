@@ -10,7 +10,13 @@ import {
   ListItem,
   Divider,
 } from "@mui/material";
-import { FaBell } from "react-icons/fa";
+import {
+  FaBell,
+  FaBoxOpen,
+  FaTruck,
+  FaCheckCircle,
+  FaMapMarkerAlt,
+} from "react-icons/fa";
 import toast from "react-hot-toast";
 import { useAuthStore } from "../hooks/userStorage";
 
@@ -20,26 +26,25 @@ export const HeaderShopping = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-    const user = useAuthStore((state) => state.user);
-  
+  const user = useAuthStore((state) => state.user);
+
   const [customerEmail, setCustomerEmail] = useState<string | null>(
     localStorage.getItem("customerEmail"),
   );
 
   useEffect(() => {
     const fetchAlert = async () => {
-
-      const email = user?.mail; 
-      if (!email) {
-      console.log("No hay un usuario logueado para traer el carrito.");
-      return;
-    }
+      const searchEmail = user?.mail || customerEmail;
+      if (!searchEmail) {
+        console.log("No hay un usuario logueado para traer el carrito.");
+        return;
+      }
       // Si el Drawer está cerrado o no hay mail, no gastamos recursos en internet
       if (!isDrawerOpen || !customerEmail) return;
       try {
         setLoading(true);
         setFormError(null);
-        const response = await GetCustomerCartClient(email);
+        const response = await GetCustomerCartClient(searchEmail);
         setShopping(response);
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : null;
@@ -79,22 +84,21 @@ export const HeaderShopping = () => {
 
   return (
     <>
-    {loading && <p>Cargando productos...</p>}
+      {loading && <p>Cargando productos...</p>}
       {formError && <p style={{ color: "red" }}>{formError}</p>}
 
-      {/* 🔔 ÍCONO DE LA CAMPANA */}
       <IconButton color="inherit" onClick={() => setIsDrawerOpen(true)}>
         <FaBell size={24} style={{ color: "#2563eb" }} />
       </IconButton>
 
       <Drawer
-        anchor="right" 
+        anchor="right"
         open={isDrawerOpen}
         onClose={handleCloseDrawer}
         slotProps={{
           paper: {
             sx: {
-              backgroundColor: "#111827", 
+              backgroundColor: "#111827",
               color: "#f8fafc",
               width: 360,
               borderLeft: "1px solid rgba(255, 255, 255, 0.08)",
@@ -131,7 +135,6 @@ export const HeaderShopping = () => {
                     boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.2)",
                   }}
                 >
-
                   {/* Datos del Cliente */}
                   <Typography
                     variant="caption"
@@ -150,7 +153,20 @@ export const HeaderShopping = () => {
                               : "#94a3b8",
                       }}
                     >
-                      {product.state}
+                      {product.state === "Shipped" && <FaTruck size={16} />}
+                      {product.state === "Delivered" && (
+                        <FaCheckCircle size={16} />
+                      )}
+                      {product.state !== "Shipped" &&
+                        product.state !== "Delivered" && (
+                          <FaBoxOpen size={16} />
+                        )}
+
+                      {product.state === "Shipped" && "En camino"}
+                      {product.state === "Delivered" && "Entregado"}
+                      {product.state !== "Shipped" &&
+                        product.state !== "Delivered" &&
+                        "Preparando"}
                     </span>
                   </Typography>
 
@@ -158,7 +174,13 @@ export const HeaderShopping = () => {
                     variant="caption"
                     sx={{ mb: 1.5, display: "block", color: "#94a3b8" }}
                   >
-                    📞 metodo:{" "}
+                    {product.deliveryMethod === "domicilio" && (
+                      <FaTruck size={16} />
+                    )}
+                    {product.deliveryMethod === "presencial" && (
+                      <FaMapMarkerAlt size={16} />
+                    )}
+                    metodo:{" "}
                     <span style={{ color: "#f1f5f9", fontWeight: "600" }}>
                       {product.deliveryMethod}
                     </span>
@@ -184,7 +206,7 @@ export const HeaderShopping = () => {
                       Ya tengo mi producto ✅
                     </button>
                   )}
-                  {/*alert(`Confirmando recepción de la compra ID: ${product.id}`*/}
+                  
                   {product.state === "Delivered" && (
                     <Box
                       sx={{

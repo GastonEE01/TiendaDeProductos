@@ -20,7 +20,7 @@ namespace MercadoExpress.Domain.Entities
         public DateTime CreatedAtUtc { get; set; }
         public DateTime UpdatedAtUtc { get; set; }
 
-        // Opcional (pero útil): identificar a qué cuenta de MP quedó vinculado
-        public long? MercadoPagoUserId { get; set; }
+        public long? MercadoPagoUserId { get; set; } // Opcional: identificar a qué cuenta de MP quedó vinculado
+
     }
 }

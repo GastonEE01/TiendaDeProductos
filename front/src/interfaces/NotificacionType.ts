@@ -11,7 +11,7 @@ export interface NotificacionDtoResponse {
   message: string;
   state: "Unread" | "Read";
   creationDate: string;
-  orderState: "Approved" | "Shipped" | "Delivered"; 
+  orderState: "Paid" | "Shipped" | "Delivered"; 
    ordenId: string; 
   customerName: string;
   customerAddress: string;

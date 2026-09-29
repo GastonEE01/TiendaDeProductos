@@ -25,8 +25,6 @@ namespace MercadoExpress.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-      
-
         public async Task<List<Orden>> GetShoppingByUserEmail(string email)
         {
             return await _context.Ordenes
@@ -43,7 +41,6 @@ namespace MercadoExpress.Infrastructure.Repositories
                 .FirstOrDefaultAsync(o => o.MercadoPagoPreferenceId == preferenceId);
         }
 
-
         public Task SaveChangesAsync()
         {
             return _context.SaveChangesAsync();
@@ -52,7 +49,16 @@ namespace MercadoExpress.Infrastructure.Repositories
         public async Task<Orden> GetOrdenById(Guid ordenId)
         {
             return await _context.Ordenes
+                .Include(o => o.Detalles)
+                .ThenInclude(d => d.Producto)
                 .FirstAsync(o => o.Id == ordenId);
+        }
+
+        public async Task Update(Orden orden)
+        {
+            _context.Ordenes.Update(orden);
+            await _context.SaveChangesAsync();
+
         }
     }
 }

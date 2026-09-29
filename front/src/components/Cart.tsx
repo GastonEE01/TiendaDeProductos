@@ -18,7 +18,7 @@ import toast from "react-hot-toast";
 import { addOrden } from "../service/api";
 import { CartItemDto } from "../interfaces/CartType";
 
-initMercadoPago("APP_USR-e8b4cfda-bf2e-4ac7-88e5-46bf4f4afc5a");
+initMercadoPago("APP_USR-a0c61e8e-fd17-45bb-b992-fe81a16abfbf");
 export const Cart = () => {
   const formRef = useRef<HTMLFormElement>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -56,7 +56,7 @@ export const Cart = () => {
     const formData = new FormData(e.currentTarget);
 
     const cartItems: CartItemDto[] = cart.map((item) => ({
-      productId: item.id,
+      productoId: item.id,
       quantity: item.quantity,
     }));
 
@@ -65,7 +65,7 @@ export const Cart = () => {
     const orden: OrdenDtoRequest = {
       customerName: formData.get("customerName") as string,
       customerEmail: formData.get("customerEmail") as string,
-      customerPhone: Number(formData.get("customerPhone")),
+      customerPhone: String(formData.get("customerPhone")),
       deliveryMethod: deliveryMethod,
       customerAddress: isPickup
         ? "Retiro en local"

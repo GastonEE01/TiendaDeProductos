@@ -11,9 +11,6 @@ namespace MercadoExpress.Application.DTO.Orden
     {
         public string Message { get; set; } = string.Empty;
         public List<PagoPorVendedorDto> Pagos { get; set; }
-        //public string PaymentUrl { get; set; } = string.Empty;
-        //public string? PreferenceId { get; set; }
-
     }
 
     public class PagoPorVendedorDto

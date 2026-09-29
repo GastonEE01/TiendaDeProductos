@@ -39,17 +39,20 @@ export const LoginPage: React.FC = () => {
             userName: response.userName,
             mail: response.mail,
             aliasCBU: response.aliasCBU,
-            img: response.img
+            img: response.img,
           },
           response.token,
         );
-        console.log(response);
-        navigate("/admin");
+        if (response.rol === "Seller") {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
       }
     } catch (error: unknown) {
       const menssage = error instanceof Error ? error.message : null;
       setFormError(menssage);
-      formRef.current?.reset(); // resetea los campos
+      formRef.current?.reset();
     } finally {
       setLoading(false);
     }
@@ -57,14 +60,14 @@ export const LoginPage: React.FC = () => {
 
   const inputStyle = {
     "& .MuiOutlinedInput-root": {
-      backgroundColor: "#111827", // Fondo más oscuro para las cajas de entrada
-      color: "#f8fafc", // Letras blancas al escribir
+      backgroundColor: "#111827",
+      color: "#f8fafc",
       borderRadius: "8px",
       "& fieldset": { borderColor: "rgba(255, 255, 255, 0.1)" },
       "&:hover fieldset": { borderColor: "rgba(255, 255, 255, 0.2)" },
-      "&.Mui-focused fieldset": { borderColor: "#2563eb" }, // Borde azul al hacer foco
+      "&.Mui-focused fieldset": { borderColor: "#2563eb" },
     },
-    "& .MuiInputLabel-root": { color: "#94a3b8" }, // Texto flotante en gris claro
+    "& .MuiInputLabel-root": { color: "#94a3b8" },
     "& .MuiInputLabel-root.Mui-focused": { color: "#2563eb" },
   };
 
@@ -159,7 +162,7 @@ export const LoginPage: React.FC = () => {
                 type="submit"
                 disabled={loading}
                 sx={{
-                  backgroundColor: "#2563eb", // 🔵 El azul eléctrico oficial de la Landing
+                  backgroundColor: "#2563eb",
                   color: "#ffffff",
                   fontWeight: "bold",
                   borderRadius: "8px",

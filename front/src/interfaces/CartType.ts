@@ -5,7 +5,7 @@ export interface CartItem extends ProductDtoRequest {
 }
 
 export interface CartItemDto {
-  productId: string;
+  productoId: string;
   quantity: number;
 }
 

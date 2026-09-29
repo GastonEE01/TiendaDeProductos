@@ -1,11 +1,8 @@
 import { ProductDtoRequest } from "../interfaces/ProductoType";
-import {
-  LoginDtoRequest,
-  LoginDtoResponse,
-} from "../interfaces/UsuarioType";
-import { OrdenDtoRequest,OrdenResponseData } from "../interfaces/OrdenType";
-import { NotificacionDtoResponse } from "../interfaces/NotificacionType"
-import { CustomerPurchasesDtoResponse } from "../interfaces/CartType"
+import { LoginDtoRequest, LoginDtoResponse } from "../interfaces/UsuarioType";
+import { OrdenDtoRequest, OrdenResponseData } from "../interfaces/OrdenType";
+import { NotificacionDtoResponse } from "../interfaces/NotificacionType";
+import { CustomerPurchasesDtoResponse } from "../interfaces/CartType";
 const API_URL = import.meta.env.VITE_API_URL;
 
 export interface ApiResponse<T = void> {
@@ -13,24 +10,12 @@ export interface ApiResponse<T = void> {
   data?: T;
 }
 
-export interface UpdateProductRequest {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  stock: number;
-  nameCategoria: string;
-  img: File | null;
-}
-
 export interface UpdateProductResponse extends ApiResponse {
-  img?: string;
+  img: string;
 }
 
 // Usuario
-export const register = async (
-  credentials: FormData,
-): Promise<ApiResponse> => {
+export const register = async (credentials: FormData): Promise<ApiResponse> => {
   const rest = await fetch(`${API_URL}/api/Registro`, {
     method: "POST",
     body: credentials,
@@ -91,17 +76,14 @@ export const updatePerfil = async (
   return rest.json();
 };
 
-
 export const conectAuhtMP = async (token: string): Promise<any> => {
   const rest = await fetch(`${API_URL}/Api/MercadoPago/Auth`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
-    }//,
-   // body: token,
+    },
   });
-// boton En el front, en el click del botón, hacés window.location.href = data.url.
 
   const responseData = await rest.json().catch(() => ({}));
   if (!rest.ok) {
@@ -185,10 +167,9 @@ export const getProductsSeller = async (): Promise<ProductDtoRequest[]> => {
   return rest.json();
 };
 
-
-export const deleteProduct = async ( id: String): Promise< ApiResponse > => {
+export const deleteProduct = async (id: String): Promise<ApiResponse> => {
   const token = localStorage.getItem("token");
-const rest = await fetch(`${API_URL}/api/Producto/Delete${id}`, {
+  const rest = await fetch(`${API_URL}/api/Producto/Delete${id}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -201,32 +182,77 @@ const rest = await fetch(`${API_URL}/api/Producto/Delete${id}`, {
     throw new Error(messageError);
   }
   console.log(rest);
-  return rest.json()
-}
-
+  return rest.json();
+};
 
 export const updateProduct = async (
-  credentials: UpdateProductRequest,
+  formData: FormData,
 ): Promise<UpdateProductResponse> => {
-  const productData = new FormData();
-
-  productData.append("Id", credentials.id);
-  productData.append("Name", credentials.name);
-  productData.append("Description", credentials.description);
-  productData.append("Price", String(credentials.price));
-  productData.append("Stock", String(credentials.stock));
-  productData.append("NameCategoria", credentials.nameCategoria);
-
-  if (credentials.img instanceof File) {
-    productData.append("IMG", credentials.img);
-  }
+  const token = localStorage.getItem("token");
 
   const rest = await fetch(`${API_URL}/api/Producto/Update`, {
     method: "PUT",
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${token}`,
     },
-    body: productData,
+    body: formData,
+  });
+
+  if (!rest.ok) {
+    const responseBody = await rest.text();
+    let errorData: unknown;
+
+    try {
+      errorData = JSON.parse(responseBody);
+    } catch {
+      errorData = null;
+    }
+
+    if (errorData && typeof errorData === "object") {
+      const body = errorData as Record<string, unknown>;
+      const message = body.Message ?? body.message ?? body.detail;
+      if (typeof message === "string" && message.length > 0) {
+        throw new Error(message);
+      }
+
+      if (body.errors && typeof body.errors === "object") {
+        const validationMessages = Object.values(
+          body.errors as Record<string, unknown>,
+        )
+          .flatMap((messages) =>
+            Array.isArray(messages) ? messages : [messages],
+          )
+          .filter((item): item is string => typeof item === "string");
+        if (validationMessages.length > 0) {
+          throw new Error(validationMessages.join(" "));
+        }
+      }
+
+      if (typeof body.title === "string" && body.title.length > 0) {
+        throw new Error(body.title);
+      }
+    }
+
+    throw new Error(
+      responseBody ||
+        `No se pudo actualizar el producto (HTTP ${rest.status}).`,
+    );
+  }
+
+  return rest.json();
+};
+
+// Oden
+export const addOrden = async (
+  credentials: OrdenDtoRequest,
+): Promise<OrdenResponseData> => {
+  const rest = await fetch(`${API_URL}/Api/Orden/Add`, {
+    //248
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(credentials),
   });
 
   if (!rest.ok) {
@@ -235,44 +261,20 @@ export const updateProduct = async (
     throw new Error(messageError);
   }
 
-  console.log(rest);
-
-  return rest.json();
-};
-
-
-// Oden
-export const addOrden = async (
-  credentials: OrdenDtoRequest,): Promise<OrdenResponseData> => {
-  //const token = localStorage.getItem("token");
-  const rest = await fetch(`${API_URL}/Api/Orden/Add`, { //248
-    method: "POST",
-    headers: {
-     "Content-Type": "application/json",
-    },
-         body: JSON.stringify(credentials),
-
-  });
-
-    if (!rest.ok) {
-    const errorData = await rest.json().catch(() => ({}));
-    const messageError = errorData.Message || errorData.message;
-    throw new Error(messageError);
-  }
-  
   const jsonResponse = await rest.json();
-     // Imprimimos para que verifiques en consola el objeto Limpio con { message, data }
   console.log("JSON real de .NET Core extraído en api.ts:", jsonResponse);
   return jsonResponse;
-}
+};
 
-export const getNotificacionesAdmin = async (): Promise<NotificacionDtoResponse[]> => {
+export const getNotificacionesAdmin = async (): Promise<
+  NotificacionDtoResponse[]
+> => {
   const token = localStorage.getItem("token"); // Ajustalo a cómo recuperás tu JWT
   const rest = await fetch(`${API_URL}/Api/Notificacion/GetNotificacionAdmin`, {
     method: "GET",
     headers: {
       "Content-type": "application/json",
-      "Authorization": `Bearer ${token}` // Crucial para que .NET lea el Claim
+      Authorization: `Bearer ${token}`,
     },
   });
 
@@ -289,18 +291,23 @@ export const MarkNotificationsRead = async (): Promise<void> => {
     method: "PUT",
     headers: {
       "Content-type": "application/json",
-      "Authorization": `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
     },
   });
 };
 
-export const GetCustomerCartClient = async (email: string): Promise<CustomerPurchasesDtoResponse[]> => {
-  const rest = await fetch(`${API_URL}/Api/Orden/GetCustomerCartClient/${email}`, {
-    method: "GET",
-    headers: {
-      "Content-type": "application/json",
+export const GetCustomerCartClient = async (
+  email: string,
+): Promise<CustomerPurchasesDtoResponse[]> => {
+  const rest = await fetch(
+    `${API_URL}/Api/Orden/GetCustomerCartClient/${email}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-type": "application/json",
+      },
     },
-  });
+  );
 
   if (!rest.ok) {
     throw new Error("No se pudieron cargar las compras");
@@ -317,9 +324,8 @@ export const updateOrdenShipped = async (
   const rest = await fetch(`${API_URL}/Api/Orden/OrdenShipped/${ordenId}`, {
     method: "PUT",
     headers: {
-     "Content-Type": "application/json", 
-      "Authorization": `Bearer ${token}`
-
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
   });
 
@@ -335,18 +341,21 @@ export const updateOrdenShipped = async (
 };
 
 export const updateOrdenDelivered = async (
-  ordenId: string,email: string
+  ordenId: string,
+  email: string,
 ): Promise<ApiResponse> => {
   const token = localStorage.getItem("token");
 
-  const rest = await fetch(`${API_URL}/Api/Orden/UpdateOrdenDelivered/${ordenId}/${email}`, {
-    method: "PUT",
-    headers: {
-     "Content-Type": "application/json", 
-      "Authorization": `Bearer ${token}`
-
+  const rest = await fetch(
+    `${API_URL}/Api/Orden/UpdateOrdenDelivered/${ordenId}/${email}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
     },
-  });
+  );
 
   if (!rest.ok) {
     const errorData = await rest.json().catch(() => ({}));

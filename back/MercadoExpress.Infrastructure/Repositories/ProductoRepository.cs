@@ -44,12 +44,12 @@ namespace MercadoExpress.Infrastructure.Repositories
             return await _context.Productos
                 .Include(p => p.Categoria)
                 .FirstOrDefaultAsync(p => p.Id == id);
- //           _context.SaveChanges();
         }
 
         public async Task<List<Producto>> GetProductVendedor(Guid usuarioId)
         {
             return await _context.Productos
+                .Include(p => p.Categoria)
                 .Where(p => p.UsuarioId == usuarioId)
                 .ToListAsync();
         }

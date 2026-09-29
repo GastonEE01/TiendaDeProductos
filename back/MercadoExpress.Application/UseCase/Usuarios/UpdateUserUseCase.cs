@@ -29,12 +29,12 @@ namespace MercadoExpress.Application.UseCase.Usuarios
             if (!string.IsNullOrEmpty(dto.UserName)) searchUser.UserName = dto.UserName;
             if (!string.IsNullOrEmpty(dto.Mail)) searchUser.Mail = dto.Mail;
             if (!string.IsNullOrEmpty(dto.ImgPath)) searchUser.IMG = dto.ImgPath;
-            if (!string.IsNullOrEmpty(dto.AliasCBU)) searchUser.AliasCBU = dto.AliasCBU;
+            searchUser.AliasCBU = dto.AliasCBU ?? "";
 
             await _usuarioRepository.Update(searchUser);
 
             UpdateUserResponse response = _mapper.Map<UpdateUserResponse>(searchUser);
-            response.Message = "Producto actualizado.";
+            response.Message = "Usuario actualizado.";
             return response;
         }
     }

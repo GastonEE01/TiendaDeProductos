@@ -16,7 +16,7 @@ import {
   ListItem,
   Divider,
 } from "@mui/material";
-import { FaBell } from "react-icons/fa";
+import { FaBell,FaAddressCard,FaPhoneAlt } from "react-icons/fa";
 
 export const HeaderNotification = () => {
   const [notifications, setNotifications] = useState<NotificacionDtoResponse[]>(
@@ -86,7 +86,7 @@ export const HeaderNotification = () => {
       </IconButton>
 
       <Drawer
-        anchor="right" // Hace que salga desde la derecha
+        anchor="right"
         open={isDrawerOpen}
         onClose={handleCloseDrawer}
         slotProps={{
@@ -158,6 +158,7 @@ export const HeaderNotification = () => {
                     variant="caption"
                     sx={{ color: "#94a3b8", display: "block", mb: 0.5 }}
                   >
+                    <FaAddressCard/>
                     📍 Dirección:{" "}
                     <span style={{ color: "#f1f5f9", fontWeight: "600" }}>
                       {notif.customerAddress}
@@ -168,19 +169,21 @@ export const HeaderNotification = () => {
                     variant="caption"
                     sx={{ color: "#94a3b8", display: "block", mb: 2 }}
                   >
+
+                   < FaPhoneAlt/> 
                     📞 Tel:{" "}
                     <span style={{ color: "#f1f5f9", fontWeight: "600" }}>
                       {notif.customerPhone}
                     </span>
                   </Typography>
 
-                  {notif.orderState === "Approved" ? (
+                  {notif.orderState === "Paid" ? (
                     <button
                       style={{
                         marginTop: "4px",
                         marginBottom: "12px",
                         padding: "8px 16px",
-                        backgroundColor: "#2563eb", // Azul eléctrico oficial
+                        backgroundColor: "#2563eb", 
                         color: "white",
                         border: "none",
                         borderRadius: "6px",
@@ -189,7 +192,7 @@ export const HeaderNotification = () => {
                         width: "100%",
                         fontSize: "0.9rem",
                       }}
-                      onClick={() => handleUpdateOrdenShipped(notif.ordenId)} // Aquí irá tu llamada PUT mañana
+                      onClick={() => handleUpdateOrdenShipped(notif.ordenId)} 
                     >
                       Marcar como Enviado 📦
                     </button>

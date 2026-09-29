@@ -22,17 +22,6 @@ namespace MercadoExpress.Application.UseCase.MercadoPagos
             _config = config;
         }
 
-        /*
-         * 1) Valida que el usuario exista y sea seller.
-
-2) Genera state aleatorio.
-
-3) Guarda state (con expiración corta, ej. 10 min) asociado a usuarioId.
-
-4) Construye la URL de autorización y la devuelve.
-
-La autorización se hace contra: endpoint de autorización (flujo “authorization code”).*/
-
         public async Task<string> ConnectMercadoPagoAuth(Guid usuarioId)
         {
            var user = await _usuarioRepository.GetUserById(usuarioId);

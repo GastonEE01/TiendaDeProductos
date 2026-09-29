@@ -25,6 +25,11 @@ namespace MercadoExpress.Application.UseCase.Productos
 
         public async Task<UpdateProductResponse> UpdateProducto(UpdateProductoDtoRequest dto)
         {
+            if (dto.Id == Guid.Empty)
+            {
+                throw new ArgumentException("El ID del producto llegó vacío o en un formato inválido desde el Frontend.");
+            }
+
             Producto searchProduct = await _productoRepository.GetProductoById(dto.Id);
             if (searchProduct == null) throw new KeyNotFoundException("No se encontro el producto");
 
@@ -33,11 +38,14 @@ namespace MercadoExpress.Application.UseCase.Productos
             if (dto.Price.HasValue) searchProduct.Price = dto.Price.Value;
             if (!string.IsNullOrEmpty(dto.ImgPath)) searchProduct.IMG = dto.ImgPath;
             if (dto.Stock.HasValue) searchProduct.Stock = dto.Stock.Value;
-            if (!string.IsNullOrEmpty(dto.NameCategoria)) searchProduct.Categoria.Name = dto.NameCategoria;
+            if (!string.IsNullOrEmpty(dto.CategoriaName)) searchProduct.Categoria.Name = dto.CategoriaName;
 
             await _productoRepository.Update(searchProduct); 
 
             UpdateProductResponse response = _mapper.Map<UpdateProductResponse>(searchProduct);
+            response.IMG = !string.IsNullOrEmpty(dto.ImgPath) ? dto.ImgPath : searchProduct.IMG;
+            response.Id = searchProduct.Id;
+
             response.Message = "Producto actualizado.";
             return response;
 

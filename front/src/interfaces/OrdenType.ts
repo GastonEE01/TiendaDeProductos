@@ -3,12 +3,12 @@ import { CartItemDto } from "./CartType";
 export interface OrdenDtoRequest{
 customerName: string,
 customerEmail: string,
-customerPhone: number,
+customerPhone: string,
 deliveryMethod: string,
 customerAddress: string,
 city: string,
 postalCode: string,
- items: CartItemDto[]; 
+items: CartItemDto[]; 
 }
 
 export interface PagoPorVendedorDto {

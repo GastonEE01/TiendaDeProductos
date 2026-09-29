@@ -25,12 +25,18 @@ namespace MercadoExpress.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task<Notificacion> GetByOrdenId(Guid id)
+        {
+            return await _context.Notificaciones.FirstOrDefaultAsync(o => o.OrdenId == id);
+
+        }
+
         public async Task<List<Notificacion>> GetNotificacionVendedor(Guid usuarioId)
         {
             return await _context.Notificaciones
                 .Include(n => n.Orden)
-                 .ThenInclude(o => o.Detalles) // 🚀 1. Entra a la orden y trae la lista de detalles
-                .ThenInclude(d => d.Producto) // 🚀 2. Entra al detalle y trae el Producto (ahí está la Img y el Name)
+                 .ThenInclude(o => o.Detalles) 
+                .ThenInclude(d => d.Producto) 
                 .Where(n => n.UsuarioId ==  usuarioId)
                 .OrderByDescending(n => n.CreationDate).
                 ToListAsync();
@@ -48,6 +54,11 @@ namespace MercadoExpress.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-       
+        public async Task Update(Notificacion notificacion)
+        {
+            _context.Notificaciones.Update(notificacion);
+            await _context.SaveChangesAsync();
+
+        }
     }
 }

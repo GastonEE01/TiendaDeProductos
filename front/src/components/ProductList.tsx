@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { getProducts,getProductsSeller, deleteProduct, updateProduct } from "../service/api";
+import {
+  getProducts,
+  getProductsSeller,
+  deleteProduct,
+  updateProduct,
+} from "../service/api";
 import { ProductDtoRequest } from "../interfaces/ProductoType";
 import { ProductCard } from "../components/ProductCard";
 import { useDebouceSearch } from "../hooks/useDebouce";
-import { useAuthStore } from '../hooks/userStorage'
+import { useAuthStore } from "../hooks/userStorage";
 import toast from "react-hot-toast";
 import {
   Button,
@@ -13,16 +18,17 @@ import {
   DialogTitle,
   TextField,
   Box,
-  Typography
+  Typography,
 } from "@mui/material";
-import { FaSearch,FaTimes } from "react-icons/fa";
-
+import { FaSearch, FaTimes } from "react-icons/fa";
 
 export const ProductList: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [products, setProducts] = useState<ProductDtoRequest[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [editProduct, setEditProduct] = useState<ProductDtoRequest | null>(null,);
+  const [editProduct, setEditProduct] = useState<ProductDtoRequest | null>(
+    null,
+  );
 
   const user = useAuthStore((state) => state.user);
 
@@ -31,14 +37,14 @@ export const ProductList: React.FC = () => {
     description: string;
     price: string;
     stock: string;
-    nameCategoria: string;
+    categoriaName: string;
     img: File | null;
   }>({
     name: "",
     description: "",
     price: "",
     stock: "",
-    nameCategoria: "",
+    categoriaName: "",
     img: null,
   });
 
@@ -49,12 +55,12 @@ export const ProductList: React.FC = () => {
     const loadProducts = async () => {
       try {
         setLoading(true);
-         let data;
-         if (user?.rol === "Seller") {
-        data = await getProductsSeller(); 
-      } else {
-        data = await getProducts(); 
-      }
+        let data;
+        if (user?.rol === "Seller") {
+          data = await getProductsSeller();
+        } else {
+          data = await getProducts();
+        }
         setProducts(data);
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : null;
@@ -89,44 +95,62 @@ export const ProductList: React.FC = () => {
   const handleEdit = async (product: ProductDtoRequest) => {
     setEditProduct(product);
     setEditFormData({
+      id: product.id,
       name: product.name,
       description: product.description,
       price: String(product.price),
       stock: String(product.stock),
-      nameCategoria: product.categoriaName,
-      img: null,
-    });
+      categoriaName: product.categoriaName,
+      img: product.img,
+    } as any); // any temporal
   };
 
   const handleSaveEdit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setLoading(true);
+
     if (!editProduct) return;
+    const formData = new FormData(event.currentTarget);
+    const image = formData.get("img");
+
+    const productFormData = new FormData();
+    const idReal = editProduct.id || (editProduct as any).id;
+
+    productFormData.append("Id", idReal);
+    productFormData.append("Name", editFormData.name.trim());
+    productFormData.append("Description", editFormData.description.trim());
+    productFormData.append("Price", Number(editFormData.price).toString());
+    productFormData.append("Stock", Number(editFormData.stock).toString());
+    productFormData.append("CategoriaName", editFormData.categoriaName.trim());
+
+    if (image instanceof File) {
+      productFormData.append("IMG", image);
+    }
 
     try {
-      const response = await updateProduct({
-        id: editProduct.id,
-        name: editFormData.name.trim(),
-        description: editFormData.description.trim(),
-        price: Number(editFormData.price),
-        stock: Number(editFormData.stock),
-        nameCategoria: editFormData.nameCategoria.trim(),
-        img: editFormData.img
-      });
+      const response = await updateProduct(productFormData);
+      console.log(response);
 
       setProducts((currentProducts) =>
-        currentProducts.map((product) =>
-          product.id === editProduct.id
+        currentProducts.map((product) => {
+          const pId = product.id || (product as any).Id;
+          const eId = editProduct.id || (editProduct as any).Id;
+          return pId === eId
             ? {
                 ...product,
                 name: editFormData.name.trim(),
                 description: editFormData.description.trim(),
                 price: Number(editFormData.price),
                 stock: Number(editFormData.stock),
-                categoriaName: editFormData.nameCategoria.trim(),
-                img: response.img ?? product.img,
+                categoriaName: editFormData.categoriaName.trim(),
+                img: response.img
+                  ? response.img
+                  : editFormData.img
+                    ? `/uploads/products/${editFormData.img.name}`
+                    : product.img,
               }
-            : product,
-        ),
+            : product;
+        }),
       );
       toast.success(response.message || "Producto actualizado");
       setEditProduct(null);
@@ -154,17 +178,17 @@ export const ProductList: React.FC = () => {
   });
 
   const inputStyle = {
-  "& .MuiOutlinedInput-root": {
-    backgroundColor: "#111827", // Fondo medianoche para las cajas
-    color: "#f8fafc",            // Letras blancas al escribir
-    borderRadius: "8px",
-    "& fieldset": { borderColor: "rgba(255, 255, 255, 0.1)" },
-    "&:hover fieldset": { borderColor: "rgba(255, 255, 255, 0.2)" },
-    "&.Mui-focused fieldset": { borderColor: "#2563eb" }, // Borde azul eléctrico al escribir
-  },
-  "& .MuiInputLabel-root": { color: "#94a3b8" }, // Texto gris claro flotando
-  "& .MuiInputLabel-root.Mui-focused": { color: "#2563eb" }
-};
+    "& .MuiOutlinedInput-root": {
+      backgroundColor: "#111827",
+      color: "#f8fafc",
+      borderRadius: "8px",
+      "& fieldset": { borderColor: "rgba(255, 255, 255, 0.1)" },
+      "&:hover fieldset": { borderColor: "rgba(255, 255, 255, 0.2)" },
+      "&.Mui-focused fieldset": { borderColor: "#2563eb" },
+    },
+    "& .MuiInputLabel-root": { color: "#94a3b8" },
+    "& .MuiInputLabel-root.Mui-focused": { color: "#2563eb" },
+  };
 
   return (
     <div
@@ -195,11 +219,11 @@ export const ProductList: React.FC = () => {
           onChange={(event) => setSearch(event.target.value)}
           fullWidth
           sx={{
-            ...inputStyle, // Hereda el fondo oscuro y letras blancas
-          "& .MuiOutlinedInput-root": {
-            ...inputStyle["& .MuiOutlinedInput-root"],
-            borderRadius: "50px",
-          }
+            ...inputStyle,
+            "& .MuiOutlinedInput-root": {
+              ...inputStyle["& .MuiOutlinedInput-root"],
+              borderRadius: "50px",
+            },
           }}
         />
       </div>
@@ -229,124 +253,163 @@ export const ProductList: React.FC = () => {
         fullWidth
         maxWidth="sm"
       >
+        <Box
+          sx={{
+            backgroundColor: "#1e293b",
+            borderRadius: "16px",
+            padding: "10px",
+            width: "100%",
+          }}
+        >
+          <form onSubmit={handleSaveEdit}>
+            <DialogTitle
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                p: 2,
+                color: "#f8fafc",
+              }}
+            >
+              <Typography>Editar producto</Typography>
 
-              <Box sx={{ backgroundColor: "#1e293b", borderRadius: "16px", padding: "10px", width: "100%" }}>
-
-        <form onSubmit={handleSaveEdit}>
-           <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", p: 2 }}>
-            <div style={{ width: "24px" }}></div> 
-            <Typography variant="h5" sx={{ fontWeight: "bold", color: "#f8fafc", flexGrow: 1, textAlign: "center" }}>
-              Editar producto
-            </Typography>
-            
-            {/* 🚀 RECTIFICADO: Pasamos una función de flecha limpia para limpiar el estado */}
-            <FaTimes 
-              size={24} 
-              onClick={() => setEditProduct(null)} 
-              style={{ cursor: "pointer", color: "#ef4444", transition: "color 0.2s" }}
-              onMouseOver={(e) => e.currentTarget.style.color = '#ff0000'}
-              onMouseOut={(e) => e.currentTarget.style.color = '#ef4444'}
-            />
-          </DialogTitle>
-          <DialogContent
-            sx={{ display: "flex", flexDirection: "column", gap: 3, pt: 2 }}
-          >
-            <TextField
-              name="name"
-              label="Nombre"
-              value={editFormData.name}
-              onChange={handleFieldChange}
-              required
-              fullWidth
-              sx={inputStyle}
-            />
-            <TextField
-              name="description"
-              label="Descripción"
-              value={editFormData.description}
-              onChange={handleFieldChange}
-              required
-              fullWidth
-              multiline
-              rows={2}
-              sx={inputStyle}
-            />
-            <TextField
-              name="nameCategoria"
-              label="Categoría"
-              value={editFormData.nameCategoria}
-              onChange={handleFieldChange}
-              required
-              fullWidth
-               multiline
-              rows={2}
-              sx={inputStyle}
-            />
-
-             <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              <Typography variant="caption" sx={{ color: "#94a3b8", fontWeight: "bold" }}>
-                Nueva imagen (Opcional)
-              </Typography>
-              <input
-                type="file"
-                onChange={(event) => {
-                  if (event.target instanceof HTMLInputElement) {
-                    const file = event.target.files?.[0] ?? null;
-                    setEditFormData((currentData) => ({
-                      ...currentData,
-                      img: file,
-                    }));
-                  }
-                }}
+              <FaTimes
+                size={24}
+                onClick={() => setEditProduct(null)}
                 style={{
-                  color: "#94a3b8",
-                  backgroundColor: "#111827",
-                  padding: "12px",
-                  borderRadius: "8px",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
-                  cursor: "pointer"
+                  cursor: "pointer",
+                  color: "#ef4444",
+                  transition: "color 0.2s",
                 }}
+                onMouseOver={(e) => (e.currentTarget.style.color = "#ff0000")}
+                onMouseOut={(e) => (e.currentTarget.style.color = "#ef4444")}
               />
-            </Box>
+            </DialogTitle>
+            <DialogContent
+              sx={{ display: "flex", flexDirection: "column", gap: 3, pt: 2 }}
+            >
+              <TextField
+                name="name"
+                label="Nombre"
+                value={editFormData.name}
+                onChange={handleFieldChange}
+                required
+                fullWidth
+                sx={inputStyle}
+              />
+              <TextField
+                name="description"
+                label="Descripción"
+                value={editFormData.description}
+                onChange={handleFieldChange}
+                required
+                fullWidth
+                multiline
+                rows={2}
+                sx={inputStyle}
+              />
+              <TextField
+                name="categoriaName"
+                label="Categoría"
+                value={editFormData.categoriaName}
+                onChange={handleFieldChange}
+                required
+                fullWidth
+                multiline
+                rows={2}
+                sx={inputStyle}
+              />
 
-            <Box sx={{ display: "flex", gap: 2 }}>
-            <TextField
-              name="price"
-              label="Precio"
-              type="number"
-              value={editFormData.price}
-              onChange={handleFieldChange}
-              required
-               fullWidth
-                sx={inputStyle}
-            />
-            <TextField
-              name="stock"
-              label="Stock"
-              type="number"
-              value={editFormData.stock}
-              onChange={handleFieldChange}
-              required
-               fullWidth
-                sx={inputStyle}
-            />
-            </Box>
-          </DialogContent>
-           <DialogActions sx={{ p: 2, pr: 3, gap: 1 }}>
-            <Button onClick={() => setEditProduct(null)} sx={{ color: "#94a3b8", "&:hover": { color: "#f8fafc" } }}>Cancelar</Button>
-            <Button type="submit" variant="contained"  sx={{
-                backgroundColor: "#2563eb", // El mismo azul oficial de tus botones
-                color: "#ffffff",
-                fontWeight: "bold",
-                borderRadius: "8px",
-                padding: "8px 24px",
-                "&:hover": { backgroundColor: "#1d4ed8" }
-              }}>
-              Guardar cambios
-            </Button>
-          </DialogActions>
-        </form>
-         </Box>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                <Typography
+                  variant="caption"
+                  sx={{ color: "#94a3b8", fontWeight: "bold" }}
+                >
+                  Nueva imagen
+                </Typography>
+                <Typography variant="body2" sx={{ color: "#cbd5e1" }}>
+                  Imagen actual:{" "}
+                  {editProduct?.img
+                    ? editProduct.img.split(/[\\/]/).pop()
+                    : "Sin imagen"}
+                </Typography>{" "}
+               
+                <input
+                  type="file"
+                  name="img"
+                  onChange={(event) => {
+                    if (event.target instanceof HTMLInputElement) {
+                      const file = event.target.files?.[0] ?? null;
+                      setEditFormData((currentData) => ({
+                        ...currentData,
+                        img: file,
+                      }));
+                    }
+                  }}
+                  accept="image/jpeg,image/png,image/webp"
+                  style={{
+                    color: "#94a3b8",
+                    backgroundColor: "#111827",
+                    padding: "12px",
+                    borderRadius: "8px",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                    cursor: "pointer",
+                  }}
+                />
+                {editFormData.img && (
+                  <Typography variant="caption" sx={{ color: "#94a3b8" }}>
+                    Nueva imagen seleccionada: {editFormData.img.name}
+                  </Typography>
+                )}
+              </Box>
+
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <TextField
+                  name="price"
+                  label="Precio"
+                  type="number"
+                  value={editFormData.price}
+                  onChange={handleFieldChange}
+                  required
+                  fullWidth
+                  sx={inputStyle}
+                />
+                <TextField
+                  name="stock"
+                  label="Stock"
+                  type="number"
+                  value={editFormData.stock}
+                  onChange={handleFieldChange}
+                  required
+                  fullWidth
+                  sx={inputStyle}
+                />
+              </Box>
+            </DialogContent>
+            <DialogActions sx={{ p: 2, pr: 3, gap: 1 }}>
+              <Button
+                onClick={() => setEditProduct(null)}
+                sx={{ color: "#94a3b8", "&:hover": { color: "#f8fafc" } }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                sx={{
+                  backgroundColor: "#2563eb", 
+                  color: "#ffffff",
+                  fontWeight: "bold",
+                  borderRadius: "8px",
+                  padding: "8px 24px",
+                  "&:hover": { backgroundColor: "#1d4ed8" },
+                }}
+              >
+                Guardar cambios
+              </Button>
+            </DialogActions>
+          </form>
+        </Box>
       </Dialog>
     </div>
   );

@@ -1,18 +1,27 @@
-import React, { useRef, useState,useEffect  } from 'react';
-import { Box, TextField, Button, Typography, Avatar, Dialog, DialogContent, DialogTitle, DialogActions } from '@mui/material';
-import { FaTimes } from 'react-icons/fa';
+import React, { useRef, useState, useEffect } from "react";
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  Avatar,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogActions,
+} from "@mui/material";
+import { FaTimes } from "react-icons/fa";
 import { FaCloudArrowUp } from "react-icons/fa6";
-import { useAuthStore } from '../hooks/userStorage'; // Tu store de Zustand
+import { useAuthStore } from "../hooks/userStorage"; // Tu store de Zustand
 import toast from "react-hot-toast";
-import { updatePerfil,conectAuhtMP } from '../service/api';
-import { useSearchParams } from 'react-router-dom'
+import { updatePerfil, conectAuhtMP } from "../service/api";
+import { useSearchParams } from "react-router-dom";
 export interface ProfileProps {
   open: boolean;
   onClose: () => void;
 }
 
 export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
-  // 👤 Traemos al usuario actual y el método login de Zustand para actualizar la RAM al guardar
   const user = useAuthStore((state) => state.user);
   const login = useAuthStore((state) => state.login);
   const token = useAuthStore((state) => state.token);
@@ -31,54 +40,54 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
       "&.Mui-focused fieldset": { borderColor: "#2563eb" },
     },
     "& .MuiInputLabel-root": { color: "#94a3b8" },
-    "& .MuiInputLabel-root.Mui-focused": { color: "#2563eb" }
+    "& .MuiInputLabel-root.Mui-focused": { color: "#2563eb" },
   };
 
-  // 💾 PROCESAR CAMBIOS DE FORMA ATÓMICA (Igual que el Alta de Producto)
   const handleSaveEdit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setFormError(null);
-     
-    // 🚀 Recolectamos de forma nativa todo el formulario binario
+
     const formData = new FormData(e.currentTarget);
     const image = formData.get("img");
 
     const profileData = new FormData();
     profileData.append("UserName", formData.get("userName") as string);
     profileData.append("Mail", formData.get("mail") as string);
-    profileData.append("AliasCBU", formData.get("aliasCBU") as string);
-    
+    const rawAliasCBU = (formData.get("aliasCBU") as string) || "";
+    const cleanAliasCBU = rawAliasCBU.trim();
+    profileData.append("AliasCBU", cleanAliasCBU);
+
     if (image instanceof File) {
       profileData.append("IMG", image);
     }
 
     try {
-      // Mandamos los datos binarios a tu endpoint de .NET
       const response = await updatePerfil(profileData);
       console.log("Respuesta del PUT de .NET:", response);
       if (!user || !token) {
-    toast.error("Sesión inválida. Reubique sus credenciales.");
-    return;
-  }
+        toast.error("Sesión inválida. Reubique sus credenciales.");
+        return;
+      }
 
- login({
-  id: user.id,                      
-  rol: user.rol,                    
-  token: token,                     
-  userName: response.userName,      
-  mail: response.mail,              
-  aliasCBU: response.aliasCBU,      
-  
-  // 🎯 CONEXIÓN PERFECTA: Guardamos el string 'img' del back 
-  // adentro de la casilla 'imgPath' que exige tu interfaz de Zustand.
-  img: response.img             
-}, token);
+      login(
+        {
+          id: user.id,
+          rol: user.rol,
+          token: token,
+          userName: response.userName,
+          mail: response.mail,
+          aliasCBU: response.aliasCBU,
+          img: response.img,
+        },
+        token,
+      );
 
       toast.success(response.message);
-      onClose(); // Cerramos el modal de forma limpia
+      onClose(); 
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Error al actualizar";
+      const message =
+        error instanceof Error ? error.message : "Error al actualizar";
       setFormError(message);
       toast.error(message);
     } finally {
@@ -91,90 +100,130 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
     setFormError(null);
 
     if (!token) {
-    toast.error("Sesión inválida. Por favor, vuelva a iniciar sesión.");
-    setLoading(false);
-    return;
-  }
+      toast.error("Sesión inválida. Por favor, vuelva a iniciar sesión.");
+      setLoading(false);
+      return;
+    }
 
-    try{
-      const response =  await conectAuhtMP(token);
+    try {
+      const response = await conectAuhtMP(token);
       console.log("JSON recibido del backend:", response);
 
- // const urlDeVinculacion = response.url || response.Url;
-     if (response.url) {
-      toast.success("Redirigiendo a Mercado Pago de forma segura... 🔒");
-              // 3. 🔥 ¡EL EYECTOR DEFINITIVO!: Forzamos al navegador a viajar a la pantalla azul
-      setTimeout(() => {
-        window.location.href = response.url;
-      }, 1000);
+      if (response.url) {
+        toast.success("Redirigiendo a Mercado Pago de forma segura... 🔒");
+        setTimeout(() => {
+          window.location.href = response.url;
+        }, 1000);
       } else {
-      setFormError("El servidor no devolvió la propiedad 'url' en la respuesta.");
-      toast.error("Error en la respuesta del servidor.");
-    }
-    }catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Error al actualizar";
+        setFormError(
+          "El servidor no devolvió la propiedad 'url' en la respuesta.",
+        );
+        toast.error("Error en la respuesta del servidor.");
+      }
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Error al actualizar";
       setFormError(message);
       toast.error(message);
     } finally {
       setLoading(false);
     }
   };
-  
 
   useEffect(() => {
-  // 🔍 Leemos si Mercado Pago nos mandó el flag de éxito en la URL
-  if (searchParams.get("mp_connected") === "1") {
-    
-    // 1. ✨ Le tiramos un bombazo de confeti o un toast premium al vendedor
-    toast.success("¡Mercado Pago vinculado con éxito! Ya podés recibir cobros. 🔒💳", {
-      duration: 5000,
-      position: "top-center",
-      style: {
-        background: "#1e293b",
-        color: "#4ade80",
-        fontWeight: "bold",
-        border: "1px solid #4ade80"
-      }
-    });
+    // Leemos si Mercado Pago nos mandó el flag de éxito en la URL
+    if (searchParams.get("mp_connected") === "1") {
+      toast.success("¡Mercado Pago vinculado con éxito! Ya podés recibir cobros. 🔒💳",
+        {
+          duration: 5000,
+          position: "top-center",
+          style: {
+            background: "#1e293b",
+            color: "#4ade80",
+            fontWeight: "bold",
+            border: "1px solid #4ade80",
+          },
+        },
+      );
 
-    // 2. 🧼 Limpiamos la URL para que no quede el '?mp_connected=1' feo para siempre
-    searchParams.delete("mp_connected");
-    setSearchParams(searchParams);
-  }
-}, [searchParams, setSearchParams]);
+      // Limpiamos la URL para que no quede el '?mp_connected=1' feo para siempre
+      searchParams.delete("mp_connected");
+      setSearchParams(searchParams);
+    }
+  }, [searchParams, setSearchParams]);
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      fullWidth
-      maxWidth="sm"
-    >
-      <Box sx={{ backgroundColor: '#1e293b', borderRadius: '16px', padding: '10px', width: '100%' }}>
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <Box
+        sx={{
+          backgroundColor: "#1e293b",
+          borderRadius: "16px",
+          padding: "10px",
+          width: "100%",
+        }}
+      >
         <form onSubmit={handleSaveEdit} ref={formRef}>
-          
-          {/* 🏷️ ENCABEZADO CON CRUZ ROJA */}
-          <DialogTitle component="div" sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", p: 2 }}>
-            <div style={{ width: "24px" }}></div> 
-            <Typography variant="h5" sx={{ fontWeight: "bold", color: "#f8fafc", flexGrow: 1, textAlign: "center" }}>
+          <DialogTitle
+            component="div"
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              p: 2,
+            }}
+          >
+            <div style={{ width: "24px" }}></div>
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: "bold",
+                color: "#f8fafc",
+                flexGrow: 1,
+                textAlign: "center",
+              }}
+            >
               Mi Perfil
             </Typography>
-            <FaTimes 
-              size={24} 
-              onClick={onClose} 
-              style={{ cursor: "pointer", color: "#ef4444", transition: "color 0.2s" }}
-              onMouseOver={(e) => e.currentTarget.style.color = '#ff0000'}
-              onMouseOut={(e) => e.currentTarget.style.color = '#ef4444'}
+            <FaTimes
+              size={24}
+              onClick={onClose}
+              style={{
+                cursor: "pointer",
+                color: "#ef4444",
+                transition: "color 0.2s",
+              }}
+              onMouseOver={(e) => (e.currentTarget.style.color = "#ff0000")}
+              onMouseOut={(e) => (e.currentTarget.style.color = "#ef4444")}
             />
           </DialogTitle>
 
           {/* 🧼 CUERPO DEL MODAL */}
-          <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 3, pt: 2 }}>
-            
+          <DialogContent
+            sx={{ display: "flex", flexDirection: "column", gap: 3, pt: 2 }}
+          >
             {/* SECCIÓN DE FOTO ACTUAL */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 1, justifyContent: "center" }}>
-              <Avatar 
-                src={user?.img ? `${import.meta.env.VITE_API_URL}${user.img}` : undefined} 
-                sx={{ width: 75, height: 75, bgcolor: 'rgba(37, 99, 235, 0.1)', color: '#2563eb', fontWeight: 'bold', fontSize: '1.5rem' }}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 3,
+                mb: 1,
+                justifyContent: "center",
+              }}
+            >
+              <Avatar
+                src={
+                  user?.img
+                    ? `${import.meta.env.VITE_API_URL}${user.img}`
+                    : undefined
+                }
+                sx={{
+                  width: 75,
+                  height: 75,
+                  bgcolor: "rgba(37, 99, 235, 0.1)",
+                  color: "#2563eb",
+                  fontWeight: "bold",
+                  fontSize: "1.5rem",
+                }}
               >
                 {user?.userName?.charAt(0).toUpperCase()}
               </Avatar>
@@ -182,20 +231,46 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
                 component="label"
                 variant="outlined"
                 startIcon={<FaCloudArrowUp />}
-                sx={{ color: '#94a3b8', borderColor: 'rgba(255, 255, 255, 0.1)', '&:hover': { borderColor: '#2563eb', color: '#2563eb' } }}
+                sx={{
+                  color: "#94a3b8",
+                  borderColor: "rgba(255, 255, 255, 0.1)",
+                  "&:hover": { borderColor: "#2563eb", color: "#2563eb" },
+                }}
               >
                 Nueva Foto
                 <input type="file" name="img" hidden />
               </Button>
             </Box>
 
-            {/* CAMPOS CON DATOS PRECARGADOS DESDE TU USEAUTHSTORE */}
-            <TextField label="Nombre de Usuario" name="userName" defaultValue={user?.userName} sx={inputStyle} fullWidth required />
-            <TextField label="Correo Electrónico" name="mail" defaultValue={user?.mail} sx={inputStyle} fullWidth required />
-            <TextField label="Alias Homebanking / CBU" name="aliasCBU" defaultValue={user?.aliasCBU} sx={inputStyle} fullWidth />
+            <TextField
+              label="Nombre de Usuario"
+              name="userName"
+              defaultValue={user?.userName}
+              sx={inputStyle}
+              fullWidth
+              required
+            />
+            <TextField
+              label="Correo Electrónico"
+              name="mail"
+              defaultValue={user?.mail}
+              sx={inputStyle}
+              fullWidth
+              required
+            />
+            <TextField
+              label="Alias Homebanking / CBU"
+              name="aliasCBU"
+              defaultValue={user?.aliasCBU}
+              sx={inputStyle}
+              fullWidth
+            />
 
             {formError && (
-              <Typography variant="body2" sx={{ color: "#ef4444", fontWeight: "bold", mt: 1 }}>
+              <Typography
+                variant="body2"
+                sx={{ color: "#ef4444", fontWeight: "bold", mt: 1 }}
+              >
                 ❌ {formError}
               </Typography>
             )}
@@ -203,7 +278,10 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
 
           {/* 🔘 ACCIONES */}
           <DialogActions sx={{ p: 2, pr: 3, gap: 1 }}>
-            <Button onClick={onClose} sx={{ color: "#94a3b8", "&:hover": { color: "#f8fafc" } }}>
+            <Button
+              onClick={onClose}
+              sx={{ color: "#94a3b8", "&:hover": { color: "#f8fafc" } }}
+            >
               Cancelar
             </Button>
             <Button
@@ -216,50 +294,56 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
                 fontWeight: "bold",
                 borderRadius: "8px",
                 padding: "8px 24px",
-                "&:hover": { backgroundColor: "#1d4ed8" }
+                "&:hover": { backgroundColor: "#1d4ed8" },
               }}
             >
-              {loading ? 'Guardando...' : 'Guardar Cambios'}
+              {loading ? "Guardando..." : "Guardar Cambios"}
             </Button>
           </DialogActions>
-
         </form>
-        {/* 👤 BOTÓN OFICIAL DE VINCULACIÓN OAUTH MERCADO PAGO */}
-<Box sx={{ mt: 1, mb: 1 }}>
-  <Button
-    variant="contained"
-    fullWidth
-    // startIcon={<FaHandshake />} // Podés importar FaHandshake de react-icons/fa
-    onClick={handleConectMP}
-   disabled={loading}
-    sx={{
-      backgroundColor: "#009ee3", // 🔵 El Azul Oficial de la marca Mercado Pago
-      color: "#ffffff",
-      fontWeight: "bold",
-      fontSize: "0.95rem",
-      borderRadius: "8px",
-      padding: "10px 16px",
-      textTransform: "none", // Evita que MUI te lo ponga todo en mayúsculas estresantes
-      boxShadow: "0 4px 12px rgba(0, 158, 227, 0.2)",
-      transition: "all 0.2s ease-in-out",
-      "&:hover": {
-        backgroundColor: "#1289c4", // Azul un poco más oscuro al pasar el mouse
-        boxShadow: "0 6px 16px rgba(0, 158, 227, 0.4)",
-        transform: "translateY(-1px)" // Efecto sutil flotante de Startup premium
-      },
-      "&:active": {
-        transform: "translateY(0)"
-      }
-    }}
-  >
-    Conectar con Mercado Pago
-  </Button>
-  
-  <Typography variant="caption" sx={{ color: "#64748b", display: "block", mt: 0.5, textAlign: "center" }}>
-    🔒 Vinculación segura mediante protocolo oficial OAuth 2.0
-  </Typography>
-</Box>
+        
+        {/*Mercado pago */}
+        <Box sx={{ mt: 1, mb: 1 }}>
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={handleConectMP}
+            disabled={loading}
+            sx={{
+              backgroundColor: "#009ee3",
+              color: "#ffffff",
+              fontWeight: "bold",
+              fontSize: "0.95rem",
+              borderRadius: "8px",
+              padding: "10px 16px",
+              textTransform: "none", 
+              boxShadow: "0 4px 12px rgba(0, 158, 227, 0.2)",
+              transition: "all 0.2s ease-in-out",
+              "&:hover": {
+                backgroundColor: "#1289c4", 
+                boxShadow: "0 6px 16px rgba(0, 158, 227, 0.4)",
+                transform: "translateY(-1px)", 
+              },
+              "&:active": {
+                transform: "translateY(0)",
+              },
+            }}
+          >
+            Conectar con Mercado Pago
+          </Button>
 
+          <Typography
+            variant="caption"
+            sx={{
+              color: "#64748b",
+              display: "block",
+              mt: 0.5,
+              textAlign: "center",
+            }}
+          >
+            🔒 Vinculación segura mediante protocolo oficial OAuth 2.0
+          </Typography>
+        </Box>
       </Box>
     </Dialog>
   );

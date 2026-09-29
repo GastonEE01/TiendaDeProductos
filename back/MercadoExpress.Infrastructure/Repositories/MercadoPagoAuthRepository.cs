@@ -24,7 +24,6 @@ namespace MercadoExpress.Infrastructure.Repositories
             return await _context.AutenticacionesMP.FirstOrDefaultAsync(a => a.UsuarioId == usuarioId);
         }
 
-
         public async Task Upsert(MercadoPagoAuth auth)
         {
             var existing = await _context.AutenticacionesMP

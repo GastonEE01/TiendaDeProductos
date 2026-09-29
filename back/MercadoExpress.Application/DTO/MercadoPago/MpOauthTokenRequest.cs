@@ -13,8 +13,6 @@ namespace MercadoExpress.Application.DTO.MercadoPago
         public string grant_type { get; set; } = "authorization_code";
         public string code { get; set; } = "";
         public string redirect_uri { get; set; } = "";
-
-        // opcional: si querés tokens de prueba
-        public bool test_token { get; set; } = true;
+        public bool test_token { get; set; } = true; // Opcional
     }
 }

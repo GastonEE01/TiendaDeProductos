@@ -1,5 +1,7 @@
-﻿using MercadoExpress.Application.UseCase.MercadoPagos;
+﻿using MercadoExpress.Application.DTO.MercadoPago;
+using MercadoExpress.Application.UseCase.MercadoPagos;
 using MercadoPago.Client;
+using MercadoPago.Client.Payment;
 using MercadoPago.Client.Preference;
 using MercadoPago.Config;
 using Microsoft.AspNetCore.Authorization;
@@ -14,10 +16,12 @@ namespace MercadoExpress.API.Controllers
     {
         private readonly ConnectMercadoPagoUseCase _connectMP;
         private readonly MercadoPagoCallbackUseCase _mercadoPagoCallback;
-        public MercadoPagoController(ConnectMercadoPagoUseCase connectMP, MercadoPagoCallbackUseCase mercadoPagoCallback)
+        private readonly ProcessMercadoPagoWebhookUseCase _processWebhookUseCase;
+        public MercadoPagoController(ConnectMercadoPagoUseCase connectMP, MercadoPagoCallbackUseCase mercadoPagoCallback, ProcessMercadoPagoWebhookUseCase processWebhookUseCase)
         {
             _connectMP = connectMP;
             _mercadoPagoCallback = mercadoPagoCallback;
+            _processWebhookUseCase = processWebhookUseCase;
         }
 
         [HttpPost("mp/preference-test")]
@@ -45,15 +49,13 @@ namespace MercadoExpress.API.Controllers
 
                 var client = new PreferenceClient();
 
-                // Creamos la preferencia en los servidores de MP
                 var pref = await client.CreateAsync(request, new RequestOptions { AccessToken = token });
 
-                // 🚀 RECTIFICADO PRUEBA A/B: Devolvemos ambos links para hacer el descarte de cookies
                 return Ok(new
                 {
                     PreferenceId = pref.Id,
-                    PaymentUrlSandbox = pref.SandboxInitPoint, // 🧪 El de pruebas (Sandbox)
-                    PaymentUrlProdLike = pref.InitPoint       // 🌍 El de producción (Live)
+                    PaymentUrlSandbox = pref.SandboxInitPoint,
+                    PaymentUrlProdLike = pref.InitPoint
                 });
             }
             catch (Exception ex)
@@ -62,41 +64,6 @@ namespace MercadoExpress.API.Controllers
             }
         }
 
-        /*  [HttpPost("mp/preference-test")]
-          public async Task<IActionResult> PreferenceTest()
-          {
-              try
-              {
-                  var token = MercadoPagoConfig.AccessToken;
-                  if (string.IsNullOrWhiteSpace(token))
-                      return StatusCode(500, new { message = "No hay Access Token configurado" });
-
-                  var request = new PreferenceRequest
-                  {
-                      Items = new List<PreferenceItemRequest>
-              {
-                  new PreferenceItemRequest
-                  {
-                      Title = "Test Swagger",
-                      Quantity = 1,
-                      CurrencyId = "ARS",
-                      UnitPrice = 100m
-                  }
-              }
-                  };
-
-                  var client = new PreferenceClient();
-                  var pref = await client.CreateAsync(request, new RequestOptions { AccessToken = token });
-
-                  return Ok(new { pref.Id, pref.InitPoint });
-              }
-              catch (Exception ex)
-              {
-                  // Temporal: para diagnóstico local, así ves el motivo real
-                  return StatusCode(500, new { message = ex.ToString() });
-              }
-          }
-  */
         [Authorize]
         [HttpPost("Auth")]
         public async Task<IActionResult> ConnectMercadoPago()
@@ -106,24 +73,20 @@ namespace MercadoExpress.API.Controllers
 
             var usuarioId = Guid.Parse(userIdClaim);
 
-            var responseUrl = await _connectMP.ConnectMercadoPagoAuth (usuarioId);
-            //return Ok(responseUrl);
+            var responseUrl = await _connectMP.ConnectMercadoPagoAuth(usuarioId);
             return Ok(new { Url = responseUrl });
         }
 
-      
-        
-
-
+        [AllowAnonymous]
         [HttpGet("Callback")]
         public async Task<IActionResult> MercadoPagoCallback([FromQuery] string code, [FromQuery] string state)
         {
             if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(state))
                 return Redirect("https://tienda-de-productos-ivory.vercel.app/login?mp_error=missing_params");
-
             try
             {
                 await _mercadoPagoCallback.Execute(code, state);
+
                 return Redirect("https://tienda-de-productos-ivory.vercel.app/admin?mp_connected=1");
             }
             catch (Exception ex)
@@ -132,36 +95,82 @@ namespace MercadoExpress.API.Controllers
                 return Redirect($"https://tienda-de-productos-ivory.vercel.app/login?mp_error=oauth&detail={detail}");
             }
         }
-        /*[HttpGet("Callback")]
-        public async Task<IActionResult> MercadoPagoCallback([FromQuery] string code, [FromQuery] string state)
-        {
-            if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(state))
-            {
-                return Redirect("https://tienda-de-productos-ivory.vercel.app/login");
-            }
 
+
+        [HttpPost("mp/split-order-test")]
+        public async Task<IActionResult> SplitOrderTest([FromBody] SplitOrderTestRequest dto)
+        {
+            var carts = new[]
+            {
+        new {
+            Seller = "A",
+            Token = dto.SellerATestAccessToken,
+            Items = new List<PreferenceItemRequest> {
+                new PreferenceItemRequest { Title="Item vendedor A", Quantity=1, CurrencyId="ARS", UnitPrice=100m }
+            }
+        }
+    };
+            var client = new PreferenceClient();
+            var result = new List<object>();
+
+            foreach (var c in carts)
+            {
+                decimal? totalNullable = c.Items.Sum(i => (decimal?)(i.UnitPrice * i.Quantity));
+                decimal total = totalNullable ?? 0m;
+                decimal fee = Math.Round(total * 0.03m, 2);
+
+                var request = new PreferenceRequest
+                {
+                    Items = c.Items
+                };
+
+                var pref = await client.CreateAsync(
+                    request,
+                    new RequestOptions { AccessToken = c.Token }
+                );
+
+                result.Add(new
+                {
+                    seller = c.Seller,
+                    preferenceId = pref.Id,
+                    total,
+                    marketplaceFee = fee,
+                    paymentUrlSandbox = pref.SandboxInitPoint,
+                    paymentUrlProdLike = pref.InitPoint
+                });
+            }
+            return Ok(new
+            {
+                message = $"Se generaron {result.Count} preferencias (una por vendedor).",
+                pagos = result
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpPost("Webhook")]
+        public async Task<IActionResult> MercadoPagoWebhook([FromQuery] string type, [FromQuery] long? data_id)
+        {
+            if (string.IsNullOrEmpty(type) || !data_id.HasValue)
+            {
+                return BadRequest("Parámetros de notificación inválidos o incompletos.");
+            }
             try
             {
-                await _mercadoPagoCallback.Execute(code, state);
-                return Redirect("https://tienda-de-productos-ivory.vercel.app/admin?mp_connected=1");
+                await _processWebhookUseCase.Execute(type, data_id.Value);
+                return Ok();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"🛑 ERROR EN CALLBACK: {ex.Message}");
-
-                if (ex.Message.Contains("ya usado") || ex.Message.Contains("inválido"))
-                {
-                    return Redirect("https://tienda-de-productos-ivory.vercel.app/login");
-                }
-
-                return Redirect($"https://vercel.app{Uri.EscapeDataString(ex.Message)}");
+                Console.WriteLine($"Error interno procesando Webhook de MP: {ex.Message}");
+                return Ok(new { error = "Processed with internal logging" });
             }
-        }*/
-
-
-
+        }
     }
 
 
 
 }
+
+
+
+

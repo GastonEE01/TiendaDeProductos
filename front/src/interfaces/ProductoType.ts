@@ -3,7 +3,7 @@
 
 
 export interface ProductDtoRequest{
-    id: string, // para recorrer 
+    id: string, 
     name: string,
     description: string,
     price: number,
@@ -13,3 +13,5 @@ export interface ProductDtoRequest{
     usuarioId: string,
     
 }
+
+

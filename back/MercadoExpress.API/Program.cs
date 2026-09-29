@@ -32,6 +32,7 @@ builder.Services.AddScoped<IOrdenRepository, OrdenRepository>();
 builder.Services.AddScoped<INotificacionRepository, NotificacionRepository>();
 builder.Services.AddScoped<IOauthStateRepository, OauthStateRepository>();
 builder.Services.AddScoped<IMercadoPagoAuthRepository, MercadoPagoAuthRepository>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Casos de uso
 builder.Services.AddScoped<RegisterUserUseCase>();
@@ -46,7 +47,6 @@ builder.Services.AddScoped<GetProductoVendedorUseCase>();
 
 builder.Services.AddScoped<AddOrdenUseCase>();
 builder.Services.AddScoped<GetCustomerCartClientUseCase>();
-builder.Services.AddScoped<SimulatePaymentWebhookUseCase>();
 builder.Services.AddScoped<UpdateStateOrdenShippedUseCase>();
 builder.Services.AddScoped<UpdateOrdenDeliveredUseCase>();
 
@@ -55,6 +55,7 @@ builder.Services.AddScoped<MarkNotificationsReadUseCase>();
 
 builder.Services.AddScoped<ConnectMercadoPagoUseCase>();
 builder.Services.AddScoped<MercadoPagoCallbackUseCase>();
+builder.Services.AddScoped<ProcessMercadoPagoWebhookUseCase>();
 
 builder.Services.AddAutoMapper(cfg => { }, typeof(MercadoExpress.Application.Mapper.Mappers));
 
@@ -141,7 +142,7 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
                 "http://localhost:5173",                  // Tu React en tu PC
-                "https://tienda-de-productos-ivory.vercel.app/"   // Tu React publicado en Vercel
+                "https://tienda-de-productos-ivory.vercel.app"   // Tu React publicado en Vercel
               )
               .AllowAnyHeader()
               .AllowAnyMethod()

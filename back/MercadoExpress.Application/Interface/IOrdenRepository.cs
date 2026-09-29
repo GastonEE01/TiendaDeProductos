@@ -14,5 +14,6 @@ namespace MercadoExpress.Application.Interface
         Task<Orden?> GetByPreferenceIdAsync(string preferenceId);
         Task<List<Orden>> GetShoppingByUserEmail(string email);
         Task<Orden> GetOrdenById(Guid ordenId);
+        Task Update(Orden ordenEnBase);
     }
 }

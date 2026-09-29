@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { ProductDtoRequest } from "../interfaces/ProductoType";
 import {
   Card,
@@ -32,6 +32,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const user = useAuthStore((state) => state.user);
   const addToCart = useCartStore((state) => state.addToCart);
 
+  const [imgSrc, setImgSrc] = useState<string>(`${API_URL}${product.img}`);
+
+  useEffect(() => {
+    setImgSrc(`${API_URL}${product.img}`);
+  }, [product.img]);
+
+  const handleImageError = () => {
+    const urlAlternativa = `https://azurewebsites.net${product.img}`;
+    
+    if (imgSrc !== urlAlternativa) {
+      console.log(`⚡ Imagen de '${product.name}' no encontrada localmente. Redirigiendo a Azure...`);
+      setImgSrc(urlAlternativa);
+    }
+  };
+
   return (
     <div style={{ backgroundColor: "orange" }}>
       <Card sx={{ maxWidth: 345, borderRadius: "12px", boxShadow: 3, m: 2 }}>
@@ -41,16 +56,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             gutterBottom
             variant="h5"
             component="div"
-            sx={{ fontWeight: "bold" }}
-          >
+            sx={{ fontWeight: "bold" }} >
             {product.name}
           </Typography>
 
           {/* IMG */}
           <Box
             component="img"
-            src={`${API_URL}${product.img}`}
+            src={imgSrc}
             alt={product.name}
+            onError={handleImageError} 
             sx={{
               width: "100%",
               height: "160px",
@@ -59,6 +74,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               borderTopRightRadius: "8px",
             }}
           ></Box>
+
+          {/* Categoria */}
+          <Typography
+            variant="caption"
+            sx={{
+              backgroundColor: "rgba(37, 99, 235, 0.15)", 
+              color: "#60a5fa",                            
+              padding: "4px 10px",
+              borderRadius: "50px",
+              fontWeight: "bold",
+              display: "inline-block",
+              mb: 2,
+              border: "1px solid rgba(37, 99, 235, 0.3)"
+            }}
+          >
+            {product.categoriaName || "General"}
+          </Typography>
 
           {/* Descripcion */}
           <Typography
@@ -91,7 +123,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Botones de acción de la tarjeta */}
         <CardActions sx={{ justifyContent: "space-between", padding: "16px" }}>
-          {user?.rol === "Admin" && (
+          {user?.rol === "Seller" && (
             <>
               <Button
                 size="small"
@@ -114,7 +146,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             </>
           )}
 
-          {user?.rol !== "Admin" && (
+          {user?.rol !== "Seller" && (
             <>
               <Button
                 size="small"

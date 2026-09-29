@@ -12,12 +12,12 @@ namespace MercadoExpress.Application.DTO.Producto
     {
         public Guid Id { get; set; }
 
-        public string? Name { get; set; } = string.Empty;
-        public string? Description { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
         public Decimal? Price { get; set; }
         public IFormFile? IMG { get; set; }
         public string ImgPath { get; set; } = string.Empty;
         public int? Stock { get; set; }
-        public string? NameCategoria { get; set; } = string.Empty;
+        public string CategoriaName { get; set; } = string.Empty;
     }
 }

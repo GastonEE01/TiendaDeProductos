@@ -15,18 +15,19 @@ namespace MercadoExpress.Application.Mapper
     {
         public Mappers()
         {
-            CreateMap<RegisterDtoRequest, Usuario>().ReverseMap() 
+            CreateMap<RegisterDtoRequest, Usuario>().ReverseMap()
               .ForMember(dest => dest.Password, opt => opt.Ignore());
 
             CreateMap<AddProductoRequest, Producto>()
               .ForMember(dest => dest.IMG, opt => opt.Ignore())
-              .ForMember(dest => dest.CategoriaId, opt => opt.Ignore()) 
-              .ForMember(dest => dest.UsuarioId, opt => opt.Ignore()); 
+              .ForMember(dest => dest.CategoriaId, opt => opt.Ignore())
+              .ForMember(dest => dest.UsuarioId, opt => opt.Ignore());
 
             CreateMap<Usuario, LoginDtoResponse>();
 
             CreateMap<Producto, UpdateProductResponse>()
-              .ForMember(dest => dest.NameCategoria, opt => opt.MapFrom(src => src.Categoria.Name));
+                .ForMember(dest => dest.CategoriaName, opt => opt.MapFrom(src => src.Categoria.Name))
+                .ForMember(dest => dest.IMG, opt => opt.MapFrom(src => src.IMG)); 
 
             CreateMap<Usuario, UpdateUserResponse>();
 

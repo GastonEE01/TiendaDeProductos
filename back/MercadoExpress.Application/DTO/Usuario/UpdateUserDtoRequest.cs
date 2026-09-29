@@ -13,7 +13,7 @@ namespace MercadoExpress.Application.DTO.Usuario
         public string? UserName { get; set; } = string.Empty;
         public string? AliasCBU { get; set; } = string.Empty;
         public IFormFile? IMG { get; set; } 
-        public string? ImgPath { get; set; } = string.Empty;
+        public string ImgPath { get; set; } = string.Empty;
 
     }
 }

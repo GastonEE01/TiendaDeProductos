@@ -14,10 +14,8 @@ namespace MercadoExpress.Application.DTO.Orden
         public string DeliveryMethod { get; set; } = string.Empty;
         public List<CustomerPurchaseItemDto> Productos { get; set; } = new();
         public decimal Total { get; set; }
-
     }
 
-    // Es la clase secundaria exclusiva para los items del carrito comprado
     public class CustomerPurchaseItemDto
     {
         public string Name { get; set; } = string.Empty;

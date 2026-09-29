@@ -10,7 +10,7 @@ namespace MercadoExpress.Application.DTO.Orden
     {
         public string CustomerName { get; set; } = string.Empty;
         public string CustomerEmail { get; set; } = string.Empty;
-        public long CustomerPhone { get; set; } // Usá 'long' por si el celular es largo
+        public string CustomerPhone { get; set; } = string.Empty; 
         public string DeliveryMethod { get; set; } = string.Empty ;
         public string CustomerAddress { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
@@ -20,7 +20,7 @@ namespace MercadoExpress.Application.DTO.Orden
 
     public class CartItemDto
     {
-        public Guid ProductId { get; set; }
+        public Guid ProductoId { get; set; }
         public int Quantity { get; set; }
     }
 }

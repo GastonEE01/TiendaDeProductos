@@ -13,13 +13,10 @@ namespace MercadoExpress.Application.DTO.Producto
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public Decimal Price { get; set; }
-        //public string IMG { get; set; } = string.Empty;
         public IFormFile IMG { get; set; } = default!;
         public string ImgPath { get; set; } = string.Empty;
         public int Stock { get; set; }
-       // public Guid CategoriaId { get; set; }
         public string CategoriaName { get; set;} = string.Empty;
-
         public Guid UsuarioId { get; set; }
     }
 }

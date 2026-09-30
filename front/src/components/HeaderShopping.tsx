@@ -20,6 +20,8 @@ import {
 import toast from "react-hot-toast";
 import { useAuthStore } from "../hooks/userStorage";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export const HeaderShopping = () => {
   const [loading, setLoading] = useState(false);
   const [shopping, setShopping] = useState<CustomerPurchasesDtoResponse[]>([]);
@@ -82,6 +84,20 @@ export const HeaderShopping = () => {
     }
   };
 
+  const handleImageError = (
+    e: React.SyntheticEvent<HTMLImageElement, Event>,
+  ) => {
+    const imgPath = e.currentTarget.getAttribute("data-path");
+    const fallbackUrl = `https://azurewebsites.net${imgPath}`;
+
+    if (e.currentTarget.src !== fallbackUrl) {
+      console.log(
+        "No se encontro la img del carrito.Redirigiendo a Azure de respaldo...",
+      );
+      e.currentTarget.src = fallbackUrl;
+    }
+  };
+
   return (
     <>
       {loading && <p>Cargando productos...</p>}
@@ -135,16 +151,36 @@ export const HeaderShopping = () => {
                     boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.2)",
                   }}
                 >
-                  {/* Datos del Cliente */}
-                  <Typography
-                    variant="caption"
-                    color="textSecondary"
-                    sx={{ display: "block" }}
-                  >
-                    📍 Estado:
-                    <span
-                      style={{
-                        fontWeight: "bold",
+                  <Box sx={{ mb: 1.5, width: "100%" }}>
+                    <Typography
+                      variant="caption"
+                      color="textSecondary"
+                      sx={{
+                        color: "#94a3b8",
+                        fontWeight: "600",
+                        display: "block",
+                        textTransform: "uppercase",
+                        fontSize: "0.7rem",
+                        letterSpacing: 0.5,
+                      }}
+                    >
+                      Estado del pedido
+                    </Typography>
+
+                    <Box
+                      sx={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 1,
+                        mt: 0.5,
+                        padding: "4px 10px",
+                        borderRadius: "6px",
+                        backgroundColor:
+                          product.state === "Shipped"
+                            ? "rgba(245, 158, 11, 0.12)"
+                            : product.state === "Delivered"
+                              ? "rgba(16, 185, 129, 0.12)"
+                              : "rgba(148, 163, 184, 0.12)",
                         color:
                           product.state === "Shipped"
                             ? "#f59e0b"
@@ -153,38 +189,65 @@ export const HeaderShopping = () => {
                               : "#94a3b8",
                       }}
                     >
-                      {product.state === "Shipped" && <FaTruck size={16} />}
+                      {product.state === "Shipped" && <FaTruck size={14} />}
                       {product.state === "Delivered" && (
-                        <FaCheckCircle size={16} />
+                        <FaCheckCircle size={14} />
                       )}
+
                       {product.state !== "Shipped" &&
                         product.state !== "Delivered" && (
-                          <FaBoxOpen size={16} />
+                          <FaBoxOpen size={14} />
                         )}
 
-                      {product.state === "Shipped" && "En camino"}
-                      {product.state === "Delivered" && "Entregado"}
-                      {product.state !== "Shipped" &&
-                        product.state !== "Delivered" &&
-                        "Preparando"}
-                    </span>
-                  </Typography>
+                      <span style={{ fontWeight: "bold", fontSize: "0.85rem" }}>
+                        {product.state === "Shipped" && "En camino"}
+                        {product.state === "Delivered" && "Entregado"}
+                        {product.state !== "Shipped" &&
+                          product.state !== "Delivered" &&
+                          "Preparando pedido"}
+                      </span>
+                    </Box>
+                  </Box>
 
-                  <Typography
-                    variant="caption"
-                    sx={{ mb: 1.5, display: "block", color: "#94a3b8" }}
-                  >
-                    {product.deliveryMethod === "domicilio" && (
-                      <FaTruck size={16} />
-                    )}
-                    {product.deliveryMethod === "presencial" && (
-                      <FaMapMarkerAlt size={16} />
-                    )}
-                    metodo:{" "}
-                    <span style={{ color: "#f1f5f9", fontWeight: "600" }}>
-                      {product.deliveryMethod}
-                    </span>
-                  </Typography>
+                  {/*  TIPO DE ENTREGA */}
+                  <Box sx={{ mb: 2, width: "100%" }}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "#94a3b8",
+                        fontWeight: "600",
+                        display: "block",
+                        textTransform: "uppercase",
+                        fontSize: "0.7rem",
+                        letterSpacing: 0.5,
+                      }}
+                    >
+                      Tipo de entrega
+                    </Typography>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        mt: 0.5,
+                        color: "#f1f5f9",
+                      }}
+                    >
+                      {product.deliveryMethod === "domicilio" ? (
+                        <FaTruck size={14} style={{ color: "#38bdf8" }} />
+                      ) : (
+                        <FaMapMarkerAlt
+                          size={14}
+                          style={{ color: "#ef4444" }}
+                        />
+                      )}
+                      <span style={{ fontWeight: "600", fontSize: "0.85rem" }}>
+                        {product.deliveryMethod === "domicilio"
+                          ? "Envío a domicilio"
+                          : "Retiro presencial"}
+                      </span>
+                    </Box>
+                  </Box>
 
                   {product.state === "Shipped" && (
                     <button
@@ -192,7 +255,7 @@ export const HeaderShopping = () => {
                         marginTop: "4px",
                         marginBottom: "12px",
                         padding: "8px 16px",
-                        backgroundColor: "#28a745",
+                        backgroundColor: "#10b981",
                         color: "white",
                         border: "none",
                         borderRadius: "6px",
@@ -206,7 +269,7 @@ export const HeaderShopping = () => {
                       Ya tengo mi producto ✅
                     </button>
                   )}
-                  
+
                   {product.state === "Delivered" && (
                     <Box
                       sx={{
@@ -245,8 +308,10 @@ export const HeaderShopping = () => {
                         }}
                       >
                         <img
-                          src={`https://localhost:7197${prod.img}`}
+                          src={`${API_URL}${prod.img}`}
                           alt={prod.name}
+                          data-path={prod.img}
+                          onError={handleImageError}
                           style={{
                             width: 40,
                             height: 40,

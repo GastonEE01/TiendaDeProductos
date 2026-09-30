@@ -3,7 +3,7 @@ import HeroSplit from "../../assets/sections/HeroSection";
 import Specification from "../../assets/sections/Specification"; // 💡 Asegurate de que empiece con mayúscula la 'S'
 import LifeCycle from "../../assets/sections/LifeCycle";
 import Footer from "../../assets/sections/Footer";
-
+import SandboxCredentials from "../../assets/sections/SandboxCredentials";
 class Home extends React.Component {
   render() {
     return (
@@ -16,7 +16,7 @@ class Home extends React.Component {
 
         {/* 3. Ciclo de Vida del pedido (Tarjetas Grises de seguimiento) */}
         <LifeCycle className="illustration-section-01" />
-
+         <SandboxCredentials />
         <Footer className="illustration-section-01" />
       </React.Fragment>
     );

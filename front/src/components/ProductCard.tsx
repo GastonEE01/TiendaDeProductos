@@ -32,17 +32,34 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const user = useAuthStore((state) => state.user);
   const addToCart = useCartStore((state) => state.addToCart);
 
-  const [imgSrc, setImgSrc] = useState<string>(`${API_URL}${product.img}`);
+  const obtenerRutaInicial = () => {
+    if (!product.img) return "https://placeholder.com";
+    return product.img.startsWith("http") ? product.img : `${API_URL}${product.img}`;
+  };
 
+  const [imgSrc, setImgSrc] = useState<string>(obtenerRutaInicial);
+
+   useEffect(() => {
+    if (product.img) {
+      const rutaCorrecta = product.img.startsWith("http") ? product.img : `${API_URL}${product.img}`;
+      setImgSrc(rutaCorrecta);
+    }
+  }, [product.img]);
+
+/*
   useEffect(() => {
     setImgSrc(`${API_URL}${product.img}`);
   }, [product.img]);
-
+*/
   const handleImageError = () => {
+    if (product.img && product.img.startsWith("http")) {
+      setImgSrc("https://placeholder.com?text=Imagen+No+Disponible");
+      return;
+    }
     const urlAlternativa = `https://azurewebsites.net${product.img}`;
     
     if (imgSrc !== urlAlternativa) {
-      console.log(`⚡ Imagen de '${product.name}' no encontrada localmente. Redirigiendo a Azure...`);
+      console.log(`Imagen de '${product.name}' no encontrada localmente. Redirigiendo a Azure...`);
       setImgSrc(urlAlternativa);
     }
   };
@@ -69,9 +86,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             sx={{
               width: "100%",
               height: "160px",
-              objectFit: "cover",
+              objectFit: "contain",
               borderTopLeftRadius: "8px",
               borderTopRightRadius: "8px",
+               backgroundColor: "rgba(255, 255, 255, 0.02)", 
+              padding: "8px"
             }}
           ></Box>
 

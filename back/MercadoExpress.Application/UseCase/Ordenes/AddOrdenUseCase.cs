@@ -34,7 +34,19 @@ namespace MercadoExpress.Application.UseCase.Ordenes
 
         public async Task<OrdenDtoResponse> AddOrden(OrdenDtoRequest dto)
         {
-            // 🛡️ PASO 0: REGLA DE NEGOCIO (Bloquear Multi-Vendedor)
+            if (string.IsNullOrEmpty(dto.CustomerName)) throw new ArgumentException("Ingrese el nombre del cliente.");
+            if (string.IsNullOrEmpty(dto.CustomerEmail)) throw new ArgumentException("Ingrese el Email.");
+            if (string.IsNullOrEmpty(dto.CustomerPhone)) throw new ArgumentException("Ingrese el teléfono de contacto.");
+            if (string.IsNullOrEmpty(dto.DeliveryMethod)) throw new ArgumentException("Seleccione un método de entrega.");
+            if (string.IsNullOrEmpty(dto.CustomerAddress)) throw new ArgumentException("Ingrese la dirección de envío.");
+            if (string.IsNullOrEmpty(dto.City)) throw new ArgumentException("Ingrese la ciudad.");
+            if (string.IsNullOrEmpty(dto.PostalCode)) throw new ArgumentException("Ingrese el código postal.");
+            if (dto.Items == null || dto.Items.Count == 0) throw new ArgumentException("El carrito de compras no puede estar vacío.");
+            if (!dto.CustomerEmail.Contains("@")) throw new ArgumentException("El Email debe tener @");
+            string emailMinuscula = dto.CustomerEmail.ToLower();
+            if (!emailMinuscula.Contains("gmail.com") && !emailMinuscula.Contains("outlook.com") && !emailMinuscula.Contains("unlam.edu.ar"))throw new ArgumentException("El Email debe terminar en gmail.com, outlook.com o unlam.edu.ar");
+     
+            // REGLA DE NEGOCIO (Bloquear Multi-Vendedor)
             var detallesDeLaOrden = new List<DetalleOrden>();
             var listaDeVendedores = new List<Guid>();
             Guid ordenIdDeLaCompra = Guid.NewGuid();  
@@ -42,7 +54,7 @@ namespace MercadoExpress.Application.UseCase.Ordenes
             var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
             string frontendBaseUrl = env == "Development"
-                ? "http://localhost:5173"
+                ? "https://unglue-abiding-jackpot.ngrok-free.dev"
                 : "https://tienda-de-productos-ivory.vercel.app";
 
             foreach (var itemDto in dto.Items)

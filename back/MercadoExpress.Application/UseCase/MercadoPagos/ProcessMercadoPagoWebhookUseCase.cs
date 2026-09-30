@@ -59,13 +59,8 @@ namespace MercadoExpress.Application.UseCase.MercadoPagos
                             var productoEnBase = await _productRepository.GetProductoById(detalle.ProductoId);
                             if (productoEnBase != null)
                             {
-                                // Le restamos las unidades que se lleva el comprador
                                 productoEnBase.Stock -= detalle.Quantity;
-
-                                // Si el stock llega a quedar negativo por error, lo blindamos en cero
                                 if (productoEnBase.Stock < 0) productoEnBase.Stock = 0;
-
-                                // Guardamos el nuevo stock físico en Neon
                                 await _productRepository.Update(productoEnBase);
                             }
                         }

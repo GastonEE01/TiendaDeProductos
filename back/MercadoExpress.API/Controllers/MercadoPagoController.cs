@@ -147,33 +147,13 @@ namespace MercadoExpress.API.Controllers
             });
         }
 
-        /*[AllowAnonymous]
-        [HttpPost("Webhook")]
-        public async Task<IActionResult> MercadoPagoWebhook([FromQuery] string type, [FromQuery] long? data_id)
-        {
-            if (string.IsNullOrEmpty(type) || !data_id.HasValue)
-            {
-                return BadRequest("Parámetros de notificación inválidos o incompletos.");
-            }
-            try
-            {
-                await _processWebhookUseCase.Execute(type, data_id.Value);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error interno procesando Webhook de MP: {ex.Message}");
-                return Ok(new { error = "Processed with internal logging" });
-            }
-        }*/
-
         [AllowAnonymous]
         [HttpPost("Webhook")]
         public async Task<IActionResult> MercadoPagoWebhook([FromBody] JsonElement body)
         {
             try
             {
-                // 🕵️‍♂️ PESCAMOS LOS DATOS DESDE EL BODY (Como lo manda Mercado Pago de verdad)
+                // Obtenemos los dato que manda MP a traves de body
                 string? type = body.TryGetProperty("type", out var tProp) ? tProp.GetString() : null;
 
                 long? dataId = null;
@@ -190,24 +170,17 @@ namespace MercadoExpress.API.Controllers
                     }
                 }
 
-                // 🛡️ Filtro de seguridad: Si no es un pago, respondemos 200 y salimos rápido sin romper nada
                 if (string.IsNullOrEmpty(type) || type.ToLower().Trim() != "payment" || !dataId.HasValue)
                 {
                     Console.WriteLine("===> WEBHOOK: Se recibió una notificación automática que no es de pagos o está vacía.");
                     return Ok();
                 }
-
-                // 🚀 MANDAMOS LOS DATOS LIMPIOS AL USECASE DE SIEMPRE
                 await _processWebhookUseCase.Execute(type.ToLower().Trim(), dataId.Value);
-
-                return Ok(); // Todo salió impecable
+                return Ok(); 
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"===> ERROR CRÍTICO PROCESANDO WEBHOOK EN AZURE: {ex.Message}");
-
-                // 🚨 SEGUIMOS EL CONSEJO SENIOR: Si el backend explotó de verdad por un nulo o base de datos, 
-                // devolvemos un Error 500 para que Mercado Pago sepa que falló y nos vuelva a mandar la notificación más tarde.
                 return StatusCode(500, new { message = "Error interno en el servidor", details = ex.Message });
             }
         }

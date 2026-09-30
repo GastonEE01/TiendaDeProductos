@@ -16,7 +16,7 @@ import {
   ListItem,
   Divider,
 } from "@mui/material";
-import { FaBell,FaAddressCard,FaPhoneAlt } from "react-icons/fa";
+import { FaBell, FaAddressCard, FaPhoneAlt } from "react-icons/fa";
 
 export const HeaderNotification = () => {
   const [notifications, setNotifications] = useState<NotificacionDtoResponse[]>(
@@ -62,6 +62,20 @@ export const HeaderNotification = () => {
         ),
       );
     } catch (error) {}
+  };
+
+  const handleImageError = (
+    e: React.SyntheticEvent<HTMLImageElement, Event>,
+  ) => {
+    const imgPath = e.currentTarget.getAttribute("data-path");
+    const fallbackUrl = `https://azurewebsites.net${imgPath}`;
+
+    if (e.currentTarget.src !== fallbackUrl) {
+      console.log(
+        "No se encontro la img del carrito.Redirigiendo a Azure de respaldo...",
+      );
+      e.currentTarget.src = fallbackUrl;
+    }
   };
 
   return (
@@ -154,45 +168,88 @@ export const HeaderNotification = () => {
                     {notif.message}
                   </Typography>
 
-                  <Typography
-                    variant="caption"
-                    sx={{ color: "#94a3b8", display: "block", mb: 0.5 }}
-                  >
-                    <FaAddressCard/>
-                    📍 Dirección:{" "}
-                    <span style={{ color: "#f1f5f9", fontWeight: "600" }}>
-                      {notif.customerAddress}
-                    </span>
-                  </Typography>
+                  <Box sx={{ mb: 1.5, width: "100%" }}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "#94a3b8",
+                        fontWeight: "600",
+                        display: "block",
+                        textTransform: "uppercase",
+                        fontSize: "0.65rem",
+                        letterSpacing: 0.5,
+                      }}
+                    >
+                      Dirección de entrega
+                    </Typography>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        mt: 0.5,
+                        color: "#f1f5f9",
+                      }}
+                    >
+                      <FaAddressCard size={14} style={{ color: "#94a3b8" }} />
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: "600", fontSize: "0.85rem" }}
+                      >
+                        {notif.customerAddress}
+                      </Typography>
+                    </Box>
+                  </Box>
 
-                  <Typography
-                    variant="caption"
-                    sx={{ color: "#94a3b8", display: "block", mb: 2 }}
-                  >
-
-                   < FaPhoneAlt/> 
-                    📞 Tel:{" "}
-                    <span style={{ color: "#f1f5f9", fontWeight: "600" }}>
-                      {notif.customerPhone}
-                    </span>
-                  </Typography>
+                  <Box sx={{ mb: 2, width: "100%" }}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "#94a3b8",
+                        fontWeight: "600",
+                        display: "block",
+                        textTransform: "uppercase",
+                        fontSize: "0.65rem",
+                        letterSpacing: 0.5,
+                      }}
+                    >
+                      Teléfono de contacto
+                    </Typography>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        mt: 0.5,
+                        color: "#f1f5f9",
+                      }}
+                    >
+                      <FaPhoneAlt size={12} style={{ color: "#94a3b8" }} />
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: "600", fontSize: "0.85rem" }}
+                      >
+                        {notif.customerPhone}
+                      </Typography>
+                    </Box>
+                  </Box>
 
                   {notif.orderState === "Paid" ? (
                     <button
                       style={{
                         marginTop: "4px",
                         marginBottom: "12px",
-                        padding: "8px 16px",
-                        backgroundColor: "#2563eb", 
+                        padding: "10px 16px",
+                        backgroundColor: "#2563eb",
                         color: "white",
                         border: "none",
                         borderRadius: "6px",
                         cursor: "pointer",
                         fontWeight: "bold",
                         width: "100%",
-                        fontSize: "0.9rem",
+                        fontSize: "0.85rem",
                       }}
-                      onClick={() => handleUpdateOrdenShipped(notif.ordenId)} 
+                      onClick={() => handleUpdateOrdenShipped(notif.ordenId)}
                     >
                       Marcar como Enviado 📦
                     </button>
@@ -211,14 +268,14 @@ export const HeaderNotification = () => {
                             : "#10b981",
                         backgroundColor:
                           notif.orderState === "Shipped"
-                            ? "rgba(245, 158, 11, 0.15)"
-                            : "rgba(16, 185, 129, 0.15)",
-                        padding: "6px 12px",
+                            ? "rgba(245, 158, 11, 0.12)"
+                            : "rgba(16, 185, 129, 0.12)",
+                        padding: "8px 12px",
                         borderRadius: "6px",
                         border:
                           notif.orderState === "Shipped"
-                            ? "1px solid rgba(245, 158, 11, 0.3)"
-                            : "1px solid rgba(16, 185, 129, 0.3)",
+                            ? "1px solid rgba(245, 158, 11, 0.2)"
+                            : "1px solid rgba(16, 185, 129, 0.2)",
                       }}
                     >
                       {notif.orderState === "Shipped"
@@ -241,13 +298,15 @@ export const HeaderNotification = () => {
                         sx={{
                           display: "flex",
                           alignItems: "center",
-                          gap: 1,
-                          mt: 1,
+                          gap: 1.5,
+                          mt: 1.5,
                         }}
                       >
                         <img
-                          src={`https://localhost:7197${prod.img}`}
+                          src={`${import.meta.env.VITE_API_URL}${prod.img}`}
                           alt={prod.name}
+                          data-path={prod.img}
+                          onError={handleImageError}
                           style={{
                             width: 44,
                             height: 44,

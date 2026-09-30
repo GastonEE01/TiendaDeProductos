@@ -85,12 +85,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             onError={handleImageError} 
             sx={{
               width: "100%",
-              height: "160px",
+              height: "100%",
               objectFit: "contain",
               borderTopLeftRadius: "8px",
               borderTopRightRadius: "8px",
                backgroundColor: "rgba(255, 255, 255, 0.02)", 
-              padding: "8px"
+              padding: "12px"
             }}
           ></Box>
 

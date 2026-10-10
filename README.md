@@ -4,7 +4,7 @@ Aplicacion fullstack donde se pueden visualizar productos,filtrarlos,buscarlos y
 ## 🔗 Enlaces del Proyecto
 DEMO Frontend (Vercel): https://tienda-de-productos-ivory.vercel.app/
 
-API Backend (Azure): https://tiendadeproductos-fmhngcc8czgjd9dk.brazilsouth-01.azurewebsites.net/api/product
+API Backend (Azure): https://mercadoexpress-e0b6gqgkewa2echt.brazilsouth-01.azurewebsites.net/index.html
 
 ## Funcionalidades:
 * Listado de productos

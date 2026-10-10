@@ -142,7 +142,9 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
                 "http://localhost:5173",                  // Tu React en tu PC
-                "https://tienda-de-productos-ivory.vercel.app"   // Tu React publicado en Vercel
+                "https://tienda-de-productos-ivory.vercel.app",  // Tu React publicado en Vercel
+                "http://tauri.localhost",                     //  Para la app de escritorio Tauri en Windows
+                "https://tauri.localhost"                     // Versión segura de Tauri
               )
               .AllowAnyHeader()
               .AllowAnyMethod()

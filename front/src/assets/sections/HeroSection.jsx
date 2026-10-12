@@ -78,7 +78,7 @@ class HeroSection extends React.Component {
                     </Button>
 
                     <a
-                      href="/NexusShop-Setup.exe"
+                      href="https://github.com/GastonEE01/TiendaDeProductos/releases/download/v0.1.0/Nexus.Shop_0.1.0_x64-setup.zip"
                       download="NexusShop-Setup.exe"
                       className="btn-download-pc"
                       style={{

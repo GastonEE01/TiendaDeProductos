@@ -49,3 +49,4 @@ appsettings.Development.json
 # Azure publish profiles
 Properties/PublishProfiles/
 
+*.exe

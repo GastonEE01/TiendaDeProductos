@@ -7,23 +7,24 @@ export default defineConfig({
   plugins: [react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      includeAssets: ['nexus-shop-192.png', 'nexus-shop-512.png'],
       manifest: {
         name: 'NexusShop',
         short_name: 'NexusShop',
         description: 'Plataforma moderna de comercio y gestión en tiempo real',
+        lang: 'es',
         theme_color: '#0f172a',
         background_color: '#0f172a',
         display: 'standalone',
         start_url: '/',
         icons: [
           {
-            src: '/nexus-shop.png',
-            sizes: '512x512',
+            src: '/nexus-shop-192.png',
+            sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: '/nexus-shop.png',
+            src: '/nexus-shop-512.png',
             sizes: '512x512',
             type: 'image/png'
           }

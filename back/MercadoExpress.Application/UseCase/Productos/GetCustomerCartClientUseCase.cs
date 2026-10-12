@@ -25,8 +25,6 @@ namespace MercadoExpress.Application.UseCase.Productos
         {
             var comprasRaw = await _ordenRepository.GetShoppingByUserEmail(email);
 
-            if (comprasRaw == null || !comprasRaw.Any()) throw new KeyNotFoundException($"No se encontraron compras asociadas al correo: {email}");
-
             var response = comprasRaw.Select(o => new CustomerPurchasesDtoResponse
             {
                 Id = o.Id,

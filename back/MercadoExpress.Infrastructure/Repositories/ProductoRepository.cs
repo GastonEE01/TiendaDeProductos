@@ -36,6 +36,7 @@ namespace MercadoExpress.Infrastructure.Repositories
         {
             return await _context.Productos
                 .Include(p => p.Categoria)    
+                .Include(p => p.Images)
                 .ToListAsync();
         }
 
@@ -43,6 +44,7 @@ namespace MercadoExpress.Infrastructure.Repositories
         {
             return await _context.Productos
                 .Include(p => p.Categoria)
+                .Include(p => p.Images)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
@@ -50,6 +52,7 @@ namespace MercadoExpress.Infrastructure.Repositories
         {
             return await _context.Productos
                 .Include(p => p.Categoria)
+                .Include(p => p.Images)
                 .Where(p => p.UsuarioId == usuarioId)
                 .ToListAsync();
         }

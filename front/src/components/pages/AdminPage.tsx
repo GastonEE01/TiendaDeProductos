@@ -9,7 +9,7 @@ export const AdminPage = () => {
     "products",
   );
   return (
-    <div style={{ backgroundColor: "#0f172a", minHeight: "100vh" }}>
+    <div style={{ backgroundColor: "#0B1120", minHeight: "100vh" }}>
       <Header />
 
       <ProductHeader

@@ -39,11 +39,19 @@ namespace MercadoExpress.Application.UseCase.Productos
             if (dto.Price == 0) throw new ArgumentException("Ingrese el precio del producto");
             if (string.IsNullOrEmpty(dto.CategoriaName)) throw new ArgumentException("Ingrese la categoria del producto");
             if (dto.Stock == 0) throw new ArgumentException("Ingrese el stock del producto");
-            if (dto.IMG == null || dto.IMG.Length == 0) throw new ArgumentException("Suba una IMG del producto");
+            if (dto.ImagePaths.Count == 0)
+                throw new ArgumentException("Suba al menos una imagen del producto");
 
             // 1. Mapeas el producto
             Producto product = _mapper.Map<Producto>(dto);
             product.IMG = dto.ImgPath;
+            product.Images = dto.ImagePaths
+                .Select((path, index) => new ProductoImagen
+                {
+                    Url = path,
+                    SortOrder = index
+                })
+                .ToList();
 
             // 2. Buscas o creas la categoría por su nombre (lógica de negocio)
             var categoria = await _categoriaRepository.GetByName(dto.CategoriaName);

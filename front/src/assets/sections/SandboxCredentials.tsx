@@ -20,7 +20,7 @@ export const SandboxCredentials = () => {
   return (
     <section
       style={{
-        backgroundColor: "#111827",
+        backgroundColor: "#0B1120",
         padding: "60px 24px",
         borderTop: "1px solid rgba(255, 255, 255, 0.05)",
       }}
@@ -38,7 +38,7 @@ export const SandboxCredentials = () => {
           <h4
             style={{
               margin: 0,
-              color: "#f8fafc",
+              color: "#FFFFFF",
               fontSize: "1.1rem",
               fontWeight: "bold",
               textTransform: "uppercase",
@@ -76,7 +76,7 @@ export const SandboxCredentials = () => {
         >
           <span
             style={{
-              color: "#38bdf8",
+              color: "#00E5FF",
               fontSize: "0.8rem",
               fontWeight: "600",
               display: "inline-flex",
@@ -87,7 +87,7 @@ export const SandboxCredentials = () => {
             }}
           >
             <FaEnvelope
-              color="#38bdf8"
+              color="#00E5FF"
               size={14}
               style={{ marginTop: "2px" }}
             />
@@ -102,7 +102,7 @@ export const SandboxCredentials = () => {
         {/* Contenedor de las credenciales */}
         <div
           style={{
-            backgroundColor: "#1e293b",
+            backgroundColor: "#172033",
             borderRadius: "12px",
             padding: "20px",
             border: "1px solid rgba(255, 255, 255, 0.05)",
@@ -117,7 +117,7 @@ export const SandboxCredentials = () => {
               display: "flex",
               justifyContent: "between",
               alignItems: "center",
-              backgroundColor: "#0f172a",
+              backgroundColor: "#0B1120",
               padding: "10px 14px",
               borderRadius: "6px",
               border: "1px solid rgba(255, 255, 255, 0.03)",
@@ -177,7 +177,7 @@ export const SandboxCredentials = () => {
                 display: "flex",
                 justifyContent: "between",
                 alignItems: "center",
-                backgroundColor: "#0f172a",
+                backgroundColor: "#0B1120",
                 padding: "10px 14px",
                 borderRadius: "6px",
                 border: "1px solid rgba(255, 255, 255, 0.03)",
@@ -225,7 +225,7 @@ export const SandboxCredentials = () => {
             {/* Vence */}
             <div
               style={{
-                backgroundColor: "#0f172a",
+                backgroundColor: "#0B1120",
                 padding: "10px 14px",
                 borderRadius: "6px",
                 border: "1px solid rgba(255, 255, 255, 0.03)",
@@ -257,7 +257,7 @@ export const SandboxCredentials = () => {
             {/* CVV */}
             <div
               style={{
-                backgroundColor: "#0f172a",
+                backgroundColor: "#0B1120",
                 padding: "10px 14px",
                 borderRadius: "6px",
                 border: "1px solid rgba(255, 255, 255, 0.03)",

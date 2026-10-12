@@ -104,7 +104,7 @@ export const HeaderShopping = () => {
       {formError && <p style={{ color: "red" }}>{formError}</p>}
 
       <IconButton color="inherit" onClick={() => setIsDrawerOpen(true)}>
-        <FaBell size={24} style={{ color: "#2563eb" }} />
+        <FaBell size={24} style={{ color: "#00E5FF" }} />
       </IconButton>
 
       <Drawer
@@ -114,8 +114,8 @@ export const HeaderShopping = () => {
         slotProps={{
           paper: {
             sx: {
-              backgroundColor: "#111827",
-              color: "#f8fafc",
+              backgroundColor: "#0B1120",
+              color: "#FFFFFF",
               width: 360,
               borderLeft: "1px solid rgba(255, 255, 255, 0.08)",
             },
@@ -125,7 +125,7 @@ export const HeaderShopping = () => {
         <Box sx={{ padding: 3 }}>
           <Typography
             variant="h6"
-            sx={{ mb: 2, fontWeight: "bold", color: "#f8fafc" }}
+            sx={{ mb: 2, fontWeight: "bold", color: "#FFFFFF" }}
           >
             Mis compras
           </Typography>
@@ -144,7 +144,7 @@ export const HeaderShopping = () => {
                   sx={{
                     flexDirection: "column",
                     alignItems: "flex-start",
-                    backgroundColor: "#1e293b",
+                    backgroundColor: "#172033",
                     padding: 2.5,
                     borderRadius: "12px",
                     border: "1px solid rgba(255, 255, 255, 0.05)",

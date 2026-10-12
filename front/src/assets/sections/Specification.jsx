@@ -4,6 +4,19 @@ import { SectionTilesProps } from '../../utils/SectionProps';
 import SectionHeader from './partials/SectionHeader';
 import { FaBell, FaUserCheck, FaTruck } from "react-icons/fa6"; // 🚀 Icono de camión inyectado
 
+/**
+ * @typedef {React.HTMLAttributes<HTMLElement> & {
+ *   topOuterDivider?: boolean,
+ *   bottomOuterDivider?: boolean,
+ *   topDivider?: boolean,
+ *   bottomDivider?: boolean,
+ *   hasBgColor?: boolean,
+ *   invertColor?: boolean,
+ *   pushLeft?: boolean
+ * }} SpecificationProps
+ */
+
+/** @extends {React.Component<SpecificationProps>} */
 class Specification extends React.Component {
   render() {
     const { className, topOuterDivider, bottomOuterDivider, topDivider, bottomDivider, hasBgColor, invertColor, pushLeft, ...props } = this.props;

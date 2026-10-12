@@ -8,10 +8,10 @@ export interface ProductDtoRequest{
     description: string,
     price: number,
     img: string,
+    images: string[],
     stock: number,
     categoriaName: string,
     usuarioId: string,
     
 }
-
 

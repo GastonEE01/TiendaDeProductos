@@ -13,7 +13,9 @@ namespace MercadoExpress.Application.DTO.Producto
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public Decimal Price { get; set; }
-        public IFormFile IMG { get; set; } = default!;
+        public IFormFile? IMG { get; set; }
+        public List<IFormFile> Images { get; set; } = [];
+        public List<string> ImagePaths { get; set; } = [];
         public string ImgPath { get; set; } = string.Empty;
         public int Stock { get; set; }
         public string CategoriaName { get; set;} = string.Empty;

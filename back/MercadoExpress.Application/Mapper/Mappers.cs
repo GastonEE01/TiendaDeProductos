@@ -20,6 +20,7 @@ namespace MercadoExpress.Application.Mapper
 
             CreateMap<AddProductoRequest, Producto>()
               .ForMember(dest => dest.IMG, opt => opt.Ignore())
+              .ForMember(dest => dest.Images, opt => opt.Ignore())
               .ForMember(dest => dest.CategoriaId, opt => opt.Ignore())
               .ForMember(dest => dest.UsuarioId, opt => opt.Ignore());
 
@@ -27,12 +28,16 @@ namespace MercadoExpress.Application.Mapper
 
             CreateMap<Producto, UpdateProductResponse>()
                 .ForMember(dest => dest.CategoriaName, opt => opt.MapFrom(src => src.Categoria.Name))
-                .ForMember(dest => dest.IMG, opt => opt.MapFrom(src => src.IMG)); 
+                .ForMember(dest => dest.IMG, opt => opt.MapFrom(src => src.IMG))
+                .ForMember(dest => dest.Images, opt => opt.MapFrom(src =>
+                    src.Images.OrderBy(image => image.SortOrder).Select(image => image.Url)));
 
             CreateMap<Usuario, UpdateUserResponse>();
 
             CreateMap<Producto, GetProductResponse>()
-                .ForMember(dest => dest.CategoriaName, opt => opt.MapFrom(src => src.Categoria.Name));
+                .ForMember(dest => dest.CategoriaName, opt => opt.MapFrom(src => src.Categoria.Name))
+                .ForMember(dest => dest.Images, opt => opt.MapFrom(src =>
+                    src.Images.OrderBy(image => image.SortOrder).Select(image => image.Url)));
 
             CreateMap<OrdenDtoRequest, Orden>()
              .ForMember(dest => dest.Detalles, opt => opt.Ignore());

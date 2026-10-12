@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   getProducts,
   getProductsSeller,
@@ -16,11 +16,16 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  MenuItem,
   TextField,
   Box,
   Typography,
 } from "@mui/material";
 import { FaSearch, FaTimes } from "react-icons/fa";
+import { PRODUCT_CATEGORIES } from "../constants/productCategories";
+
+const MAX_IMAGES = 8;
+const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 
 export const ProductList: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -38,18 +43,41 @@ export const ProductList: React.FC = () => {
     price: string;
     stock: string;
     categoriaName: string;
-    img: File | null;
   }>({
     name: "",
     description: "",
     price: "",
     stock: "",
     categoriaName: "",
-    img: null,
   });
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const imagePreviews = useMemo(
+    () => selectedImages.map((image) => URL.createObjectURL(image)),
+    [selectedImages],
+  );
 
   const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
   const deboucedSearch = useDebouceSearch<string>(search, 1000);
+
+  useEffect(() => () => imagePreviews.forEach((url) => URL.revokeObjectURL(url)), [imagePreviews]);
+
+  const addSelectedImages = (newImages: File[]) => {
+    setError(null);
+    const availableSlots = MAX_IMAGES - selectedImages.length;
+    if (newImages.length > availableSlots) {
+      setError(`No podés agregar más fotos. El límite es de ${MAX_IMAGES}.`);
+      return;
+    }
+
+    const oversizedImage = newImages.find((image) => image.size > MAX_IMAGE_SIZE_BYTES);
+    if (oversizedImage) {
+      setError(`${oversizedImage.name} supera el máximo de 5 MB.`);
+      return;
+    }
+
+    setSelectedImages((currentImages) => [...currentImages, ...newImages]);
+  };
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -95,37 +123,31 @@ export const ProductList: React.FC = () => {
   const handleEdit = async (product: ProductDtoRequest) => {
     setEditProduct(product);
     setEditFormData({
-      id: product.id,
       name: product.name,
       description: product.description,
       price: String(product.price),
       stock: String(product.stock),
       categoriaName: product.categoriaName,
-      img: product.img,
-    } as any); // any temporal
+    });
+    setSelectedImages([]);
   };
 
   const handleSaveEdit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!editProduct) {
+      return;
+    }
     setLoading(true);
-
-    if (!editProduct) return;
-    const formData = new FormData(event.currentTarget);
-    const image = formData.get("img");
-
     const productFormData = new FormData();
-    const idReal = editProduct.id || (editProduct as any).id;
 
-    productFormData.append("Id", idReal);
+    productFormData.append("Id", editProduct.id);
     productFormData.append("Name", editFormData.name.trim());
     productFormData.append("Description", editFormData.description.trim());
     productFormData.append("Price", Number(editFormData.price).toString());
     productFormData.append("Stock", Number(editFormData.stock).toString());
     productFormData.append("CategoriaName", editFormData.categoriaName.trim());
 
-    if (image instanceof File) {
-      productFormData.append("IMG", image);
-    }
+    selectedImages.forEach((image) => productFormData.append("Images", image));
 
     try {
       const response = await updateProduct(productFormData);
@@ -143,17 +165,15 @@ export const ProductList: React.FC = () => {
                 price: Number(editFormData.price),
                 stock: Number(editFormData.stock),
                 categoriaName: editFormData.categoriaName.trim(),
-                img: response.img
-                  ? response.img
-                  : editFormData.img
-                    ? `/uploads/products/${editFormData.img.name}`
-                    : product.img,
+                img: response.img || product.img,
+                images: response.images?.length ? response.images : product.images,
               }
             : product;
         }),
       );
       toast.success(response.message || "Producto actualizado");
       setEditProduct(null);
+      setSelectedImages([]);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : null;
       setError(message);
@@ -170,35 +190,46 @@ export const ProductList: React.FC = () => {
   };
 
   const normalizedSearch = deboucedSearch.trim().toLowerCase();
+  const categoryOptions = Array.from(
+    new Set([
+      ...PRODUCT_CATEGORIES,
+      ...products.map((product) => product.categoriaName.trim()).filter(Boolean),
+    ]),
+  );
   const filteredProducts = products.filter((product) => {
-    if (!normalizedSearch) {
-      return true;
-    }
-    return product.name.toLowerCase().includes(normalizedSearch);
+    const matchesSearch =
+      !normalizedSearch || product.name.toLowerCase().includes(normalizedSearch);
+    const matchesCategory =
+      !categoryFilter ||
+      product.categoriaName.toLowerCase() === categoryFilter.toLowerCase();
+    return matchesSearch && matchesCategory;
   });
 
   const inputStyle = {
     "& .MuiOutlinedInput-root": {
-      backgroundColor: "#111827",
-      color: "#f8fafc",
+      backgroundColor: "#0B1120",
+      color: "#FFFFFF",
       borderRadius: "8px",
       "& fieldset": { borderColor: "rgba(255, 255, 255, 0.1)" },
       "&:hover fieldset": { borderColor: "rgba(255, 255, 255, 0.2)" },
-      "&.Mui-focused fieldset": { borderColor: "#2563eb" },
+      "&.Mui-focused fieldset": { borderColor: "#00E5FF" },
     },
     "& .MuiInputLabel-root": { color: "#94a3b8" },
-    "& .MuiInputLabel-root.Mui-focused": { color: "#2563eb" },
+    "& .MuiInputLabel-root.Mui-focused": { color: "#00E5FF" },
   };
 
   return (
-    <div
-      style={{
+    <Box
+      sx={{
         display: "flex",
         flexDirection: "column",
-        gap: "20px",
-        marginLeft: "15%",
-        width: "82%",
-        padding: "20px",
+        gap: 2.5,
+        ml: user?.rol === "Seller" ? { xs: 0, md: "15%" } : 0,
+        width: user?.rol === "Seller" ? { xs: "100%", md: "85%" } : "100%",
+        maxWidth: user?.rol === "Seller" ? "none" : 1440,
+        mx: user?.rol === "Seller" ? undefined : "auto",
+        p: { xs: 1.5, sm: 2.5 },
+        minWidth: 0,
       }}
     >
       {loading && <p>Cargando productos...</p>}
@@ -210,31 +241,56 @@ export const ProductList: React.FC = () => {
           alignItems: "center",
           gap: "10px",
           width: "100%",
+          flexWrap: "wrap",
         }}
       >
-        <FaSearch size={24} style={{ color: "#2563eb" }} />
+        <FaSearch
+          size={24}
+          style={{ color: "#2563eb", flexShrink: 0 }}
+          aria-hidden="true"
+        />
         <TextField
           label="Buscar producto"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          fullWidth
           sx={{
             ...inputStyle,
+            flex: "1 1 240px",
+            minWidth: 0,
             "& .MuiOutlinedInput-root": {
               ...inputStyle["& .MuiOutlinedInput-root"],
               borderRadius: "50px",
             },
           }}
         />
+        <TextField
+          select
+          label="Filtrar por categoría"
+          value={categoryFilter}
+          onChange={(event) => setCategoryFilter(event.target.value)}
+          sx={{
+            ...inputStyle,
+            minWidth: { xs: "100%", sm: 220 },
+            flex: { xs: "1 1 100%", sm: "0 1 220px" },
+          }}
+        >
+          <MenuItem value="">Todas las categorías</MenuItem>
+          {categoryOptions.map((category) => (
+            <MenuItem key={category} value={category}>
+              {category}
+            </MenuItem>
+          ))}
+        </TextField>
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          flexWrap: "wrap",
-          gap: "15px",
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
+          gap: { xs: 1.5, sm: 2 },
           width: "100%",
+          minWidth: 0,
+          alignItems: "start",
         }}
       >
         {filteredProducts.map((product) => (
@@ -245,7 +301,7 @@ export const ProductList: React.FC = () => {
             onEdit={handleEdit}
           />
         ))}
-      </div>
+      </Box>
 
       <Dialog
         open={editProduct !== null}
@@ -255,7 +311,7 @@ export const ProductList: React.FC = () => {
       >
         <Box
           sx={{
-            backgroundColor: "#1e293b",
+            backgroundColor: "#172033",
             borderRadius: "16px",
             padding: "10px",
             width: "100%",
@@ -268,7 +324,7 @@ export const ProductList: React.FC = () => {
                 justifyContent: "space-between",
                 alignItems: "center",
                 p: 2,
-                color: "#f8fafc",
+                color: "#FFFFFF",
               }}
             >
               <Typography>Editar producto</Typography>
@@ -278,11 +334,11 @@ export const ProductList: React.FC = () => {
                 onClick={() => setEditProduct(null)}
                 style={{
                   cursor: "pointer",
-                  color: "#ef4444",
+                  color: "#7C3AED",
                   transition: "color 0.2s",
                 }}
-                onMouseOver={(e) => (e.currentTarget.style.color = "#ff0000")}
-                onMouseOut={(e) => (e.currentTarget.style.color = "#ef4444")}
+                onMouseOver={(e) => (e.currentTarget.style.color = "#00E5FF")}
+                onMouseOut={(e) => (e.currentTarget.style.color = "#7C3AED")}
               />
             </DialogTitle>
             <DialogContent
@@ -312,54 +368,82 @@ export const ProductList: React.FC = () => {
                 name="categoriaName"
                 label="Categoría"
                 value={editFormData.categoriaName}
-                onChange={handleFieldChange}
                 required
                 fullWidth
-                multiline
-                rows={2}
+                select
+                onChange={(event) =>
+                  setEditFormData((currentData) => ({
+                    ...currentData,
+                    categoriaName: event.target.value,
+                  }))
+                }
                 sx={inputStyle}
-              />
+              >
+                {categoryOptions.map((category) => (
+                  <MenuItem key={category} value={category}>
+                    {category}
+                  </MenuItem>
+                ))}
+              </TextField>
 
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
                 <Typography
                   variant="caption"
                   sx={{ color: "#94a3b8", fontWeight: "bold" }}
                 >
-                  Nueva imagen
+                  Fotos actuales: {editProduct?.images?.length || (editProduct?.img ? 1 : 0)}
                 </Typography>
-                <Typography variant="body2" sx={{ color: "#cbd5e1" }}>
-                  Imagen actual:{" "}
-                  {editProduct?.img
-                    ? editProduct.img.split(/[\\/]/).pop()
-                    : "Sin imagen"}
-                </Typography>{" "}
-               
+                <Typography variant="body2" sx={{ color: "#FFFFFF" }}>
+                  Si seleccionás fotos nuevas, se reemplazará la galería actual.
+                </Typography>
+                <Typography variant="caption" sx={{ color: "#FFFFFF" }}>
+                  Podés elegir varias con Ctrl/Shift o agregarlas en varias tandas.
+                </Typography>
                 <input
                   type="file"
-                  name="img"
-                  onChange={(event) => {
-                    if (event.target instanceof HTMLInputElement) {
-                      const file = event.target.files?.[0] ?? null;
-                      setEditFormData((currentData) => ({
-                        ...currentData,
-                        img: file,
-                      }));
-                    }
-                  }}
+                  name="Images"
+                  multiple
                   accept="image/jpeg,image/png,image/webp"
+                  onChange={(event) => {
+                    addSelectedImages(Array.from(event.currentTarget.files ?? []));
+                    event.currentTarget.value = "";
+                  }}
                   style={{
                     color: "#94a3b8",
-                    backgroundColor: "#111827",
+                    backgroundColor: "#0B1120",
                     padding: "12px",
                     borderRadius: "8px",
                     border: "1px solid rgba(255, 255, 255, 0.1)",
                     cursor: "pointer",
                   }}
                 />
-                {editFormData.img && (
-                  <Typography variant="caption" sx={{ color: "#94a3b8" }}>
-                    Nueva imagen seleccionada: {editFormData.img.name}
-                  </Typography>
+                <Typography variant="caption" sx={{ color: "#00E5FF" }}>
+                  {selectedImages.length} fotos nuevas seleccionadas
+                </Typography>
+                {selectedImages.length > 0 && (
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                    {selectedImages.map((image, index) => (
+                      <Box key={`${image.name}-${image.lastModified}-${index}`} sx={{ position: "relative", width: 76 }}>
+                        <Box
+                          component="img"
+                          src={imagePreviews[index]}
+                          alt={`Vista previa de ${image.name}`}
+                          sx={{ width: 76, height: 76, objectFit: "cover", borderRadius: 1, border: "1px solid rgba(255,255,255,.2)" }}
+                        />
+                        <Button
+                          type="button"
+                          aria-label={`Quitar ${image.name}`}
+                          onClick={() => setSelectedImages((current) => current.filter((_, imageIndex) => imageIndex !== index))}
+                          sx={{ position: "absolute", top: 0, right: 0, minWidth: 24, width: 24, height: 24, p: 0, color: "#FFFFFF", backgroundColor: "rgba(11,17,32,.85)" }}
+                        >
+                          <FaTimes size={12} />
+                        </Button>
+                        <Typography variant="caption" noWrap sx={{ display: "block", color: "#FFFFFF" }}>
+                          {image.name}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
                 )}
               </Box>
 
@@ -389,7 +473,7 @@ export const ProductList: React.FC = () => {
             <DialogActions sx={{ p: 2, pr: 3, gap: 1 }}>
               <Button
                 onClick={() => setEditProduct(null)}
-                sx={{ color: "#94a3b8", "&:hover": { color: "#f8fafc" } }}
+                sx={{ color: "#FFFFFF", "&:hover": { color: "#00E5FF" } }}
               >
                 Cancelar
               </Button>
@@ -397,12 +481,12 @@ export const ProductList: React.FC = () => {
                 type="submit"
                 variant="contained"
                 sx={{
-                  backgroundColor: "#2563eb", 
-                  color: "#ffffff",
+                  backgroundColor: "#2563EB",
+                  color: "#FFFFFF",
                   fontWeight: "bold",
                   borderRadius: "8px",
                   padding: "8px 24px",
-                  "&:hover": { backgroundColor: "#1d4ed8" },
+                  "&:hover": { backgroundColor: "#7C3AED" },
                 }}
               >
                 Guardar cambios
@@ -411,6 +495,6 @@ export const ProductList: React.FC = () => {
           </form>
         </Box>
       </Dialog>
-    </div>
+    </Box>
   );
 };

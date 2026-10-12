@@ -34,7 +34,7 @@ namespace MercadoExpress.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categorias");
+                    b.ToTable("Categorias", (string)null);
                 });
 
             modelBuilder.Entity("MercadoExpress.Domain.Entities.DetalleOrden", b =>
@@ -61,7 +61,7 @@ namespace MercadoExpress.Infrastructure.Migrations
 
                     b.HasIndex("ProductoId");
 
-                    b.ToTable("DetallesOrden");
+                    b.ToTable("DetallesOrden", (string)null);
                 });
 
             modelBuilder.Entity("MercadoExpress.Domain.Entities.MercadoPagoAuth", b =>
@@ -98,7 +98,7 @@ namespace MercadoExpress.Infrastructure.Migrations
                     b.HasIndex("UsuarioId")
                         .IsUnique();
 
-                    b.ToTable("AutenticacionesMP");
+                    b.ToTable("AutenticacionesMP", (string)null);
                 });
 
             modelBuilder.Entity("MercadoExpress.Domain.Entities.Notificacion", b =>
@@ -130,7 +130,7 @@ namespace MercadoExpress.Infrastructure.Migrations
 
                     b.HasIndex("UsuarioId");
 
-                    b.ToTable("Notificaciones");
+                    b.ToTable("Notificaciones", (string)null);
                 });
 
             modelBuilder.Entity("MercadoExpress.Domain.Entities.OAuthState", b =>
@@ -156,7 +156,7 @@ namespace MercadoExpress.Infrastructure.Migrations
 
                     b.HasIndex("UsuarioId");
 
-                    b.ToTable("OAuthStates");
+                    b.ToTable("OAuthStates", (string)null);
                 });
 
             modelBuilder.Entity("MercadoExpress.Domain.Entities.Orden", b =>
@@ -222,7 +222,7 @@ namespace MercadoExpress.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Ordenes");
+                    b.ToTable("Ordenes", (string)null);
                 });
 
             modelBuilder.Entity("MercadoExpress.Domain.Entities.Producto", b =>
@@ -261,7 +261,30 @@ namespace MercadoExpress.Infrastructure.Migrations
 
                     b.HasIndex("UsuarioId");
 
-                    b.ToTable("Productos");
+                    b.ToTable("Productos", (string)null);
+                });
+
+            modelBuilder.Entity("MercadoExpress.Domain.Entities.ProductoImagen", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ProductoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductoId", "SortOrder");
+
+                    b.ToTable("ProductoImagenes", (string)null);
                 });
 
             modelBuilder.Entity("MercadoExpress.Domain.Entities.Usuario", b =>
@@ -296,7 +319,7 @@ namespace MercadoExpress.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Usuarios");
+                    b.ToTable("Usuarios", (string)null);
                 });
 
             modelBuilder.Entity("MercadoExpress.Domain.Entities.DetalleOrden", b =>
@@ -378,6 +401,17 @@ namespace MercadoExpress.Infrastructure.Migrations
                     b.Navigation("Usuario");
                 });
 
+            modelBuilder.Entity("MercadoExpress.Domain.Entities.ProductoImagen", b =>
+                {
+                    b.HasOne("MercadoExpress.Domain.Entities.Producto", "Producto")
+                        .WithMany("Images")
+                        .HasForeignKey("ProductoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Producto");
+                });
+
             modelBuilder.Entity("MercadoExpress.Domain.Entities.Categoria", b =>
                 {
                     b.Navigation("Productos");
@@ -386,6 +420,11 @@ namespace MercadoExpress.Infrastructure.Migrations
             modelBuilder.Entity("MercadoExpress.Domain.Entities.Orden", b =>
                 {
                     b.Navigation("Detalles");
+                });
+
+            modelBuilder.Entity("MercadoExpress.Domain.Entities.Producto", b =>
+                {
+                    b.Navigation("Images");
                 });
 
             modelBuilder.Entity("MercadoExpress.Domain.Entities.Usuario", b =>

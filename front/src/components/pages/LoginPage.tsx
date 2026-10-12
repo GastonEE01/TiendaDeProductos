@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { LoginDtoRequest } from "../../interfaces/UsuarioType";
-import { LogoMercadoExpress } from "../../assets/sections/LogoMercadoExpress";
+import { LogoNexusShopHex } from "../../assets/sections/LogoNexusShopHex";
 
 import { Button, TextField, Typography, Box } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
@@ -60,15 +60,15 @@ export const LoginPage: React.FC = () => {
 
   const inputStyle = {
     "& .MuiOutlinedInput-root": {
-      backgroundColor: "#111827",
-      color: "#f8fafc",
+      backgroundColor: "#0B1120",
+      color: "#FFFFFF",
       borderRadius: "8px",
       "& fieldset": { borderColor: "rgba(255, 255, 255, 0.1)" },
       "&:hover fieldset": { borderColor: "rgba(255, 255, 255, 0.2)" },
-      "&.Mui-focused fieldset": { borderColor: "#2563eb" },
+      "&.Mui-focused fieldset": { borderColor: "#00E5FF" },
     },
     "& .MuiInputLabel-root": { color: "#94a3b8" },
-    "& .MuiInputLabel-root.Mui-focused": { color: "#2563eb" },
+    "& .MuiInputLabel-root.Mui-focused": { color: "#00E5FF" },
   };
 
   return (
@@ -78,7 +78,7 @@ export const LoginPage: React.FC = () => {
         justifyContent: "center",
         alignItems: "center",
         minHeight: "100vh",
-        backgroundColor: "#0f172a",
+        backgroundColor: "#0B1120",
       }}
     >
       <div
@@ -92,12 +92,15 @@ export const LoginPage: React.FC = () => {
         }}
       >
         <Box sx={{ display: "flex", justifyContent: "center" }}>
-          <LogoMercadoExpress />
+          <LogoNexusShopHex
+            size={{ xs: 26, sm: 30 }}
+            fontSize={{ xs: "1.25rem", sm: "1.5rem" }}
+          />
         </Box>
 
         <div
           style={{
-            backgroundColor: "1e293b",
+            backgroundColor: "#172033",
             padding: "40px",
             borderRadius: "16px",
             border: "1px solid rgba(255, 255, 255, 0.05)",
@@ -111,7 +114,7 @@ export const LoginPage: React.FC = () => {
                 textAlign: "center",
                 marginBottom: "20px",
                 fontWeight: "bold",
-                color: "#2563eb",
+                color: "#00E5FF",
               }}
             >
               Iniciando sesión, por favor espere...
@@ -122,7 +125,7 @@ export const LoginPage: React.FC = () => {
             style={{ display: "flex", flexDirection: "column", gap: "24px" }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <MdOutlineMailLock fontSize={28} style={{ color: "#94a3b8" }} />
+              <MdOutlineMailLock fontSize={28} style={{ color: "#00E5FF" }} />
               <TextField
                 id="standard-basic"
                 label="Ingrese su mail"
@@ -136,7 +139,7 @@ export const LoginPage: React.FC = () => {
             </div>
 
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <RiLockPasswordFill fontSize={35} style={{ color: "#94a3b8" }} />
+              <RiLockPasswordFill fontSize={35} style={{ color: "#00E5FF" }} />
               <TextField
                 id="standard-basic"
                 label="Ingrese su contraseña"
@@ -162,13 +165,13 @@ export const LoginPage: React.FC = () => {
                 type="submit"
                 disabled={loading}
                 sx={{
-                  backgroundColor: "#2563eb",
-                  color: "#ffffff",
+                  backgroundColor: "#2563EB",
+                  color: "#FFFFFF",
                   fontWeight: "bold",
                   borderRadius: "8px",
                   padding: "10px 24px",
                   "&:hover": {
-                    backgroundColor: "#1d4ed8",
+                    backgroundColor: "#7C3AED",
                   },
                 }}
               >
@@ -178,12 +181,12 @@ export const LoginPage: React.FC = () => {
                 to="/register"
                 style={{
                   textDecoration: "none",
-                  color: "#60a5fa",
+                  color: "#00E5FF",
                   fontSize: "0.9rem",
                   fontWeight: "600",
                 }}
                 onMouseOver={(e) => (e.currentTarget.style.color = "#2563eb")}
-                onMouseOut={(e) => (e.currentTarget.style.color = "#60a5fa")}
+                onMouseOut={(e) => (e.currentTarget.style.color = "#00E5FF")}
               >
                 ¿No tienes una cuenta? Registrate{" "}
               </Link>

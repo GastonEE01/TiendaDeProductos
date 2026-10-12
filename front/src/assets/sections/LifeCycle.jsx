@@ -4,6 +4,19 @@ import { SectionTilesProps } from '../../utils/SectionProps';
 import SectionHeader from './partials/SectionHeader';
 import { FaBolt, FaCreditCard, FaCircleCheck } from "react-icons/fa6"; // 🚀 Nuevos íconos de proceso
 
+/**
+ * @typedef {React.HTMLAttributes<HTMLElement> & {
+ *   topOuterDivider?: boolean,
+ *   bottomOuterDivider?: boolean,
+ *   topDivider?: boolean,
+ *   bottomDivider?: boolean,
+ *   hasBgColor?: boolean,
+ *   invertColor?: boolean,
+ *   pushLeft?: boolean
+ * }} LifeCycleProps
+ */
+
+/** @extends {React.Component<LifeCycleProps>} */
 class LifeCycle extends React.Component {
   render() {
     const { className, topOuterDivider, bottomOuterDivider, topDivider, bottomDivider, hasBgColor, invertColor, pushLeft, ...props } = this.props;

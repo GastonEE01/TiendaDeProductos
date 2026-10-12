@@ -13,6 +13,7 @@ namespace MercadoExpress.Domain.Entities
         public string Description { get; set; } = string.Empty;
         public Decimal Price { get; set; }
         public string IMG { get; set; } = string.Empty;    
+        public ICollection<ProductoImagen> Images { get; set; } = new List<ProductoImagen>();
         public int Stock { get; set; }
         public Guid CategoriaId { get; set; }
         public Categoria Categoria { get; set; } = null!; 

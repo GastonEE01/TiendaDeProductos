@@ -14,7 +14,7 @@ import { FaShoppingCart, FaSignOutAlt } from "react-icons/fa";
 import { Cart } from "../components/Cart";
 import { HeaderNotification } from "../components/HeaderNotification";
 import { HeaderShopping } from "../components/HeaderShopping";
-import { LogoMercadoExpress } from "../assets/sections/LogoMercadoExpress";
+import { LogoNexusShopHex } from "../assets/sections/LogoNexusShopHex";
 import { Profile } from "./Profile";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -42,39 +42,64 @@ export const Header = () => {
   };
 
   return (
-    <AppBar position="static" style={{ background: "black", height: "10vh" }}>
+    <AppBar position="static" sx={{ background: "#0B1120", height: "auto" }}>
       <Toolbar
-        style={{
+        sx={{
+          minHeight: { xs: 64, sm: 80 },
+          px: { xs: 1, sm: 2 },
           display: "flex",
           justifyContent: "space-between",
-          height: "100%",
+          gap: { xs: 0.5, sm: 2 },
         }}
       >
-        {/* LADO IZQUIERDO: Tu Logo o Nombre de la App */}
-        <Box style={{ display: "flex", alignItems: "center" }}>
-          <LogoMercadoExpress />
+        {/* LOGO */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            flex: "1 1 auto",
+            minWidth: 0,
+            "& > a > span": {
+              fontSize: { xs: "1.1rem", sm: "2rem", md: "3.75rem" },
+            },
+            "& > a > div": { p: { xs: 0.75, sm: 1 } },
+            "& > a > div svg": {
+              width: { xs: 18, sm: 25 },
+              height: { xs: 18, sm: 25 },
+            },
+          }}
+        >
+          <LogoNexusShopHex
+            size={{ xs: 22, sm: 30 }}
+            fontSize={{ xs: "1rem", sm: "1.35rem" }}
+          />
         </Box>
 
-        <Box style={{ flexGrow: 1, textAlign: "center" }}></Box>
-
-        <Box style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-          {/* Avatar del perfil (podés cambiarlo por una foto o iniciales) */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            flex: "0 0 auto",
+            gap: { xs: 0, sm: 1 },
+            "& .MuiIconButton-root": { p: { xs: 0.75, sm: 1 } },
+          }}
+        >
+          {/* PERFIL */}
           {user ? (
             <div>
               <IconButton
-                onClick={() => setProfileModal(true)} // 🚀 Al hacer clic, abrimos el modal pasándolo a true
+                onClick={() => setProfileModal(true)} 
                 sx={{ padding: 0 }}
               >
                 <Avatar
                   sx={{
-                    // 🚀 RECTIFICADO: Quitamos el '#' para que el color rgba sea válido y estético
-                    bgcolor: "rgba(37, 99, 235, 0.1)", // Tu azul eléctrico de Startup con transparencia
-                    color: "#2563eb", // La inicial se pinta en tu azul oficial
+                    bgcolor: "rgba(0, 229, 255, 0.12)",
+                    color: "#00E5FF",
                     fontWeight: "bold",
-                    border: "1px solid rgba(37, 99, 235, 0.2)",
+                    border: "1px solid rgba(0, 229, 255, 0.3)",
                     cursor: "pointer",
-                    width: 55,
-                    height: 55,
+                    width: { xs: 36, sm: 48, md: 55 },
+                    height: { xs: 36, sm: 48, md: 55 },
                   }}
                   alt={user?.userName || "Perfil Usuario"}
                   src={user?.img ? `${API_URL}${user.img}` : undefined}
@@ -91,52 +116,43 @@ export const Header = () => {
           ) : (
             <Avatar
               sx={{
-                bgcolor: "#27272a", // Fondo gris oscuro premium para modo oscuro
-                color: "#a1a1aa", // Monigote gris claro
-                width: 55,
-                height: 55,
-                border: "1px solid #3f3f46",
+                bgcolor: "#172033",
+                color: "#FFFFFF",
+                width: { xs: 36, sm: 48, md: 55 },
+                height: { xs: 36, sm: 48, md: 55 },
+                border: "1px solid #7C3AED",
               }}
-              // Al no pasarle 'src' ni texto, renderiza automáticamente el icono de usuario genérico de Material UI
             />
           )}
           {user?.rol !== "Seller" && (
             <>
-              <FaShoppingCart
+              <IconButton
+                aria-label="Abrir carrito"
                 onClick={handleOpenCart}
-                fontSize={35}
-                style={{ cursor: "pointer", color: "white" }}
-              />
+                color="inherit"
+              >
+                <FaShoppingCart size={22} />
+              </IconButton>
               <HeaderShopping />
             </>
           )}
 
           {user?.rol == "Seller" && <HeaderNotification />}
-
-          {user ? (
-            <FaSignOutAlt
-              onClick={handleLogout}
-              fontSize="35"
-              style={{ cursor: "pointer", color: "white" }}
-            />
-              ) : (
-            // ⚪ Si es un cliente anónimo, le pintamos un botón estético para ir a loguearse
-           <FaSignOutAlt
-              onClick={handleLogout}
-              fontSize="35"
-              style={{ cursor: "pointer", color: "white" }}
-            />
-          )}
-
+          <IconButton
+            aria-label="Cerrar sesión"
+            onClick={handleLogout}
+            color="inherit"
+          >
+            <FaSignOutAlt size={22} />
+          </IconButton>
         </Box>
       </Toolbar>
 
-
       <Dialog
         open={isCartOpen}
-        onClose={handleCloseCart} // Se ejecuta si el usuario hace click fuera del modal
+        onClose={handleCloseCart} 
         fullWidth
-        maxWidth="sm" // Tamaño del modal (puedes usar xs, sm, md, lg)
+        maxWidth="sm" 
       >
         <Cart />
       </Dialog>

@@ -95,7 +95,7 @@ export const HeaderNotification = () => {
       )}
       <IconButton color="inherit" onClick={() => setIsDrawerOpen(true)}>
         <Badge badgeContent={unreadCount} color="error">
-          <FaBell size={35} style={{ color: "#2563eb" }} />
+          <FaBell size={35} style={{ color: "#00E5FF" }} />
         </Badge>
       </IconButton>
 
@@ -106,8 +106,8 @@ export const HeaderNotification = () => {
         slotProps={{
           paper: {
             sx: {
-              backgroundColor: "#111827",
-              color: "#f8fafc",
+              backgroundColor: "#0B1120",
+              color: "#FFFFFF",
               width: 360,
               borderLeft: "1px solid rgba(255, 255, 255, 0.08)",
             },
@@ -120,7 +120,7 @@ export const HeaderNotification = () => {
             sx={{
               mb: 2,
               fontWeight: "bold",
-              color: "#f8fafc",
+              color: "#FFFFFF",
               display: "flex",
               alignItems: "center",
               gap: 1,
@@ -146,7 +146,7 @@ export const HeaderNotification = () => {
                     backgroundColor:
                       notif.state === "Unread"
                         ? "rgba(37, 99, 235, 0.08)"
-                        : "#1e293b",
+                        : "#172033",
                     padding: 2.5,
                     borderRadius: "12px",
                     border:
@@ -161,7 +161,7 @@ export const HeaderNotification = () => {
                     sx={{
                       fontWeight: "bold",
                       mb: 1.5,
-                      color: "#f8fafc",
+                      color: "#FFFFFF",
                       lineHeight: 1.4,
                     }}
                   >
@@ -188,7 +188,7 @@ export const HeaderNotification = () => {
                         alignItems: "center",
                         gap: 1,
                         mt: 0.5,
-                        color: "#f1f5f9",
+                        color: "#FFFFFF",
                       }}
                     >
                       <FaAddressCard size={14} style={{ color: "#94a3b8" }} />

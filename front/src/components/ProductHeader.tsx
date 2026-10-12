@@ -15,37 +15,50 @@ export const ProductHeader = ({
        <Box
       component="nav"
       sx={{
-       backgroundColor: "#111827",
-        marginTop: "10px",
-        maxWidth: "15%",
-        width: "100%",
-        height: "100vh",
-        position: "fixed",
-        borderRadius: "10px",
+        backgroundColor: "#172033",
+        mt: { xs: 0, md: "10px" },
+        maxWidth: { xs: "100%", md: "15%" },
+        width: { xs: "100%", md: "15%" },
+        height: { xs: "auto", md: "calc(100vh - 90px)" },
+        position: { xs: "relative", md: "fixed" },
+        top: { md: "90px" },
+        left: 0,
+        zIndex: { xs: 1, md: 1100 },
+        borderRadius: { xs: 0, md: "10px" },
         borderRight: "1px solid rgba(255, 255, 255, 0.08)", 
         padding: "10px",
         boxSizing: "border-box",
       }}
     >
 
-        <List component="div" disablePadding>
-        <ListItem disablePadding>
+        <List
+          component="div"
+          disablePadding
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "row", md: "column" },
+            gap: { xs: 0.5, md: 0 },
+          }}
+        >
+        <ListItem disablePadding sx={{ flex: { xs: 1, md: "initial" }, minWidth: 0 }}>
           <ListItemButton
             onClick={onShowProducts}
             sx={{
+              justifyContent: "center",
               borderRadius: "8px",
               mb: 1,
-              color: "#94a3b8", 
+              color: "#FFFFFF",
+              px: { xs: 1, md: 2 },
               transition: "all 0.2s ease",
               "&:hover": {
                 backgroundColor: "rgba(255, 255, 255, 0.05)", 
-                color: "#2563eb", 
+                color: "#00E5FF",
               },
             }}
           >
             <ListItemText 
               primary= {
-                 <Typography sx={{ fontSize: "0.95rem", fontWeight: 700, fontFamily: "inherit" }}>
+                 <Typography sx={{ fontSize: { xs: "0.8rem", sm: "0.95rem" }, fontWeight: 700, fontFamily: "inherit", textAlign: { xs: "center", md: "left" } }}>
                   Mis productos
                 </Typography>
               } 
@@ -53,22 +66,24 @@ export const ProductHeader = ({
           </ListItemButton>
         </ListItem>
 
-        <ListItem disablePadding>
+        <ListItem disablePadding sx={{ flex: { xs: 1, md: "initial" }, minWidth: 0 }}>
           <ListItemButton
             onClick={onAddProduct}
             sx={{
+              justifyContent: "center",
               borderRadius: "8px",
-              color: "#94a3b8",
+              color: "#FFFFFF",
+              px: { xs: 1, md: 2 },
               transition: "all 0.2s ease",
               "&:hover": {
                 backgroundColor: "rgba(255, 255, 255, 0.05)",
-                color: "#2563eb",
+                color: "#00E5FF",
               },
             }}
           >
             <ListItemText 
                primary={
-                <Typography sx={{ fontSize: "0.95rem", fontWeight: 700, fontFamily: "inherit" }}>
+                <Typography sx={{ fontSize: { xs: "0.8rem", sm: "0.95rem" }, fontWeight: 700, fontFamily: "inherit", textAlign: { xs: "center", md: "left" } }}>
                   Agregar producto
                 </Typography>
               } 

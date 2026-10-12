@@ -32,15 +32,15 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const inputStyle = {
     "& .MuiOutlinedInput-root": {
-      backgroundColor: "#111827",
-      color: "#f8fafc",
+      backgroundColor: "#0B1120",
+      color: "#FFFFFF",
       borderRadius: "8px",
       "& fieldset": { borderColor: "rgba(255, 255, 255, 0.1)" },
       "&:hover fieldset": { borderColor: "rgba(255, 255, 255, 0.2)" },
-      "&.Mui-focused fieldset": { borderColor: "#2563eb" },
+      "&.Mui-focused fieldset": { borderColor: "#00E5FF" },
     },
     "& .MuiInputLabel-root": { color: "#94a3b8" },
-    "& .MuiInputLabel-root.Mui-focused": { color: "#2563eb" },
+    "& .MuiInputLabel-root.Mui-focused": { color: "#00E5FF" },
   };
 
   const handleSaveEdit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -138,7 +138,7 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
           duration: 5000,
           position: "top-center",
           style: {
-            background: "#1e293b",
+            background: "#172033",
             color: "#4ade80",
             fontWeight: "bold",
             border: "1px solid #4ade80",
@@ -155,7 +155,7 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <Box
         sx={{
-          backgroundColor: "#1e293b",
+          backgroundColor: "#172033",
           borderRadius: "16px",
           padding: "10px",
           width: "100%",
@@ -176,7 +176,7 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
               variant="h5"
               sx={{
                 fontWeight: "bold",
-                color: "#f8fafc",
+                color: "#FFFFFF",
                 flexGrow: 1,
                 textAlign: "center",
               }}
@@ -188,11 +188,11 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
               onClick={onClose}
               style={{
                 cursor: "pointer",
-                color: "#ef4444",
+                color: "#7C3AED",
                 transition: "color 0.2s",
               }}
-              onMouseOver={(e) => (e.currentTarget.style.color = "#ff0000")}
-              onMouseOut={(e) => (e.currentTarget.style.color = "#ef4444")}
+              onMouseOver={(e) => (e.currentTarget.style.color = "#00E5FF")}
+              onMouseOut={(e) => (e.currentTarget.style.color = "#7C3AED")}
             />
           </DialogTitle>
 
@@ -280,7 +280,7 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
           <DialogActions sx={{ p: 2, pr: 3, gap: 1 }}>
             <Button
               onClick={onClose}
-              sx={{ color: "#94a3b8", "&:hover": { color: "#f8fafc" } }}
+              sx={{ color: "#FFFFFF", "&:hover": { color: "#00E5FF" } }}
             >
               Cancelar
             </Button>
@@ -294,7 +294,7 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
                 fontWeight: "bold",
                 borderRadius: "8px",
                 padding: "8px 24px",
-                "&:hover": { backgroundColor: "#1d4ed8" },
+                "&:hover": { backgroundColor: "#7C3AED" },
               }}
             >
               {loading ? "Guardando..." : "Guardar Cambios"}

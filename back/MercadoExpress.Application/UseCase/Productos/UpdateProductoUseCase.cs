@@ -13,13 +13,18 @@ namespace MercadoExpress.Application.UseCase.Productos
     public class UpdateProductoUseCase
     {
         public readonly IProductoRepository _productoRepository;
+        private readonly ICategoriaRepository _categoriaRepository;
 
         public readonly IMapper _mapper;
 
 
-        public UpdateProductoUseCase(IProductoRepository productoRepository, IMapper mapper)
+        public UpdateProductoUseCase(
+            IProductoRepository productoRepository,
+            ICategoriaRepository categoriaRepository,
+            IMapper mapper)
         {
             _productoRepository = productoRepository;
+            _categoriaRepository = categoriaRepository;
             _mapper = mapper;
         }
 
@@ -37,14 +42,42 @@ namespace MercadoExpress.Application.UseCase.Productos
             if (!string.IsNullOrEmpty(dto.Description)) searchProduct.Description = dto.Description;
             if (dto.Price.HasValue) searchProduct.Price = dto.Price.Value;
             if (!string.IsNullOrEmpty(dto.ImgPath)) searchProduct.IMG = dto.ImgPath;
+            if (dto.ImagePaths.Count > 0)
+            {
+                searchProduct.Images.Clear();
+                for (var index = 0; index < dto.ImagePaths.Count; index++)
+                {
+                    searchProduct.Images.Add(new ProductoImagen
+                    {
+                        Url = dto.ImagePaths[index],
+                        SortOrder = index,
+                        ProductoId = searchProduct.Id
+                    });
+                }
+            }
             if (dto.Stock.HasValue) searchProduct.Stock = dto.Stock.Value;
-            if (!string.IsNullOrEmpty(dto.CategoriaName)) searchProduct.Categoria.Name = dto.CategoriaName;
+            if (!string.IsNullOrWhiteSpace(dto.CategoriaName))
+            {
+                var categoria = await _categoriaRepository.GetByName(dto.CategoriaName.Trim());
+                if (categoria == null)
+                {
+                    categoria = new Categoria { Name = dto.CategoriaName.Trim() };
+                    await _categoriaRepository.AddAsync(categoria);
+                }
+
+                searchProduct.CategoriaId = categoria.Id;
+                searchProduct.Categoria = categoria;
+            }
 
             await _productoRepository.Update(searchProduct); 
 
             UpdateProductResponse response = _mapper.Map<UpdateProductResponse>(searchProduct);
             response.IMG = !string.IsNullOrEmpty(dto.ImgPath) ? dto.ImgPath : searchProduct.IMG;
             response.Id = searchProduct.Id;
+            response.Images = searchProduct.Images
+                .OrderBy(image => image.SortOrder)
+                .Select(image => image.Url)
+                .ToList();
 
             response.Message = "Producto actualizado.";
             return response;

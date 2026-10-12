@@ -12,6 +12,7 @@ export interface ApiResponse<T = void> {
 
 export interface UpdateProductResponse extends ApiResponse {
   img: string;
+  images: string[];
 }
 
 // Usuario

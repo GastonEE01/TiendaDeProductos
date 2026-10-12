@@ -18,6 +18,7 @@ import toast from "react-hot-toast";
 import { addOrden } from "../service/api";
 import { CartItemDto } from "../interfaces/CartType";
 
+const API_URL = import.meta.env.VITE_API_URL;
 initMercadoPago("APP_USR-a0c61e8e-fd17-45bb-b992-fe81a16abfbf");
 export const Cart = () => {
   const formRef = useRef<HTMLFormElement>(null);
@@ -37,6 +38,9 @@ export const Cart = () => {
   const [customerAddress, setCustomerAddress] = useState("");
   const [city, setCity] = useState("");
   const [postalCode, setPostalCode] = useState("");
+
+  const getImageUrl = (path: string) =>
+    path.startsWith("http") ? path : `${API_URL}${path}`;
 
   const handleSelectChange = (event: SelectChangeEvent) => {
     setDeliveryMethod(event.target.value);
@@ -81,66 +85,33 @@ export const Cart = () => {
     try {
       const response = await addOrden(orden);
       console.log("Respuesta:", response);
-       const listaPagos = response.pagos;
+      const listaPagos = response.pagos;
 
-       if (listaPagos && listaPagos.length > 0) {
-      toast.success(response.message);
-      localStorage.setItem("cola_pagos_vendedores", JSON.stringify(listaPagos));
-
-       // 4. 🔍 LEEMOS EL PRIMER PAGO DE LA LISTA
-      const primerPago = listaPagos[0]; // Captura el primer elemento del array
-
-      // Guardamos el preferenceId en el estado para activar el botón Wallet si el usuario regresa
-      if (primerPago.preferenceId) {
-        setPreferenceId(primerPago.preferenceId);
-      }
-
-       // 5. 🔥 ¡EL ADELANTADO DE LA SECUENCIA!:
-      // Si el primer pago tiene URL, forzamos el viaje directo a Mercado Pago de una
-     /* if (primerPago.paymentUrl) {
-        console.log("Redirigiendo al primer checkout...", primerPago.paymentUrl);
-        
-        setTimeout(() => {
-          window.location.href = primerPago.paymentUrl; // Lo catapulta directo a MP
-        }, 1000);
-      } else {
-        setFormError("La primera orden de la lista no posee una URL de pago válida.");
-      }
-
-    } else {
-      setFormError("El servidor procesó la orden pero el array de 'pagos' llegó vacío.");
-    }*/
-    if (primerPago.paymentUrl) {
-      console.log("--> Redirigiendo automáticamente a:", primerPago.paymentUrl);
-      window.location.href = primerPago.paymentUrl;
-    }
-
-  } else {
-    setFormError("El array de pagos llegó vacío.");
-  }
-    
-     /* const urlDePago = (response as any).paymentUrl;
-      const idDirecto = (response as any).preferenceId;
-
-      if (idDirecto) {
-        setPreferenceId(idDirecto);
-        console.log("¡ID de preferencia guardado con éxito!", idDirecto);
-      } else {
-        console.warn("No se recibió el preferenceId en la raíz del objeto.");
-      }
-
-      if (urlDePago) {
-        console.log(
-          "Redirigiendo a la pasarela externa de Mercado Pago...",
-          urlDePago,
+      if (listaPagos && listaPagos.length > 0) {
+        toast.success(response.message);
+        localStorage.setItem(
+          "cola_pagos_vendedores",
+          JSON.stringify(listaPagos),
         );
-        window.location.href = urlDePago;
-      } else {
-        setFormError(
-          "No se encontró la URL de pago ('paymentUrl') en el servidor.",
-        );
-      }*/
 
+        // LEEMOS EL PRIMER PAGO DE LA LISTA
+        const primerPago = listaPagos[0]; // Captura el primer elemento del array
+
+        // Guardamos el preferenceId en el estado para activar el botón Wallet si el usuario regresa
+        if (primerPago.preferenceId) {
+          setPreferenceId(primerPago.preferenceId);
+        }
+
+        if (primerPago.paymentUrl) {
+          console.log(
+            "--> Redirigiendo automáticamente a:",
+            primerPago.paymentUrl,
+          );
+          window.location.href = primerPago.paymentUrl;
+        }
+      } else {
+        setFormError("El array de pagos llegó vacío.");
+      }
       formRef.current?.reset();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : null;
@@ -152,36 +123,35 @@ export const Cart = () => {
 
   const inputStyle = {
     "& .MuiOutlinedInput-root": {
-      backgroundColor: "#111827", // Fondo medianoche para las cajas
-      color: "#f8fafc", // Letras blancas al escribir
+      backgroundColor: "#0B1120",
+      color: "#FFFFFF",
       borderRadius: "8px",
       "& fieldset": { borderColor: "rgba(255, 255, 255, 0.1)" },
       "&:hover fieldset": { borderColor: "rgba(255, 255, 255, 0.2)" },
-      "&.Mui-focused fieldset": { borderColor: "#2563eb" }, // Borde azul al escribir
+      "&.Mui-focused fieldset": { borderColor: "#00E5FF" },
     },
     "& .MuiInputLabel-root": { color: "#94a3b8" }, // Texto gris claro flotando
-    "& .MuiInputLabel-root.Mui-focused": { color: "#2563eb" },
+    "& .MuiInputLabel-root.Mui-focused": { color: "#00E5FF" },
   };
 
   return (
     <div
       style={{
-        // background: "rgba(172, 164, 156, 0.96)",
         margin: 0,
         minHeight: "180px",
         borderRadius: "16px",
-        padding: "24px",
+        padding: "16px",
         height: "fit-content",
       }}
     >
       <Box
         sx={{
-          padding: "20px",
+          padding: { xs: "12px", sm: "20px" },
           border: "1px solid rgba(255, 255, 255, 0.1)",
           borderRadius: "12px",
           marginTop: 0,
-          backgroundColor: "#1e293b",
-          color: "#f8fafc",
+          backgroundColor: "#172033",
+          color: "#FFFFFF",
         }}
       >
         <Typography
@@ -199,32 +169,72 @@ export const Cart = () => {
           </Typography>
         ) : (
           <Box>
-            {/* Mapeamos el arreglo para ver qué hay adentro */}
             {pay === false && (
               <>
                 {cart.map((item) => (
                   <Box
                     key={item.id}
                     sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      padding: "10px 0",
-                      borderBottom: "1px solid #000000",
+                      display: "grid",
+                      gridTemplateColumns: {
+                        xs: "64px minmax(0, 1fr)",
+                        sm: "80px minmax(0, 1fr) auto",
+                      },
+                      alignItems: "center",
+                      columnGap: { xs: 1.5, sm: 2 },
+                      rowGap: 0.5,
+                      py: 1.5,
+                      borderBottom: "1px solid rgba(255, 255, 255, 0.12)",
                     }}
                   >
-                    <Typography>
-                      <strong>{item.name}</strong> (x{item.quantity})
-                    </Typography>
-                    <Typography color="primary">
+                    <Box
+                      component="img"
+                      src={getImageUrl(item.img)}
+                      alt={item.name}
+                      sx={{
+                        width: { xs: 64, sm: 80 },
+                        height: { xs: 64, sm: 80 },
+                        objectFit: "cover",
+                        borderRadius: 1,
+                        gridRow: { xs: "span 2", sm: "auto" },
+                      }}
+                    />
+
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography sx={{ fontWeight: "bold", overflowWrap: "anywhere" }}>
+                        {item.name}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Cantidad: {item.quantity}
+                      </Typography>
+                    </Box>
+
+                    <Typography
+                      color="primary"
+                      sx={{
+                        gridColumn: { xs: "2", sm: "auto" },
+                        justifySelf: "end",
+                        textAlign: "right",
+                      }}
+                    >
                       Subtotal: ${item.price * item.quantity}
                     </Typography>
                   </Box>
                 ))}
-                <Typography color="info">Total: ${total}</Typography>
+                <Typography color="info" sx={{ display: "block", textAlign: "right", mt: 1 }}>
+                  Total: ${total}
+                </Typography>
 
-                {/* Botón rápido para limpiar todo y probar de nuevo */}
-
-                <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "column-reverse", sm: "row" },
+                    gap: 1.5,
+                    mt: 2,
+                    "& > *": { flex: { sm: 1 } },
+                    "& .MuiButton-root": { width: { xs: "100%", sm: "auto" } },
+                  }}
+                >
                   <Button
                     variant="contained"
                     color="error"
@@ -233,17 +243,17 @@ export const Cart = () => {
                   >
                     Vaciar Carrito
                   </Button>
-                  <div>
+                  <Box>
                     <Button
                       type="submit"
                       variant="contained"
-                      style={{ background: " #ccdb44", color: "black" }}
+                      style={{ background: "#2563EB", color: "#FFFFFF" }}
                       disabled={loading}
                       onClick={() => setPay(true)}
                     >
                       Pagar
                     </Button>
-                  </div>
+                  </Box>
                 </Box>
               </>
             )}
@@ -270,7 +280,7 @@ export const Cart = () => {
                       gap: "10px",
                     }}
                   >
-                    <FaUserAlt fontSize={35} style={{ color: "#666" }} />
+                    <FaUserAlt fontSize={35} style={{ color: "#00E5FF" }} />
                     <TextField
                       id="standard-basic"
                       label="Nombre"
@@ -294,7 +304,7 @@ export const Cart = () => {
                   >
                     <MdOutlineMailLock
                       fontSize={35}
-                      style={{ color: "#666" }}
+                      style={{ color: "#00E5FF" }}
                     />
                     <TextField
                       id="standard-basic"
@@ -317,7 +327,7 @@ export const Cart = () => {
                       gap: "10px",
                     }}
                   >
-                    <FaPhoneAlt fontSize={20} style={{ color: "#666" }} />
+                    <FaPhoneAlt fontSize={20} style={{ color: "#00E5FF" }} />
                     <TextField
                       id="standard-basic"
                       label="Telefono"
@@ -339,7 +349,7 @@ export const Cart = () => {
                       gap: "10px",
                     }}
                   >
-                    <FaAddressCard fontSize={20} style={{ color: "#666" }} />
+                    <FaAddressCard fontSize={20} style={{ color: "#00E5FF" }} />
                     <TextField
                       id="standard-basic"
                       label="Direccion"
@@ -361,7 +371,7 @@ export const Cart = () => {
                       gap: "10px",
                     }}
                   >
-                    <FaCity fontSize={20} style={{ color: "#666" }} />
+                    <FaCity fontSize={20} style={{ color: "#00E5FF" }} />
                     <TextField
                       id="standard-basic"
                       label="Cuidad"
@@ -383,7 +393,10 @@ export const Cart = () => {
                       gap: "10px",
                     }}
                   >
-                    <MdOutlinePostAdd fontSize={20} style={{ color: "#666" }} />
+                    <MdOutlinePostAdd
+                      fontSize={20}
+                      style={{ color: "#00E5FF" }}
+                    />
                     <TextField
                       id="standard-basic"
                       label="Codigo postal"
@@ -395,7 +408,7 @@ export const Cart = () => {
                       onChange={(e) => setPostalCode(e.target.value)}
                     />
                   </div>
-         
+
                   {/* 🚚 TIPO DE ENVÍO */}
                   <Box sx={{ minWidth: 120 }}>
                     <FormControl fullWidth required>
@@ -430,7 +443,7 @@ export const Cart = () => {
                       <Button
                         type="submit"
                         variant="contained"
-                        style={{ background: " #ccdb44", color: "black" }}
+                        style={{ background: "#2563EB", color: "#FFFFFF" }}
                         disabled={loading}
                       >
                         {loading ? "Procesando..." : "Confirmar Pedido"}
@@ -438,7 +451,7 @@ export const Cart = () => {
                     </div>
                   </Box>
 
-                  {/* 🚀 6. RENDERIZADO DEL BOTÓN DE MERCADO PAGO */}
+                  {/*BOTÓN DE MERCADO PAGO */}
                   {preferenceId && (
                     <Box
                       sx={{

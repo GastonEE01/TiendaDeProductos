@@ -7,7 +7,11 @@ export default defineConfig({
   plugins: [react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['nexus-shop-192.png', 'nexus-shop-512.png'],
+      includeAssets: [
+        'nexus-shop-192.png',
+        'nexus-shop-512.png',
+        'nexus-shop-maskable-512.png',
+      ],
       manifest: {
         name: 'NexusShop',
         short_name: 'NexusShop',
@@ -21,12 +25,20 @@ export default defineConfig({
           {
             src: '/nexus-shop-192.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any'
           },
           {
             src: '/nexus-shop-512.png',
             sizes: '512x512',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/nexus-shop-maskable-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
           }
         ]
       }

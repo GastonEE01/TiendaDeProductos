@@ -3,9 +3,8 @@ import classNames from "classnames";
 import { SectionSplitProps } from "../../utils/SectionProps";
 import ButtonGroup from "../elements/ButtonGroup";
 import Button from "../elements/Button";
-import Image from "../elements/Image";
-import heroImage from "../images/heroImage.png";
 import { LogoNexusShopHex } from "./LogoNexusShopHex";
+import { HeroProductCarousel } from "./HeroProductCarousel";
 import { LuMonitorDown } from "react-icons/lu";
 
 class HeroSection extends React.Component {
@@ -51,9 +50,8 @@ class HeroSection extends React.Component {
           <div className={innerClasses}>
             <div className={splitClasses}>
               <div
-                className="split-item"
+                className="split-item hero-split"
                 style={{
-                  gridTemplateColumns: "1fr 1.2fr",
                   gap: "40px",
                   alignItems: "center",
                 }}
@@ -100,18 +98,7 @@ class HeroSection extends React.Component {
                   </ButtonGroup>
                 </div>
                 <div className="hero-figure split-item-image split-item-image-fill illustration-element-01 reveal-from-bottom">
-                  <Image
-                    src={heroImage}
-                    alt="MercadoExpress Catálogo"
-                    style={{
-                      width: "100%",
-                      height: "auto",
-                      borderRadius: "16px",
-                      boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.6)",
-                      border: "1px solid rgba(255, 255, 255, 0.08)",
-                      display: "block",
-                    }}
-                  />
+                  <HeroProductCarousel />
                 </div>
               </div>
             </div>

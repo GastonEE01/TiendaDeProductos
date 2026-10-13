@@ -45,7 +45,7 @@ export const SandboxCredentials = () => {
               letterSpacing: "1px",
             }}
           >
-            Entorno de Laboratorio (Sandbox)
+            Credenciales de prueba para probar  Mercado Pago
           </h4>
         </div>
 

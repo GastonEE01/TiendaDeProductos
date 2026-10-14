@@ -24,7 +24,7 @@ export const Footer = ({ className }) => {
       >
         {/* 🔤 Texto de derechos autorales */}
         <p style={{ margin: 0, color: "#FFFFFF", fontSize: "0.95rem" }}>
-          © {new Date().getFullYear()} MercadoExpress. Desarrollado por{" "}
+          © {new Date().getFullYear()} Nexus Shop. Desarrollado por{" "}
           <strong style={{ color: "#FFFFFF" }}>Gastón Estévez</strong>.
         </p>
 

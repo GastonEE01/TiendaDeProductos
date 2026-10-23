@@ -12,6 +12,15 @@
       "allow": [
         {
           "url": "https://wa.me/*"
+        },
+        {
+          "url": "https://github.com/GastonEE01"
+        },
+        {
+          "url": "https://linkedin.com/in/gastonestevez01"
+        },
+        {
+          "url": "mailto:estevezgaston01-email@gmail.com"
         }
       ]
     }

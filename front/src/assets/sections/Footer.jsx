@@ -1,8 +1,27 @@
 import React from "react";
 import { FaGithub, FaLinkedin, FaEnvelope } from "react-icons/fa6"; // 🚀 Tus React Icons
+import { isTauri } from "@tauri-apps/api/core";
+import { openUrl } from "@tauri-apps/plugin-opener";
+import toast from "react-hot-toast";
 
 /** @param {{ className?: string }} props */
 export const Footer = ({ className }) => {
+  const handleExternalLinkClick = async (event) => {
+    if (!isTauri()) return;
+
+    event.preventDefault();
+    const url = event.currentTarget.href;
+
+    try {
+      await openUrl(url);
+    } catch (error) {
+      console.error("No se pudo abrir el enlace externo:", error);
+      toast.error(
+        "No se pudo abrir el enlace. Verificá la configuración de aplicaciones predeterminadas.",
+      );
+    }
+  };
+
   return (
     <footer
       className={className}
@@ -34,6 +53,7 @@ export const Footer = ({ className }) => {
             href="https://github.com/GastonEE01"
             target="_blank"
             rel="noreferrer"
+            onClick={handleExternalLinkClick}
             style={{ color: "#FFFFFF", transition: "color 0.2s" }}
           >
             <FaGithub
@@ -46,6 +66,7 @@ export const Footer = ({ className }) => {
             href="https://linkedin.com/in/gastonestevez01"
             target="_blank"
             rel="noreferrer"
+            onClick={handleExternalLinkClick}
             style={{ color: "#FFFFFF", transition: "color 0.2s" }}
           >
             <FaLinkedin
@@ -56,6 +77,7 @@ export const Footer = ({ className }) => {
           </a>
           <a
             href="mailto:estevezgaston01-email@gmail.com"
+            onClick={handleExternalLinkClick}
             style={{ color: "#FFFFFF", transition: "color 0.2s" }}
           >
             <FaEnvelope

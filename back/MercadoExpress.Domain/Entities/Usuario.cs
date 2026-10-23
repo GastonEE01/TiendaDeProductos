@@ -15,6 +15,7 @@ namespace MercadoExpress.Domain.Entities
         public string Rol { get; set; } = string.Empty;
         public string AliasCBU { get; set; } = string.Empty;
         public string IMG { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
         public MercadoPagoAuth? MercadoPagoAuth { get; set; }
         public List<OAuthState>? OAuthStates { get; set; } = new List<OAuthState>();
         public List<Producto>? Productos { get; set; } = new List<Producto>();

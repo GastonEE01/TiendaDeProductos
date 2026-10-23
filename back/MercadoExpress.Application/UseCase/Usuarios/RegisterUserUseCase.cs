@@ -25,6 +25,7 @@ namespace MercadoExpress.Application.UseCase.Usuarios
         {
             if (string.IsNullOrEmpty(dto.UserName)) throw new ArgumentException("Ingrese el nombre de usuario");
             if (string.IsNullOrEmpty(dto.Mail)) throw new ArgumentException("Ingrese el Email ");
+            if (string.IsNullOrEmpty(dto.Phone)) throw new ArgumentException("Ingrese el número de teléfono");
 
             Usuario searchMail = await _usuarioRepository.GetUserByMail(dto.Mail);
             if (searchMail != null) throw new ArgumentException("Ya existe este Mail");
@@ -48,6 +49,10 @@ namespace MercadoExpress.Application.UseCase.Usuarios
 
             if (!dto.Password.Equals(dto.ConfirmPassword))
                 throw new ArgumentException("La contraseña no coincide con la contraseña confirmada");
+
+            string phoneNumbersOnly = dto.Phone.Replace("+", "");
+            if (phoneNumbersOnly.Length < 8 || phoneNumbersOnly.Length > 15)
+                throw new ArgumentException("El número de teléfono no es válido.");
 
             if (dto.IMG == null || dto.IMG.Length == 0) throw new ArgumentException("Suba una IMG del producto");
 

@@ -17,6 +17,7 @@ namespace MercadoExpress.Application.DTO.Usuario
         public string MercadoPagoAccessToken { get; set; } = string.Empty;
         public string Message = string.Empty;
         public string IMG { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
 
 
     }

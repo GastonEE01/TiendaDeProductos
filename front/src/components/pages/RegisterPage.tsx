@@ -3,7 +3,12 @@ import React, { useState, useRef } from "react";
 // style
 import { Button, TextField, Typography, Box } from "@mui/material";
 import { MdOutlineMailLock } from "react-icons/md";
-import { FaUserAlt, FaUniversity,FaFileImage  } from "react-icons/fa";
+import {
+  FaUserAlt,
+  FaUniversity,
+  FaFileImage,
+  FaPhoneAlt,
+} from "react-icons/fa";
 import { RiLockPasswordFill } from "react-icons/ri";
 
 import { Link } from "react-router-dom";
@@ -18,6 +23,24 @@ export const RegisterPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [formError, setFormError] = useState<string | null>(null);
 
+  const [countryCode, setCountryCode] = useState("+54");
+  const [formattedPhone, setFormattedPhone] = useState("");
+
+  const handleChangePhone = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const soloNumeros = e.target.value.replace(/\D/g, "");
+    const limitedNumber = soloNumeros.slice(0, 14);
+    setFormattedPhone(limitedNumber);
+
+    let formatted = limitedNumber;
+    if (limitedNumber.length > 2 && limitedNumber.length <= 6) {
+      formatted = `${limitedNumber.slice(0, 2)} ${limitedNumber.slice(2)}`;
+    } else if (limitedNumber.length > 6) {
+      formatted = `${limitedNumber.slice(0, 2)} ${limitedNumber.slice(2, 6)}-${limitedNumber.slice(6)}`;
+    }
+
+    setFormattedPhone(formatted);
+  };
+
   const handleSumit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -26,20 +49,25 @@ export const RegisterPage: React.FC = () => {
     const formData = new FormData(e.currentTarget);
     const image = formData.get("img");
 
+    const phoneClean = formattedPhone.replace(/\D/g, "");
+    const phoneFull = `${countryCode}${phoneClean}`; // Ej: "+541112345678"
+
     const userData = new FormData();
     userData.append("UserName", formData.get("userName") as string);
     userData.append("Mail", formData.get("mail") as string);
     userData.append("Password", formData.get("password") as string);
-    userData.append("ConfirmPassword", formData.get("confirmPassword") as string,);
+    userData.append("ConfirmPassword",formData.get("confirmPassword") as string,);
     if (image instanceof File) {
       userData.append("IMG", image);
     }
+    userData.append("Phone", phoneFull);
 
     try {
       const response = await register(userData);
       console.log(response);
       toast.success(response.message);
       formRef.current?.reset(); // resetea los campos
+      setFormattedPhone("");
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : null;
       setFormError(message);
@@ -113,7 +141,7 @@ export const RegisterPage: React.FC = () => {
             >
               Registro de Usuario
             </h2>
-            
+
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <FaUserAlt fontSize={28} style={{ color: "#00E5FF" }} />
               <TextField
@@ -167,6 +195,38 @@ export const RegisterPage: React.FC = () => {
             </div>
 
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <FaPhoneAlt fontSize={28} style={{ color: "#00E5FF" }} />
+              {/* Select de código de país */}
+              <select
+                onChange={(e) => setCountryCode(e.target.value)}
+                defaultValue="+54"
+                style={{ padding: "8px", borderRadius: "4px" }}
+              >
+                <option value="+54">🇦🇷 (+54)</option>
+                <option value="+55">🇧🇷 (+55)</option>
+                <option value="+56">🇨🇱 (+56)</option>
+                <option value="+57">🇨🇴 (+57)</option>
+                <option value="+52">🇲🇽 (+52)</option>
+                <option value="+51">🇵🇪 (+51)</option>
+                <option value="+598">🇺🇾 (+598)</option>
+                <option value="+58">🇻🇪 (+58)</option>
+                <option value="+34">🇪🇸 (+34)</option>
+                <option value="+1">🇺🇸 (+1)</option>
+              </select>
+              <TextField
+                id="standard-basic"
+                label="11 1234-5678"
+                variant="standard"
+                type="text"
+                name="phone"
+                value={formattedPhone}
+                onChange={handleChangePhone}
+                fullWidth
+                sx={inputStyle}
+              />
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <FaUniversity fontSize={28} style={{ color: "#00E5FF" }} />
               <TextField
                 id="standard-basic"
@@ -184,8 +244,7 @@ export const RegisterPage: React.FC = () => {
                 variant="caption"
                 sx={{ color: "#94a3b8", fontWeight: "bold" }}
               >
-                              <FaFileImage  fontSize={28} style={{ color: "#00E5FF" }} />
-
+                <FaFileImage fontSize={28} style={{ color: "#00E5FF" }} />
               </Typography>
               <input id="standard-basic" type="file" name="img" />
             </div>

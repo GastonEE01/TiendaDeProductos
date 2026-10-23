@@ -11,5 +11,10 @@ namespace MercadoExpress.Application.DTO.Producto
         public int Stock { get; set; }
         public string CategoriaName { get; set; } = string.Empty;
         public Guid UsuarioId { get; set; }
+        public string PhoneSeller { get; set; } = string.Empty;
+        public string ImgSeller { get; set; } = string.Empty;
+        public string NameSeller { get; set; } = string.Empty;
+
+
     }
 }

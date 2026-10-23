@@ -12,6 +12,8 @@ export interface ProductDtoRequest{
     stock: number,
     categoriaName: string,
     usuarioId: string,
-    
+    phoneSeller: string;
+    imgSeller: string;
+    nameSeller: string;
 }
 

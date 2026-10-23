@@ -11,7 +11,17 @@ import {
   DialogContent,
   IconButton,
 } from "@mui/material";
-import { FaCartPlus, FaTrash, FaEdit, FaSearchPlus, FaSearchMinus, FaChevronLeft, FaChevronRight, FaTimes } from "react-icons/fa";
+import {
+  FaCartPlus,
+  FaTrash,
+  FaEdit,
+  FaSearchPlus,
+  FaSearchMinus,
+  FaChevronLeft,
+  FaChevronRight,
+  FaTimes,
+  FaWhatsapp,
+} from "react-icons/fa";
 
 import { InputNumber } from "antd";
 import { useAuthStore } from "../hooks/userStorage";
@@ -34,6 +44,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
   const [zoom, setZoom] = useState(1);
+  const [showSellerInfo, setShowSellerInfo] = useState(false);
 
   const user = useAuthStore((state) => state.user);
   const addToCart = useCartStore((state) => state.addToCart);
@@ -47,25 +58,143 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     path.startsWith("http") ? path : `${API_URL}${path}`;
 
   const changeImage = (direction: number) => {
-    setActiveImage((current) => (current + direction + images.length) % images.length);
+    setActiveImage(
+      (current) => (current + direction + images.length) % images.length,
+    );
     setZoom(1);
   };
 
+  console.log(product.nameSeller);
+  console.log(product.imgSeller);
+  console.log(product.phoneSeller);
+
   return (
     <Box sx={{ minWidth: 0, width: "100%" }}>
-      <Card sx={{ width: "100%", borderRadius: "12px", boxShadow: 3, backgroundColor: "#172033", color: "#FFFFFF" }}>
-        <CardContent sx={{ p: { xs: 1.5, sm: 2 }, "&:last-child": { pb: { xs: 1.5, sm: 2 } } }}>
+      <Card
+        sx={{
+          width: "100%",
+          borderRadius: "12px",
+          boxShadow: 3,
+          backgroundColor: "#172033",
+          color: "#FFFFFF",
+        }}
+      >
+        {user?.rol !== "Seller" && product.nameSeller && (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              mb: 1.5,
+              pb: 1,
+              borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
+            }}
+          >
+            {/* Foto y nombre del vendedor */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              {product.imgSeller ? (
+                <Box
+                  component="img"
+                  src={getImageUrl(product.imgSeller)}
+                  alt={product.nameSeller}
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    border: "1px solid #00E5FF",
+                  }}
+                />
+              ) : (
+                <Box
+                  sx={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: "50%",
+                    backgroundColor: "#00E5FF",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "0.75rem",
+                    fontWeight: "bold",
+                    color: "#000",
+                  }}
+                >
+                  {product.nameSeller?.charAt(0).toUpperCase()}
+                </Box>
+              )}
+              <Typography variant="caption" sx={{ color: "#94a3b8" }}>
+                Por{" "}
+                <span style={{ color: "#00E5FF", fontWeight: "600" }}>
+                  {product.nameSeller}
+                </span>
+              </Typography>
+            </Box>
+
+            {/* Botón de WhatsApp (Solo si el vendedor tiene teléfono cargado) */}
+            {product.phoneSeller && (
+              <Box
+                component="a"
+                href={`https://wa.me/${product.phoneSeller}?text=${encodeURIComponent(`Hola! Vi tu producto *${product.name}* en la tienda y quiero consultarte.`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={`Consultar con ${product.nameSeller} por WhatsApp`}
+                sx={{
+                  backgroundColor: "rgba(37, 211, 102, 0.15)",
+                  color: "#25D366",
+                  padding: "4px 8px",
+                  borderRadius: "6px",
+                  fontSize: "0.75rem",
+                  fontWeight: "bold",
+                  textDecoration: "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  border: "1px solid rgba(37, 211, 102, 0.3)",
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    backgroundColor: "#25D366",
+                    color: "#FFFFFF",
+                  },
+                }}
+              >
+                <FaWhatsapp size={18} />
+                <span>WhatsApp</span>
+              </Box>
+            )}
+          </Box>
+        )}
+        <CardContent
+          sx={{
+            p: { xs: 1.5, sm: 2 },
+            "&:last-child": { pb: { xs: 1.5, sm: 2 } },
+          }}
+        >
           {/* Nombre */}
           <Typography
             gutterBottom
             variant="h5"
             component="div"
-            sx={{ fontWeight: "bold", fontSize: { xs: "1.15rem", sm: "1.5rem" }, overflowWrap: "anywhere" }} >
+            sx={{
+              fontWeight: "bold",
+              fontSize: { xs: "1.15rem", sm: "1.5rem" },
+              overflowWrap: "anywhere",
+            }}
+          >
             {product.name}
           </Typography>
 
           {/* IMG */}
-          <Box sx={{ display: "flex", flexDirection: { xs: "column-reverse", sm: "row" }, gap: 1, backgroundColor: "rgba(255, 255, 255, 0.02)", borderRadius: "8px", overflow: "hidden" }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column-reverse", sm: "row" },
+              gap: 1,
+              backgroundColor: "rgba(255, 255, 255, 0.02)",
+              borderRadius: "8px",
+              overflow: "hidden",
+            }}
+          >
             {images.length > 1 && (
               <Box
                 role="group"
@@ -97,12 +226,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                       flex: { xs: "0 0 40px", sm: "0 0 48px" },
                       borderRadius: 1,
                       overflow: "hidden",
-                      border: index === activeImage ? "2px solid #00E5FF" : "1px solid rgba(255,255,255,.2)",
+                      border:
+                        index === activeImage
+                          ? "2px solid #00E5FF"
+                          : "1px solid rgba(255,255,255,.2)",
                       backgroundColor: "#0B1120",
                       cursor: "pointer",
                     }}
                   >
-                    <Box component="img" src={getImageUrl(image)} alt="" sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <Box
+                      component="img"
+                      src={getImageUrl(image)}
+                      alt=""
+                      sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
                   </Box>
                 ))}
               </Box>
@@ -124,7 +261,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   }}
                 />
               ) : (
-                <Box sx={{ height: { xs: 180, sm: 220 }, display: "grid", placeItems: "center", color: "#FFFFFF" }}>
+                <Box
+                  sx={{
+                    height: { xs: 180, sm: 220 },
+                    display: "grid",
+                    placeItems: "center",
+                    color: "#FFFFFF",
+                  }}
+                >
                   Sin imágenes
                 </Box>
               )}
@@ -150,7 +294,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               {images.length > 1 && (
                 <Typography
                   variant="caption"
-                  sx={{ position: "absolute", left: 12, bottom: 12, color: "#FFFFFF", backgroundColor: "rgba(11, 17, 32, 0.85)", px: 1, borderRadius: 1 }}
+                  sx={{
+                    position: "absolute",
+                    left: 12,
+                    bottom: 12,
+                    color: "#FFFFFF",
+                    backgroundColor: "rgba(11, 17, 32, 0.85)",
+                    px: 1,
+                    borderRadius: 1,
+                  }}
                 >
                   {activeImage + 1} / {images.length}
                 </Typography>
@@ -162,14 +314,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <Typography
             variant="caption"
             sx={{
-              backgroundColor: "rgba(37, 99, 235, 0.15)", 
+              backgroundColor: "rgba(37, 99, 235, 0.15)",
               color: "#00E5FF",
               padding: "4px 10px",
               borderRadius: "50px",
               fontWeight: "bold",
               display: "inline-block",
               mb: 2,
-              border: "1px solid rgba(0, 229, 255, 0.3)"
+              border: "1px solid rgba(0, 229, 255, 0.3)",
             }}
           >
             {product.categoriaName || "General"}
@@ -185,7 +337,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             {product.description}
           </Typography>
 
-          <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 1, mt: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 1,
+              mt: 1,
+            }}
+          >
             {/* Precio */}
             <Typography
               variant="subtitle1"
@@ -205,7 +366,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </CardContent>
 
         {/* Botones de acción de la tarjeta */}
-        <CardActions sx={{ justifyContent: "space-between", flexWrap: "wrap", gap: 1, p: { xs: 1.5, sm: 2 } }}>
+        <CardActions
+          sx={{
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 1,
+            p: { xs: 1.5, sm: 2 },
+          }}
+        >
           {user?.rol === "Seller" && (
             <>
               <Button
@@ -262,20 +430,37 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         onClose={() => setGalleryOpen(false)}
         maxWidth="md"
         fullWidth
-        slotProps={{ paper: { sx: { backgroundColor: "#172033", color: "#FFFFFF" } } }}
+        slotProps={{
+          paper: { sx: { backgroundColor: "#172033", color: "#FFFFFF" } },
+        }}
       >
         <DialogContent sx={{ position: "relative", p: { xs: 2, sm: 3 } }}>
           <IconButton
             aria-label="Cerrar galería"
             onClick={() => setGalleryOpen(false)}
-            sx={{ position: "absolute", top: 8, right: 8, zIndex: 1, color: "#FFFFFF" }}
+            sx={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+              zIndex: 1,
+              color: "#FFFFFF",
+            }}
           >
             <FaTimes />
           </IconButton>
           <Typography variant="h6" sx={{ textAlign: "center", mb: 2, pr: 4 }}>
             {product.name}
           </Typography>
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: { xs: 0, sm: 2 }, overflow: "hidden", minWidth: 0 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: { xs: 0, sm: 2 },
+              overflow: "hidden",
+              minWidth: 0,
+            }}
+          >
             <IconButton
               aria-label="Foto anterior"
               onClick={() => changeImage(-1)}
@@ -291,9 +476,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 alt={`${product.name}, foto ${activeImage + 1}`}
                 onWheel={(event) => {
                   event.preventDefault();
-                  setZoom((current) => Math.min(3, Math.max(1, current + (event.deltaY < 0 ? 0.2 : -0.2))));
+                  setZoom((current) =>
+                    Math.min(
+                      3,
+                      Math.max(1, current + (event.deltaY < 0 ? 0.2 : -0.2)),
+                    ),
+                  );
                 }}
-                onDoubleClick={() => setZoom((current) => current === 1 ? 2 : 1)}
+                onDoubleClick={() =>
+                  setZoom((current) => (current === 1 ? 2 : 1))
+                }
                 sx={{
                   width: "min(68vw, 640px)",
                   height: "min(60vh, 520px)",
@@ -313,8 +505,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               <FaChevronRight />
             </IconButton>
           </Box>
-          <Typography variant="caption" sx={{ display: "block", textAlign: "center", my: 1, color: "#FFFFFF" }}>
-            Usá la rueda del mouse o doble clic para acercar. Zoom: {Math.round(zoom * 100)}%
+          <Typography
+            variant="caption"
+            sx={{
+              display: "block",
+              textAlign: "center",
+              my: 1,
+              color: "#FFFFFF",
+            }}
+          >
+            Usá la rueda del mouse o doble clic para acercar. Zoom:{" "}
+            {Math.round(zoom * 100)}%
           </Typography>
           <Box sx={{ display: "flex", justifyContent: "center", gap: 1 }}>
             <IconButton
@@ -335,7 +536,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             </IconButton>
           </Box>
           {images.length > 1 && (
-            <Box sx={{ display: "flex", justifyContent: "center", gap: 1, overflowX: "auto", mt: 2 }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                gap: 1,
+                overflowX: "auto",
+                mt: 2,
+              }}
+            >
               {images.map((image, index) => (
                 <Box
                   key={`${image}-${index}`}
@@ -353,12 +562,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                     flex: "0 0 auto",
                     borderRadius: 1,
                     overflow: "hidden",
-                    border: index === activeImage ? "2px solid #00E5FF" : "1px solid rgba(255,255,255,.2)",
+                    border:
+                      index === activeImage
+                        ? "2px solid #00E5FF"
+                        : "1px solid rgba(255,255,255,.2)",
                     backgroundColor: "#0B1120",
                     cursor: "pointer",
                   }}
                 >
-                  <Box component="img" src={getImageUrl(image)} alt="" sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <Box
+                    component="img"
+                    src={getImageUrl(image)}
+                    alt=""
+                    sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
                 </Box>
               ))}
             </Box>

@@ -37,7 +37,10 @@ namespace MercadoExpress.Application.Mapper
             CreateMap<Producto, GetProductResponse>()
                 .ForMember(dest => dest.CategoriaName, opt => opt.MapFrom(src => src.Categoria.Name))
                 .ForMember(dest => dest.Images, opt => opt.MapFrom(src =>
-                    src.Images.OrderBy(image => image.SortOrder).Select(image => image.Url)));
+                    src.Images.OrderBy(image => image.SortOrder).Select(image => image.Url)))
+                .ForMember(dest => dest.PhoneSeller, opt => opt.MapFrom(src => src.Usuario.Phone))
+                .ForMember(dest => dest.ImgSeller, opt => opt.MapFrom(src => src.Usuario.IMG))
+                .ForMember(dest => dest.NameSeller, opt => opt.MapFrom(src => src.Usuario.UserName));
 
             CreateMap<OrdenDtoRequest, Orden>()
              .ForMember(dest => dest.Detalles, opt => opt.Ignore());

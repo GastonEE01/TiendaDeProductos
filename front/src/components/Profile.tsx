@@ -79,10 +79,10 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
           mail: response.mail,
           aliasCBU: response.aliasCBU,
           img: response.img,
+          phone: response.phone
         },
         token,
       );
-
       toast.success(response.message);
       onClose(); 
     } catch (error: unknown) {
@@ -196,7 +196,6 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
             />
           </DialogTitle>
 
-          {/* 🧼 CUERPO DEL MODAL */}
           <DialogContent
             sx={{ display: "flex", flexDirection: "column", gap: 3, pt: 2 }}
           >
@@ -258,13 +257,21 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
               fullWidth
               required
             />
+             <TextField
+              label="Telefono"
+              name="phone"
+              defaultValue={user?.phone}
+              sx={inputStyle}
+              fullWidth
+              required
+            />
             <TextField
               label="Alias Homebanking / CBU"
               name="aliasCBU"
               defaultValue={user?.aliasCBU}
               sx={inputStyle}
               fullWidth
-            />
+            />      
 
             {formError && (
               <Typography

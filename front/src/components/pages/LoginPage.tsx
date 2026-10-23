@@ -40,6 +40,7 @@ export const LoginPage: React.FC = () => {
             mail: response.mail,
             aliasCBU: response.aliasCBU,
             img: response.img,
+            phone: response.phone
           },
           response.token,
         );

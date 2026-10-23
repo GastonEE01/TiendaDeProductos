@@ -26,6 +26,9 @@ import {
 import { InputNumber } from "antd";
 import { useAuthStore } from "../hooks/userStorage";
 import { useCartStore } from "../hooks/useCartStore";
+import { isTauri } from "@tauri-apps/api/core";
+import { openUrl } from "@tauri-apps/plugin-opener";
+import toast from "react-hot-toast";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -44,7 +47,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
   const [zoom, setZoom] = useState(1);
-  const [showSellerInfo, setShowSellerInfo] = useState(false);
 
   const user = useAuthStore((state) => state.user);
   const addToCart = useCartStore((state) => state.addToCart);
@@ -62,6 +64,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       (current) => (current + direction + images.length) % images.length,
     );
     setZoom(1);
+  };
+
+  const handleWhatsAppClick = async (
+    event: React.MouseEvent<HTMLAnchorElement>,
+  ) => {
+    if (!isTauri()) return;
+
+    event.preventDefault();
+    try {
+      await openUrl(event.currentTarget.href);
+    } catch (error) {
+      console.error("No se pudo abrir WhatsApp desde la aplicación:", error);
+      toast.error(
+        "No se pudo abrir WhatsApp. Verificá que haya un navegador predeterminado configurado.",
+      );
+    }
   };
 
   console.log(product.nameSeller);
@@ -138,6 +156,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 href={`https://wa.me/${product.phoneSeller}?text=${encodeURIComponent(`Hola! Vi tu producto *${product.name}* en la tienda y quiero consultarte.`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={handleWhatsAppClick}
                 title={`Consultar con ${product.nameSeller} por WhatsApp`}
                 sx={{
                   backgroundColor: "rgba(37, 211, 102, 0.15)",

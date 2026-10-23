@@ -21,7 +21,9 @@ export interface LoginDtoResponse{
     userName: string,
     mail: string,
     aliasCBU: string,
-    img: string
+    img: string,
+    phone: string,
+    
 }
 
 export interface AutenticacionType{

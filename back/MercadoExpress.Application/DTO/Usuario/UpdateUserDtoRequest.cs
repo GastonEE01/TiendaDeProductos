@@ -14,6 +14,7 @@ namespace MercadoExpress.Application.DTO.Usuario
         public string? AliasCBU { get; set; } = string.Empty;
         public IFormFile? IMG { get; set; } 
         public string ImgPath { get; set; } = string.Empty;
+        public string? Phone { get; set; }
 
     }
 }

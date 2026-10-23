@@ -11,6 +11,9 @@ export default defineConfig(({ mode }) => ({
       : [
           VitePWA({
             registerType: 'autoUpdate',
+            devOptions: {
+              enabled: true,
+            },
             includeAssets: [
               'nexus-shop-192.png',
               'nexus-shop-512.png',

@@ -10,8 +10,10 @@ import {
   DialogTitle,
   DialogActions,
 } from "@mui/material";
-import { FaTimes } from "react-icons/fa";
+import { FaTimes, FaPhoneAlt, FaUserAlt, FaUniversity } from "react-icons/fa";
 import { FaCloudArrowUp } from "react-icons/fa6";
+import { MdMail } from "react-icons/md";
+
 import { useAuthStore } from "../hooks/userStorage"; // Tu store de Zustand
 import toast from "react-hot-toast";
 import { updatePerfil, conectAuhtMP } from "../service/api";
@@ -25,6 +27,35 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
   const user = useAuthStore((state) => state.user);
   const login = useAuthStore((state) => state.login);
   const token = useAuthStore((state) => state.token);
+
+  const [countryCode, setCountryCode] = useState("+54");
+  const [formattedPhone, setFormattedPhone] = useState("");
+
+  useEffect(() => {
+    if (user?.phone) {
+      const codes = [
+        "+598",
+        "+55",
+        "+56",
+        "+57",
+        "+52",
+        "+51",
+        "+58",
+        "+34",
+        "+54",
+        "+1",
+      ];
+      const foundCode = codes.find((code) => user.phone.startsWith(code));
+
+      if (foundCode) {
+        setCountryCode(foundCode);
+        const numberWithoutCode = user.phone.replace(foundCode, "");
+        setFormattedPhone(numberWithoutCode);
+      } else {
+        setFormattedPhone(user.phone);
+      }
+    }
+  }, [user]);
 
   const formRef = useRef<HTMLFormElement>(null);
   const [loading, setLoading] = useState(false);
@@ -43,6 +74,21 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
     "& .MuiInputLabel-root.Mui-focused": { color: "#00E5FF" },
   };
 
+  const handleChangePhone = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const soloNumeros = e.target.value.replace(/\D/g, "");
+    const limitedNumber = soloNumeros.slice(0, 14);
+    setFormattedPhone(limitedNumber);
+
+    let formatted = limitedNumber;
+    if (limitedNumber.length > 2 && limitedNumber.length <= 6) {
+      formatted = `${limitedNumber.slice(0, 2)} ${limitedNumber.slice(2)}`;
+    } else if (limitedNumber.length > 6) {
+      formatted = `${limitedNumber.slice(0, 2)} ${limitedNumber.slice(2, 6)}-${limitedNumber.slice(6)}`;
+    }
+
+    setFormattedPhone(formatted);
+  };
+
   const handleSaveEdit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -51,12 +97,16 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
     const formData = new FormData(e.currentTarget);
     const image = formData.get("img");
 
+    const phoneClean = formattedPhone.replace(/\D/g, "");
+    const phoneFull = `${countryCode}${phoneClean}`; // Ej: "+541112345678"
+
     const profileData = new FormData();
     profileData.append("UserName", formData.get("userName") as string);
     profileData.append("Mail", formData.get("mail") as string);
     const rawAliasCBU = (formData.get("aliasCBU") as string) || "";
     const cleanAliasCBU = rawAliasCBU.trim();
     profileData.append("AliasCBU", cleanAliasCBU);
+    profileData.append("Phone", phoneFull);
 
     if (image instanceof File) {
       profileData.append("IMG", image);
@@ -79,12 +129,12 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
           mail: response.mail,
           aliasCBU: response.aliasCBU,
           img: response.img,
-          phone: response.phone
+          phone: response.phone,
         },
         token,
       );
       toast.success(response.message);
-      onClose(); 
+      onClose();
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : "Error al actualizar";
@@ -133,7 +183,8 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
   useEffect(() => {
     // Leemos si Mercado Pago nos mandó el flag de éxito en la URL
     if (searchParams.get("mp_connected") === "1") {
-      toast.success("¡Mercado Pago vinculado con éxito! Ya podés recibir cobros. 🔒💳",
+      toast.success(
+        "¡Mercado Pago vinculado con éxito! Ya podés recibir cobros. 🔒💳",
         {
           duration: 5000,
           position: "top-center",
@@ -241,37 +292,80 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
               </Button>
             </Box>
 
-            <TextField
-              label="Nombre de Usuario"
-              name="userName"
-              defaultValue={user?.userName}
-              sx={inputStyle}
-              fullWidth
-              required
-            />
-            <TextField
-              label="Correo Electrónico"
-              name="mail"
-              defaultValue={user?.mail}
-              sx={inputStyle}
-              fullWidth
-              required
-            />
-             <TextField
-              label="Telefono"
-              name="phone"
-              defaultValue={user?.phone}
-              sx={inputStyle}
-              fullWidth
-              required
-            />
-            <TextField
-              label="Alias Homebanking / CBU"
-              name="aliasCBU"
-              defaultValue={user?.aliasCBU}
-              sx={inputStyle}
-              fullWidth
-            />      
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <FaUserAlt fontSize={28} style={{ color: "#00E5FF" }} />
+              <TextField
+                label="Nombre de Usuario"
+                name="userName"
+                defaultValue={user?.userName}
+                sx={inputStyle}
+                fullWidth
+                required
+              />
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <MdMail fontSize={28} style={{ color: "#00E5FF" }} />
+              <TextField
+                label="Correo Electrónico"
+                name="mail"
+                defaultValue={user?.mail}
+                sx={inputStyle}
+                fullWidth
+                required
+              />
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <FaPhoneAlt fontSize={28} style={{ color: "#00E5FF" }} />
+              {/* Select del código de país */}
+              <select
+                value={countryCode}
+                onChange={(e) => setCountryCode(e.target.value)}
+                style={{
+                  padding: "8px",
+                  borderRadius: "4px",
+                  backgroundColor: "#1a1a1a",
+                  color: "#fff",
+                  border: "1px solid #444",
+                }}
+              >
+                <option value="+54">🇦🇷 (+54)</option>
+                <option value="+55">🇧🇷 (+55)</option>
+                <option value="+56">🇨🇱 (+56)</option>
+                <option value="+57">🇨🇴 (+57)</option>
+                <option value="+52">🇲🇽 (+52)</option>
+                <option value="+51">🇵🇪 (+51)</option>
+                <option value="+598">🇺🇾 (+598)</option>
+                <option value="+58">🇻🇪 (+58)</option>
+                <option value="+34">🇪🇸 (+34)</option>
+                <option value="+1">🇺🇸 (+1)</option>
+              </select>
+
+              {/* Campo del número de teléfono */}
+              <TextField
+                id="standard-basic"
+                label="11 1234-5678"
+                variant="standard"
+                type="text"
+                name="phone"
+                value={formattedPhone} 
+                onChange={handleChangePhone}
+                fullWidth
+                sx={inputStyle}
+              />
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <FaUniversity fontSize={28} style={{ color: "#00E5FF" }} />
+              <TextField
+                label="Alias Homebanking / CBU"
+                name="aliasCBU"
+                defaultValue={user?.aliasCBU}
+                sx={inputStyle}
+                fullWidth
+              />
+            </div>
 
             {formError && (
               <Typography
@@ -283,7 +377,7 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
             )}
           </DialogContent>
 
-          {/* 🔘 ACCIONES */}
+          {/* ACCIONES */}
           <DialogActions sx={{ p: 2, pr: 3, gap: 1 }}>
             <Button
               onClick={onClose}
@@ -308,7 +402,7 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
             </Button>
           </DialogActions>
         </form>
-        
+
         {/*Mercado pago */}
         <Box sx={{ mt: 1, mb: 1 }}>
           <Button
@@ -323,13 +417,13 @@ export const Profile: React.FC<ProfileProps> = ({ open, onClose }) => {
               fontSize: "0.95rem",
               borderRadius: "8px",
               padding: "10px 16px",
-              textTransform: "none", 
+              textTransform: "none",
               boxShadow: "0 4px 12px rgba(0, 158, 227, 0.2)",
               transition: "all 0.2s ease-in-out",
               "&:hover": {
-                backgroundColor: "#1289c4", 
+                backgroundColor: "#1289c4",
                 boxShadow: "0 6px 16px rgba(0, 158, 227, 0.4)",
-                transform: "translateY(-1px)", 
+                transform: "translateY(-1px)",
               },
               "&:active": {
                 transform: "translateY(0)",

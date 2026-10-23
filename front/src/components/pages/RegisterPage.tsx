@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 
 // style
 import { Button, TextField, Typography, Box } from "@mui/material";
-import { MdOutlineMailLock } from "react-icons/md";
+import { MdMailLock  } from "react-icons/md";
 import {
   FaUserAlt,
   FaUniversity,
@@ -156,7 +156,7 @@ export const RegisterPage: React.FC = () => {
             </div>
 
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <MdOutlineMailLock fontSize={28} style={{ color: "#00E5FF" }} />
+              <MdMailLock  fontSize={28} style={{ color: "#00E5FF" }} />
               <TextField
                 id="standard-basic"
                 label="Ingrese su mail"
